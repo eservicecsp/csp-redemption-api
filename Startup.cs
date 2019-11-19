@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
+using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CSP_Redemption_WebApi
 {
@@ -25,6 +27,40 @@ namespace CSP_Redemption_WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Culture Info
+            var cultureInfo = new CultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
+            //Context
+            //services.AddDbContext<CSP_RedemptionContext>();
+
+            // Services
+            services.AddScoped<IStaffService, StaffService>();
+
+            // Repositories
+            //services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
+
+            // JWT Authentication
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(config =>
+            {
+                config.RequireHttpsMetadata = false;
+                config.SaveToken = true;
+                config.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidIssuer = Configuration["JWTAuthentication:Issuer"],
+                    ValidAudience = Configuration["JWTAuthentication:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWTAuthentication:Key"])),
+                    ClockSkew = TimeSpan.Zero,
+                };
+            });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -40,6 +76,20 @@ namespace CSP_Redemption_WebApi
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            // Authenticate
+            app.UseAuthentication();
+
+            //Add CORS
+            app.UseCors(builder =>
+            {
+                builder
+                    .SetPreflightMaxAge(TimeSpan.MaxValue)
+                    .AllowAnyMethod()
+                    .WithOrigins("http://localhost:4200")
+                    .AllowCredentials()
+                    .AllowAnyHeader();
+            });
 
             app.UseHttpsRedirection();
             app.UseMvc();
