@@ -12,7 +12,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         }
 
         public int Id { get; set; }
-        public int? CompanyId { get; set; }
+        public int CompanyId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
 

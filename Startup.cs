@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Text;
 using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using CSP_Redemption_WebApi.Repositories;
+using CSP_Redemption_WebApi.Entities.DBContext;
 
 namespace CSP_Redemption_WebApi
 {
@@ -33,13 +33,13 @@ namespace CSP_Redemption_WebApi
             CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
             //Context
-            //services.AddDbContext<CSP_RedemptionContext>();
+            services.AddDbContext<CSP_RedemptionContext>();
 
             // Services
             services.AddScoped<IStaffService, StaffService>();
 
             // Repositories
-            //services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
+            services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

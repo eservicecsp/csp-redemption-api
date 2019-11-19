@@ -277,9 +277,7 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
             modelBuilder.Entity<Staff>(entity =>
             {
-                entity.Property(e => e.Id)
-                    .HasMaxLength(10)
-                    .ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.CreatedDate)
                     .HasColumnType("datetime")
