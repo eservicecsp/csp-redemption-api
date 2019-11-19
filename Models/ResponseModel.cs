@@ -42,6 +42,53 @@ namespace CSP_Redemption_WebApi.Models
         public CompanyModel Company { get; set; }
         public RoleModel Role { get; set; }
     }
+
+    public class AuthorizationResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<Navigation> Navigations { get; set; }
+    }
+
+    public class Navigation
+    {
+        public string id { get; set; }
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string type { get; set; }
+        public List<Child> children { get; set; }
+    }
+
+    public class Child
+    {
+        public string id { get; set; }
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string type { get; set; }
+        public string icon { get; set; }
+        public List<SubChild> children { get; set; }
+        public string url { get; set; }
+        public Badge badge { get; set; }
+    }
+
+    public class Badge
+    {
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string bg { get; set; }
+        public string fg { get; set; }
+    }
+
+    public class SubChild
+    {
+        public string id { get; set; }
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string type { get; set; }
+        public string icon { get; set; }
+        public string url { get; set; }
+        public Badge badge { get; set; }
+    }
     #endregion
 
     #region Company

@@ -12,6 +12,7 @@ namespace CSP_Redemption_WebApi.Services
     public interface IStaffService
     {
         Task<AuthenticationResponseModel> Authenticate(Staff staff);
+        Task<AuthorizationResponseModel> Authorize(string token);
         Task<StaffsResponseModel> GetStaffsByCompanyIdAsync(int companyId);
     }
 
@@ -19,14 +20,17 @@ namespace CSP_Redemption_WebApi.Services
     {
         private readonly IConfiguration configuration;
         private readonly IStaffRepository staffRepository;
+        private readonly IMenuRepository menuRepository;
 
         public StaffService(
             IConfiguration configuration,
-            IStaffRepository staffRepository
+            IStaffRepository staffRepository,
+            IMenuRepository menuRepository
             )
         {
             this.configuration = configuration;
             this.staffRepository = staffRepository;
+            this.menuRepository = menuRepository;
         }
 
         public async Task<AuthenticationResponseModel> Authenticate(Staff staff)
@@ -65,6 +69,100 @@ namespace CSP_Redemption_WebApi.Services
             }
 
             return response;
+        }
+
+        public async Task<AuthorizationResponseModel> Authorize(string token)
+        {
+            AuthorizationResponseModel authorization = new AuthorizationResponseModel();
+            try
+            {
+                var staffId = Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId");
+
+                var staff = await this.staffRepository.GetStaffByIdAsync(Convert.ToInt32(staffId));
+
+                var menus = await this.menuRepository.GetMenusByRoleIdAsync(staff.RoleId);
+                var parentMenus = await this.menuRepository.GetMenusByParentIdAsync(0);
+
+                var navigations = new List<Navigation>();
+
+                foreach (var menu in menus.Where(x => x.ParentId != 0).OrderBy(x => x.ParentId))
+                {
+                    if (!(navigations.Any(x => x.id == menu.ParentId.ToString())))
+                    {
+                        try
+                        {
+                            var children = new List<Child>();
+                            var existParent = parentMenus.Where(x => x.Id == menu.ParentId).Single();
+
+                            children.Add(new Child()
+                            {
+                                id = menu.Id.ToString(),
+                                title = menu.Name,
+                                type = "item",
+                                url = menu.Path,
+                                icon = menu.Icon,
+                                children = new List<SubChild>()
+                            });
+                            var navigation = new Navigation()
+                            {
+                                id = existParent.Id.ToString(),
+                                title = existParent.Name,
+                                type = "group",
+                                children = children,
+                            };
+                            navigations.Add(navigation);
+                        }
+                        catch (Exception)
+                        {
+                            foreach (var item in navigations)
+                            {
+                                var existParent = item.children.Where(x => x.id == menu.ParentId.ToString()).FirstOrDefault();
+                                if (existParent != null)
+                                {
+                                    var subChild = new SubChild()
+                                    {
+                                        id = menu.Id.ToString(),
+                                        title = menu.Name,
+                                        type = "item",
+                                        url = menu.Path,
+                                        icon = menu.Icon
+                                    };
+                                    existParent.children.Add(subChild);
+                                    existParent.type = "collapsable";
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var existNavigation = navigations.Where(x => x.id == menu.ParentId.ToString()).Single();
+                            var child = new Child()
+                            {
+                                id = menu.Id.ToString(),
+                                title = menu.Name,
+                                type = "item",
+                                url = menu.Path,
+                                icon = menu.Icon
+                            };
+                            existNavigation.children.Add(child);
+                        }
+                        catch (Exception)
+                        {
+
+                        }
+                    }
+                    authorization.IsSuccess = true;
+                }
+                authorization.Navigations = navigations;
+            }
+            catch (Exception ex)
+            {
+                authorization.Message = ex.Message;
+                throw;
+            }
+            return authorization;
         }
 
         public async Task<StaffsResponseModel> GetStaffsByCompanyIdAsync(int companyId)

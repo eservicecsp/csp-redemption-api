@@ -21,7 +21,7 @@ namespace CSP_Redemption_WebApi.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(Staff staff)
+        public async Task<IActionResult> Authenticate(Staff staff)
         {
             var response = await this.staffService.Authenticate(staff);
             if (!response.IsSuccess)
@@ -32,6 +32,15 @@ namespace CSP_Redemption_WebApi.Controllers
             {
                 return Ok(response);
             }
+        }
+
+        [HttpGet("Authorize")]
+        public async Task<IActionResult> Authorize()
+        {
+            var response = await this.staffService.Authorize(Request.Headers["Authorization"]);
+
+            // var response = await this.staffService.getSta
+            return Ok(response);
         }
 
         [HttpGet]

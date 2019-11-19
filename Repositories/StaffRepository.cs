@@ -1,7 +1,6 @@
 ﻿using CSP_Redemption_WebApi.Entities.DBContext;
 using CSP_Redemption_WebApi.Entities.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +11,7 @@ namespace CSP_Redemption_WebApi.Repositories
     {
         Task<List<Staff>> GetStaffsByCompanyIdAsync(int companyId);
         Task<Staff> GetStaffByEmailAsync(string email);
+        Task<Staff> GetStaffByIdAsync(int id);
     }
 
     public class StaffRepository: IStaffRepository
@@ -34,6 +34,15 @@ namespace CSP_Redemption_WebApi.Repositories
                 return await Context.Staff
                     .Include(x => x.Company)
                     .Where(x => x.Email == email).FirstOrDefaultAsync();
+            }
+        }
+        public async Task<Staff> GetStaffByIdAsync(int id)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Staff
+                    .Include(x => x.Company)
+                    .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
         }
     }
