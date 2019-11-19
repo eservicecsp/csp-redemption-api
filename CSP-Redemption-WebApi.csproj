@@ -16,8 +16,6 @@
   <ItemGroup>
     <Folder Include="Entities\DBContext\" />
     <Folder Include="Entities\Models\" />
-    <Folder Include="Repositories\" />
-    <Folder Include="Services\" />
     <Folder Include="Uploads\" />
   </ItemGroup>
 
