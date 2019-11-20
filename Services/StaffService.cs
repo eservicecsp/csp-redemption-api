@@ -16,7 +16,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<StaffsResponseModel> GetStaffsByCompanyIdAsync(int companyId);
     }
 
-    public class StaffService: IStaffService
+    public class StaffService : IStaffService
     {
         private readonly IConfiguration configuration;
         private readonly IStaffRepository staffRepository;
@@ -85,14 +85,14 @@ namespace CSP_Redemption_WebApi.Services
 
                 var navigations = new List<Navigation>();
 
-                foreach (var menu in menus.Where(x => x.ParentId != 0).OrderBy(x => x.ParentId))
+                foreach (var menu in menus.Where(x => x.ParentId != 0 && x.IsActived == true).OrderBy(x => x.ParentId))
                 {
                     if (!(navigations.Any(x => x.id == menu.ParentId.ToString())))
                     {
                         try
                         {
                             var children = new List<Child>();
-                            var existParent = parentMenus.Where(x => x.Id == menu.ParentId).Single();
+                            var existParent = parentMenus.Where(x => x.Id == menu.ParentId && x.IsActived == true).Single();
 
                             children.Add(new Child()
                             {
@@ -114,11 +114,18 @@ namespace CSP_Redemption_WebApi.Services
                         }
                         catch (Exception)
                         {
+
                             foreach (var item in navigations)
                             {
                                 var existParent = item.children.Where(x => x.id == menu.ParentId.ToString()).FirstOrDefault();
+                                
                                 if (existParent != null)
                                 {
+                                    if (existParent.children == null)
+                                    {
+                                        existParent.children = new List<SubChild>();
+                                    }
+
                                     var subChild = new SubChild()
                                     {
                                         id = menu.Id.ToString(),
@@ -135,23 +142,16 @@ namespace CSP_Redemption_WebApi.Services
                     }
                     else
                     {
-                        try
+                        var existNavigation = navigations.Where(x => x.id == menu.ParentId.ToString()).Single();
+                        var child = new Child()
                         {
-                            var existNavigation = navigations.Where(x => x.id == menu.ParentId.ToString()).Single();
-                            var child = new Child()
-                            {
-                                id = menu.Id.ToString(),
-                                title = menu.Name,
-                                type = "item",
-                                url = menu.Path,
-                                icon = menu.Icon
-                            };
-                            existNavigation.children.Add(child);
-                        }
-                        catch (Exception)
-                        {
-
-                        }
+                            id = menu.Id.ToString(),
+                            title = menu.Name,
+                            type = "item",
+                            url = menu.Path,
+                            icon = menu.Icon
+                        };
+                        existNavigation.children.Add(child);
                     }
                     authorization.IsSuccess = true;
                 }
