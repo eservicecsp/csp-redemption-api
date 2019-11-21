@@ -44,9 +44,9 @@ namespace CSP_Redemption_WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStaffsByCompanyId(int companyId)
+        public async Task<IActionResult> GetStaffsByBrandId(int brandId)
         {
-            return Ok(await this.staffService.GetStaffsByCompanyIdAsync(companyId));
+            return Ok(await this.staffService.GetStaffsByBrandIdAsync(brandId));
         }
     }
 }

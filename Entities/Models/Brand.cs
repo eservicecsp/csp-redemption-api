@@ -3,25 +3,25 @@ using System.Collections.Generic;
 
 namespace CSP_Redemption_WebApi.Entities.Models
 {
-    public partial class Company
+    public partial class Brand
     {
-        public Company()
+        public Brand()
         {
             Campaign = new HashSet<Campaign>();
             Consumer = new HashSet<Consumer>();
-            Role = new HashSet<Role>();
+            Dealer = new HashSet<Dealer>();
+            Product = new HashSet<Product>();
             Staff = new HashSet<Staff>();
-            Transaction = new HashSet<Transaction>();
         }
 
         public int Id { get; set; }
         public string Name { get; set; }
-        public bool IsActived { get; set; }
+        public bool IsOwner { get; set; }
 
         public virtual ICollection<Campaign> Campaign { get; set; }
         public virtual ICollection<Consumer> Consumer { get; set; }
-        public virtual ICollection<Role> Role { get; set; }
+        public virtual ICollection<Dealer> Dealer { get; set; }
+        public virtual ICollection<Product> Product { get; set; }
         public virtual ICollection<Staff> Staff { get; set; }
-        public virtual ICollection<Transaction> Transaction { get; set; }
     }
 }

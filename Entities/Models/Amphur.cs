@@ -7,7 +7,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
     {
         public Amphur()
         {
-            Consumer = new HashSet<Consumer>();
             Tumbol = new HashSet<Tumbol>();
         }
 
@@ -17,7 +16,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string ProvinceCode { get; set; }
 
         public virtual Province ProvinceCodeNavigation { get; set; }
-        public virtual ICollection<Consumer> Consumer { get; set; }
         public virtual ICollection<Tumbol> Tumbol { get; set; }
     }
 }

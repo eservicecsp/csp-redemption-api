@@ -13,27 +13,27 @@ namespace CSP_Redemption_WebApi.Services
     {
         Task<AuthenticationResponseModel> Authenticate(Staff staff);
         Task<AuthorizationResponseModel> Authorize(string token);
-        Task<StaffsResponseModel> GetStaffsByCompanyIdAsync(int companyId);
+        Task<StaffsResponseModel> GetStaffsByBrandIdAsync(int brandId);
     }
 
     public class StaffService : IStaffService
     {
         private readonly IConfiguration configuration;
         private readonly IStaffRepository staffRepository;
-        private readonly IMenuRepository menuRepository;
-        private readonly IRoleMenuRepository roleMenuRepository;
+        private readonly IFunctionRepository functionRepository;
+        private readonly IRoleFunctionRepository roleFunctionRepository;
 
         public StaffService(
             IConfiguration configuration,
             IStaffRepository staffRepository,
-            IMenuRepository menuRepository,
-            IRoleMenuRepository roleMenuRepository
+            IFunctionRepository functionRepository,
+            IRoleFunctionRepository roleFunctionRepository
             )
         {
             this.configuration = configuration;
             this.staffRepository = staffRepository;
-            this.menuRepository = menuRepository;
-            this.roleMenuRepository = roleMenuRepository;
+            this.functionRepository = functionRepository;
+            this.roleFunctionRepository = roleFunctionRepository;
         }
 
         public async Task<AuthenticationResponseModel> Authenticate(Staff staff)
@@ -58,7 +58,7 @@ namespace CSP_Redemption_WebApi.Services
                     dbStaff.FirstName,
                     dbStaff.LastName,
                     dbStaff.Email,
-                    dbStaff.Company.Id,
+                    dbStaff.Brand.Id,
                     "assets/images/avatars/profile.jpg");
 
                     response.IsSuccess = true;
@@ -83,15 +83,15 @@ namespace CSP_Redemption_WebApi.Services
 
                 var staff = await this.staffRepository.GetStaffByIdAsync(Convert.ToInt32(staffId));
 
-                var roleMenus = await this.roleMenuRepository.GetRoleMenusByRoleIdAsync(staff.RoleId);
+                var roleFunctions = await this.roleFunctionRepository.GetRoleFunctionsByRoleIdAsync(staff.RoleId);
 
                 authorization.RoleMenus = new List<AuthorizationModel>();
-                foreach (var roleMenu in roleMenus)
+                foreach (var roleFunction in roleFunctions)
                 {
                     authorization.RoleMenus.Add(new AuthorizationModel()
                     {
-                        Id = roleMenu.MenuId,
-                        IsReadOnly = roleMenu.IsReadOnly
+                        Id = roleFunction.FunctionId,
+                        IsReadOnly = roleFunction.IsReadOnly
                     });
                 }
                 authorization.IsSuccess = true;
@@ -104,19 +104,19 @@ namespace CSP_Redemption_WebApi.Services
             return authorization;
         }
 
-        public async Task<StaffsResponseModel> GetStaffsByCompanyIdAsync(int companyId)
+        public async Task<StaffsResponseModel> GetStaffsByBrandIdAsync(int brandId)
         {
             var response = new StaffsResponseModel();
             try
             {
-                var dbStaffs = await this.staffRepository.GetStaffsByCompanyIdAsync(companyId);
+                var dbStaffs = await this.staffRepository.GetStaffsByBrandIdAsync(brandId);
                 response.Staffs = new List<StaffModel>();
                 foreach (var dbStaff in dbStaffs)
                 {
                     response.Staffs.Add(new StaffModel()
                     {
                         Id = dbStaff.Id,
-                        CompanyId = dbStaff.CompanyId,
+                        BrandId = dbStaff.BrandId,
                         Phone = dbStaff.Phone,
                         CreatedDate = dbStaff.CreatedDate,
                         CreatedBy = dbStaff.CreatedBy,
@@ -125,16 +125,16 @@ namespace CSP_Redemption_WebApi.Services
                         Email = dbStaff.Email,
                         IsActived = dbStaff.IsActived,
                         RoleId = dbStaff.RoleId,
-                        Company = new CompanyModel()
+                        Brand = new BrandModel()
                         {
-                            Id = dbStaff.Company.Id,
-                            Name = dbStaff.Company.Name
+                            Id = dbStaff.Brand.Id,
+                            Name = dbStaff.Brand.Name
                         },
                         Role = new RoleModel()
                         {
                             Id = dbStaff.Role.Id,
                             Description = dbStaff.Role.Description,
-                            CompanyId = dbStaff.Role.Id,
+                            BrandId = dbStaff.Role.Id,
                             Name = dbStaff.Role.Name
                         }
                     });

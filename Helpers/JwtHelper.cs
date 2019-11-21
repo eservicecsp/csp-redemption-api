@@ -19,7 +19,7 @@ namespace CSP_Redemption_WebApi.Helpers
             , string firstName
             , string lastName
             , string Email
-            , int CompanyId
+            , int BrandId
             , string AvatarPath)
         {
             var claims = new List<Claim>
@@ -30,7 +30,7 @@ namespace CSP_Redemption_WebApi.Helpers
                 new Claim("firstName", firstName),
                 new Claim("lastName", lastName),
                 new Claim("email", Email),
-                new Claim("companyId", CompanyId.ToString()),
+                new Claim("brandId", BrandId.ToString()),
                 new Claim("avatarPath", AvatarPath),
             };
 

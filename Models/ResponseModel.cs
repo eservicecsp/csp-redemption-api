@@ -35,11 +35,11 @@ namespace CSP_Redemption_WebApi.Models
         public string LastName { get; set; }
         public string Phone { get; set; }
         public int RoleId { get; set; }
-        public int CompanyId { get; set; }
+        public int BrandId { get; set; }
         public bool IsActived { get; set; }
         public DateTime CreatedDate { get; set; }
         public int CreatedBy { get; set; }
-        public CompanyModel Company { get; set; }
+        public BrandModel Brand { get; set; }
         public RoleModel Role { get; set; }
     }
 
@@ -58,8 +58,8 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
-    #region Company
-    public class CompanyModel
+    #region Brand
+    public class BrandModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -71,7 +71,7 @@ namespace CSP_Redemption_WebApi.Models
     public class RoleModel
     {
         public int Id { get; set; }
-        public int CompanyId { get; set; }
+        public int BrandId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
     }

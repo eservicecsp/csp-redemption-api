@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace CSP_Redemption_WebApi.Repositories
 {
-    public interface IRoleMenuRepository
+    public interface IRoleFunctionRepository
     {
-        Task<List<RoleMenu>> GetRoleMenusByRoleIdAsync(int roleId);
+        Task<List<RoleFunction>> GetRoleFunctionsByRoleIdAsync(int roleId);
     }
 
-    public class RoleMenuRepository : IRoleMenuRepository
+    public class RoleFunctionRepository : IRoleFunctionRepository
     {
-        public async Task<List<RoleMenu>> GetRoleMenusByRoleIdAsync(int roleId)
+        public async Task<List<RoleFunction>> GetRoleFunctionsByRoleIdAsync(int roleId)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.RoleMenu.Include(x => x.Menu).Where(x => x.RoleId == roleId).ToListAsync();
+                return await Context.RoleFunction.Include(x => x.Function).Where(x => x.RoleId == roleId).ToListAsync();
             }
         }
     }

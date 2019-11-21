@@ -9,21 +9,21 @@ namespace CSP_Redemption_WebApi.Repositories
 {
     public interface IStaffRepository
     {
-        Task<List<Staff>> GetStaffsByCompanyIdAsync(int companyId);
+        Task<List<Staff>> GetStaffsByBrandIdAsync(int brandId);
         Task<Staff> GetStaffByEmailAsync(string email);
         Task<Staff> GetStaffByIdAsync(int id);
     }
 
     public class StaffRepository: IStaffRepository
     {
-        public async Task<List<Staff>> GetStaffsByCompanyIdAsync(int companyId)
+        public async Task<List<Staff>> GetStaffsByBrandIdAsync(int brandId)
         {
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.Staff
-                    .Include(x => x.Company)
+                    .Include(x => x.Brand)
                     .Include(x => x.Role)
-                    .Where(x => x.CompanyId == companyId).ToListAsync();
+                    .Where(x => x.BrandId == brandId).ToListAsync();
             }
         }
 
@@ -32,7 +32,7 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.Staff
-                    .Include(x => x.Company)
+                    .Include(x => x.Brand)
                     .Where(x => x.Email == email).FirstOrDefaultAsync();
             }
         }
@@ -41,7 +41,7 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.Staff
-                    .Include(x => x.Company)
+                    .Include(x => x.Brand)
                     .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
         }

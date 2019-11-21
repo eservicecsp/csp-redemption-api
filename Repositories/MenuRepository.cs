@@ -8,43 +8,43 @@ using System.Threading.Tasks;
 
 namespace CSP_Redemption_WebApi.Repositories
 {
-    public interface IMenuRepository
+    public interface IFunctionRepository
     {
-        Task<List<Menu>> GetMenusAsync();
-        Task<List<Menu>> GetMenusByRoleIdAsync(int roleId);
-        Task<Menu> GetMenusBtIdAsync(int menuId);
+        Task<List<Function>> GetFunctionsAsync();
+        Task<List<Function>> GetFunctionsByRoleIdAsync(int roleId);
+        Task<Function> GetFunctionsByIdAsync(int functionId);
     }
-    public class MenuRepository : IMenuRepository
+    public class FunctionRepository : IFunctionRepository
     {
-        public async Task<List<Menu>> GetMenusAsync()
+        public async Task<List<Function>> GetFunctionsAsync()
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Menu.ToListAsync();
+                return await Context.Function.ToListAsync();
             }
         }
 
-        public async Task<List<Menu>> GetMenusByRoleIdAsync(int roleId)
+        public async Task<List<Function>> GetFunctionsByRoleIdAsync(int roleId)
         {
-            var menus = new List<Menu>();
+            var menus = new List<Function>();
             using (var Context = new CSP_RedemptionContext())
             {
-                var menuRole = await Context.RoleMenu.Where(x => x.RoleId == roleId).ToListAsync();
+                var menuRole = await Context.RoleFunction.Where(x => x.RoleId == roleId).ToListAsync();
                 foreach (var item in menuRole)
                 {
-                    var menu = await Context.Menu.Where(x=>x.Id == item.MenuId).FirstOrDefaultAsync();
+                    var menu = await Context.Function.Where(x=>x.Id == item.FunctionId).FirstOrDefaultAsync();
                     menus.Add(menu);
                 }
                 return menus;
             }
         }
 
-        public async Task<Menu> GetMenusBtIdAsync(int menuId)
+        public async Task<Function> GetFunctionsByIdAsync(int functionId)
         {
             using (var Context = new CSP_RedemptionContext())
             {
 
-                return await Context.Menu.Where(x => x.Id == menuId).FirstOrDefaultAsync();
+                return await Context.Function.Where(x => x.Id == functionId).FirstOrDefaultAsync();
             }
         }
     }

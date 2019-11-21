@@ -20,16 +20,21 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
         }
 
         public virtual DbSet<Amphur> Amphur { get; set; }
+        public virtual DbSet<Brand> Brand { get; set; }
         public virtual DbSet<Campaign> Campaign { get; set; }
-        public virtual DbSet<Company> Company { get; set; }
+        public virtual DbSet<CampaignType> CampaignType { get; set; }
         public virtual DbSet<Consumer> Consumer { get; set; }
-        public virtual DbSet<ConsumerType> ConsumerType { get; set; }
-        public virtual DbSet<Menu> Menu { get; set; }
+        public virtual DbSet<ConsumerSource> ConsumerSource { get; set; }
+        public virtual DbSet<Dealer> Dealer { get; set; }
+        public virtual DbSet<Function> Function { get; set; }
+        public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<Province> Province { get; set; }
         public virtual DbSet<QrCode> QrCode { get; set; }
         public virtual DbSet<Role> Role { get; set; }
-        public virtual DbSet<RoleMenu> RoleMenu { get; set; }
+        public virtual DbSet<RoleFunction> RoleFunction { get; set; }
         public virtual DbSet<Staff> Staff { get; set; }
+        public virtual DbSet<Transaction> Transaction { get; set; }
+        public virtual DbSet<TransactionType> TransactionType { get; set; }
         public virtual DbSet<Tumbol> Tumbol { get; set; }
         public virtual DbSet<Zone> Zone { get; set; }
 
@@ -56,9 +61,9 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasMaxLength(10)
                     .ValueGeneratedNever();
 
-                entity.Property(e => e.NameEn).HasMaxLength(150);
+                entity.Property(e => e.NameEn).HasMaxLength(100);
 
-                entity.Property(e => e.NameTh).HasMaxLength(150);
+                entity.Property(e => e.NameTh).HasMaxLength(100);
 
                 entity.Property(e => e.ProvinceCode)
                     .IsRequired()
@@ -71,45 +76,56 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasConstraintName("FK_Amphur_Province");
             });
 
+            modelBuilder.Entity<Brand>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(255);
+            });
+
             modelBuilder.Entity<Campaign>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Description).HasMaxLength(250);
-
-                entity.Property(e => e.EndDate).HasColumnType("datetime");
+                entity.Property(e => e.Description).HasMaxLength(255);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(150);
+                    .HasMaxLength(100);
 
-                entity.Property(e => e.StartDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.Company)
+                entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Campaign)
-                    .HasForeignKey(d => d.CompanyId)
+                    .HasForeignKey(d => d.BrandId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Campaign_Company");
+                    .HasConstraintName("FK_Campaign_Brand");
+
+                entity.HasOne(d => d.CampaignType)
+                    .WithMany(p => p.Campaign)
+                    .HasForeignKey(d => d.CampaignTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Campaign_CampaignType");
             });
 
-            modelBuilder.Entity<Company>(entity =>
+            modelBuilder.Entity<CampaignType>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Description).HasMaxLength(255);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(250);
+                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<Consumer>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.AmphurCode)
-                    .IsRequired()
-                    .HasMaxLength(10);
+                entity.Property(e => e.AmphurCode).HasMaxLength(10);
 
                 entity.Property(e => e.BirthDate).HasColumnType("datetime");
 
@@ -117,78 +133,98 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.Email)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(100);
 
                 entity.Property(e => e.FirstName)
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Gender)
-                    .IsRequired()
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.LastName)
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Latitude).HasMaxLength(50);
-
-                entity.Property(e => e.Location).HasMaxLength(255);
-
-                entity.Property(e => e.Longitude).HasMaxLength(50);
-
                 entity.Property(e => e.Phone)
                     .IsRequired()
-                    .HasMaxLength(20);
-
-                entity.Property(e => e.ProvinceCode)
-                    .IsRequired()
                     .HasMaxLength(10);
 
-                entity.Property(e => e.TumbolCode)
-                    .IsRequired()
-                    .HasMaxLength(10);
+                entity.Property(e => e.ProvinceCode).HasMaxLength(10);
 
-                entity.Property(e => e.ZipCode)
-                    .IsRequired()
-                    .HasMaxLength(5);
+                entity.Property(e => e.TumbolCode).HasMaxLength(10);
 
-                entity.HasOne(d => d.AmphurCodeNavigation)
+                entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Consumer)
-                    .HasForeignKey(d => d.AmphurCode)
+                    .HasForeignKey(d => d.BrandId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Consumer_Amphur");
+                    .HasConstraintName("FK_Consumer_Brand");
 
-                entity.HasOne(d => d.ConsumerType)
+                entity.HasOne(d => d.Campaign)
                     .WithMany(p => p.Consumer)
-                    .HasForeignKey(d => d.ConsumerTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Consumer_ConsumerType");
+                    .HasForeignKey(d => d.CampaignId)
+                    .HasConstraintName("FK_Consumer_Campaign");
 
-                entity.HasOne(d => d.ProvinceCodeNavigation)
+                entity.HasOne(d => d.ConsumerSource)
                     .WithMany(p => p.Consumer)
-                    .HasForeignKey(d => d.ProvinceCode)
+                    .HasForeignKey(d => d.ConsumerSourceId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Consumer_Province");
-
-                entity.HasOne(d => d.TumbolCodeNavigation)
-                    .WithMany(p => p.Consumer)
-                    .HasForeignKey(d => d.TumbolCode)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Consumer_Tumbol");
+                    .HasConstraintName("FK_Consumer_ConsumerSource");
             });
 
-            modelBuilder.Entity<ConsumerType>(entity =>
+            modelBuilder.Entity<ConsumerSource>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Description).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
 
-            modelBuilder.Entity<Menu>(entity =>
+            modelBuilder.Entity<Dealer>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.Dealer)
+                    .HasForeignKey(d => d.BrandId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Dealer_Brand");
+            });
+
+            modelBuilder.Entity<Function>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.Product)
+                    .HasForeignKey(d => d.BrandId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Product_Brand");
             });
 
             modelBuilder.Entity<Province>(entity =>
@@ -199,9 +235,9 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasMaxLength(10)
                     .ValueGeneratedNever();
 
-                entity.Property(e => e.NameEn).HasMaxLength(150);
+                entity.Property(e => e.NameEn).HasMaxLength(100);
 
-                entity.Property(e => e.NameTh).HasMaxLength(150);
+                entity.Property(e => e.NameTh).HasMaxLength(100);
 
                 entity.HasOne(d => d.Zone)
                     .WithMany(p => p.Province)
@@ -212,70 +248,64 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
             modelBuilder.Entity<QrCode>(entity =>
             {
-                entity.HasKey(e => new { e.QrCode1, e.CampaignId })
-                    .HasName("PK_Code");
+                entity.HasKey(e => new { e.Token, e.CampaignId });
 
-                entity.Property(e => e.QrCode1)
-                    .HasColumnName("QrCode")
-                    .HasMaxLength(42)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ScanDate).HasColumnType("datetime");
+                entity.Property(e => e.Token).HasMaxLength(50);
 
                 entity.HasOne(d => d.Campaign)
                     .WithMany(p => p.QrCode)
                     .HasForeignKey(d => d.CampaignId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Code_Campaign");
+                    .HasConstraintName("FK_QrCode_Campaign");
 
                 entity.HasOne(d => d.Consumer)
                     .WithMany(p => p.QrCode)
                     .HasForeignKey(d => d.ConsumerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_QrCode_Consumer");
+
+                entity.HasOne(d => d.Transaction)
+                    .WithMany(p => p.QrCode)
+                    .HasForeignKey(d => d.TransactionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_QrCode_Transaction");
             });
 
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Description).HasMaxLength(255);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.HasOne(d => d.Company)
-                    .WithMany(p => p.Role)
-                    .HasForeignKey(d => d.CompanyId)
-                    .HasConstraintName("FK_Role_Company");
+                    .HasMaxLength(100);
             });
 
-            modelBuilder.Entity<RoleMenu>(entity =>
+            modelBuilder.Entity<RoleFunction>(entity =>
             {
-                entity.HasKey(e => new { e.RoleId, e.MenuId });
+                entity.HasKey(e => new { e.RoleId, e.FunctionId });
 
-                entity.HasOne(d => d.Menu)
-                    .WithMany(p => p.RoleMenu)
-                    .HasForeignKey(d => d.MenuId)
+                entity.HasOne(d => d.Function)
+                    .WithMany(p => p.RoleFunction)
+                    .HasForeignKey(d => d.FunctionId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_RoleMenu_Menu");
+                    .HasConstraintName("FK_RoleFunction_Function");
 
                 entity.HasOne(d => d.Role)
-                    .WithMany(p => p.RoleMenu)
+                    .WithMany(p => p.RoleFunction)
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_RoleMenu_Role");
+                    .HasConstraintName("FK_RoleFunction_Role");
             });
 
             modelBuilder.Entity<Staff>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
                 entity.Property(e => e.Email)
                     .IsRequired()
-                    .HasMaxLength(100);
+                    .HasMaxLength(255);
 
                 entity.Property(e => e.FirstName)
                     .IsRequired()
@@ -287,21 +317,59 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.Password)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(255);
 
-                entity.Property(e => e.Phone).HasMaxLength(50);
-
-                entity.HasOne(d => d.Company)
+                entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Staff)
-                    .HasForeignKey(d => d.CompanyId)
+                    .HasForeignKey(d => d.BrandId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Staff_Company");
+                    .HasConstraintName("FK_Staff_Brand");
 
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Staff)
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Staff_Role");
+            });
+
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Token)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.HasOne(d => d.Campaign)
+                    .WithMany(p => p.Transaction)
+                    .HasForeignKey(d => d.CampaignId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Transaction_Campaign");
+
+                entity.HasOne(d => d.Consumer)
+                    .WithMany(p => p.Transaction)
+                    .HasForeignKey(d => d.ConsumerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Transaction_Consumer");
+
+                entity.HasOne(d => d.TransactionType)
+                    .WithMany(p => p.Transaction)
+                    .HasForeignKey(d => d.TransactionTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Transaction_TransactionType");
+            });
+
+            modelBuilder.Entity<TransactionType>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<Tumbol>(entity =>
@@ -316,9 +384,9 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .IsRequired()
                     .HasMaxLength(10);
 
-                entity.Property(e => e.NameEn).HasMaxLength(150);
+                entity.Property(e => e.NameEn).HasMaxLength(100);
 
-                entity.Property(e => e.NameTh).HasMaxLength(150);
+                entity.Property(e => e.NameTh).HasMaxLength(100);
 
                 entity.Property(e => e.ZipCode).HasMaxLength(5);
 
@@ -333,9 +401,15 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.NameEn).HasMaxLength(150);
+                entity.Property(e => e.Description).HasMaxLength(255);
 
-                entity.Property(e => e.NameTh).HasMaxLength(150);
+                entity.Property(e => e.NameEn)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.NameTh)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
         }
     }
