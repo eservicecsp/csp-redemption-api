@@ -175,6 +175,10 @@ namespace CSP_Redemption_WebApi.Models
         public string NameEn { get; set; }
         public string AmphurCode { get; set; }
     }
+
+    #endregion
+
+
     #region Function
 
     public class FunctionsResponseModel
