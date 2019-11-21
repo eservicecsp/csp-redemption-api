@@ -143,12 +143,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Latitude).HasMaxLength(50);
-
-                entity.Property(e => e.Location).HasMaxLength(255);
-
-                entity.Property(e => e.Longitude).HasMaxLength(50);
-
                 entity.Property(e => e.Phone)
                     .IsRequired()
                     .HasMaxLength(10);
@@ -355,6 +349,12 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.Token)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.Property(e => e.Latitude).HasMaxLength(50);
+
+                entity.Property(e => e.Location).HasMaxLength(255);
+
+                entity.Property(e => e.Longitude).HasMaxLength(50);
 
                 entity.HasOne(d => d.Campaign)
                     .WithMany(p => p.Transaction)
