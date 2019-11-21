@@ -37,12 +37,17 @@ namespace CSP_Redemption_WebApi
 
             // Services
             services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<IFunctionService, FunctionService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
             services.AddScoped(typeof(IFunctionRepository), typeof(FunctionRepository));
             services.AddScoped(typeof(IRoleFunctionRepository), typeof(RoleFunctionRepository));
+            services.AddScoped(typeof(IZoneRepository),typeof(ZoneRepository));
+            services.AddScoped(typeof(IProvinceRepository),typeof(ProvinceRepository));
+            services.AddScoped(typeof(IAmphurRepository),typeof(AmphurRepository));
+            services.AddScoped(typeof(ITumbolRepository), typeof(TumbolRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
