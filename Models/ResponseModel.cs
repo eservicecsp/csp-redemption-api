@@ -47,13 +47,47 @@ namespace CSP_Redemption_WebApi.Models
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
-        public List<AuthorizationModel> RoleMenus { get; set; }
+        public List<NavigationModel> navigations { get; set; }
     }
 
-    public class AuthorizationModel
+    public class NavigationModel
     {
-        public int Id { get; set; }
-        public bool IsReadOnly { get; set; }
+        public string id { get; set; }
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string type { get; set; }
+        public List<ChildModel> children { get; set; }
+    }
+
+    public class ChildModel
+    {
+        public string id { get; set; }
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string type { get; set; }
+        public string icon { get; set; }
+        public List<SubChild> children { get; set; }
+        public string url { get; set; }
+        public BadgeModel badge { get; set; }
+    }
+
+    public class BadgeModel
+    {
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string bg { get; set; }
+        public string fg { get; set; }
+    }
+
+    public class SubChild
+    {
+        public string id { get; set; }
+        public string title { get; set; }
+        //public string translate { get; set; }
+        public string type { get; set; }
+        public string icon { get; set; }
+        public string url { get; set; }
+        public BadgeModel badge { get; set; }
     }
 
     #endregion
@@ -74,6 +108,33 @@ namespace CSP_Redemption_WebApi.Models
         public int BrandId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+    }
+
+    #endregion
+
+    #region Function
+
+    public class FunctionsResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<FunctionModel> Functions { get; set; }
+    }
+
+    public class FunctionModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int Level { get; set; }
+        public int ParentId { get; set; }
+        public string Path { get; set; }
+        public string Icon { get; set; }
+        public bool IsInternal { get; set; }
+        public bool IsExternal { get; set; }
+        public bool IsActived { get; set; }
+        public int? ModifiedBy { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 
     #endregion
