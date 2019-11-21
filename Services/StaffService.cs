@@ -21,16 +21,19 @@ namespace CSP_Redemption_WebApi.Services
         private readonly IConfiguration configuration;
         private readonly IStaffRepository staffRepository;
         private readonly IMenuRepository menuRepository;
+        private readonly IRoleMenuRepository roleMenuRepository;
 
         public StaffService(
             IConfiguration configuration,
             IStaffRepository staffRepository,
-            IMenuRepository menuRepository
+            IMenuRepository menuRepository,
+            IRoleMenuRepository roleMenuRepository
             )
         {
             this.configuration = configuration;
             this.staffRepository = staffRepository;
             this.menuRepository = menuRepository;
+            this.roleMenuRepository = roleMenuRepository;
         }
 
         public async Task<AuthenticationResponseModel> Authenticate(Staff staff)
@@ -80,82 +83,18 @@ namespace CSP_Redemption_WebApi.Services
 
                 var staff = await this.staffRepository.GetStaffByIdAsync(Convert.ToInt32(staffId));
 
-                var menus = await this.menuRepository.GetMenusByRoleIdAsync(staff.RoleId);
-                var parentMenus = await this.menuRepository.GetMenusByParentIdAsync(0);
+                var roleMenus = await this.roleMenuRepository.GetRoleMenusByRoleIdAsync(staff.RoleId);
 
-                var navigations = new List<Navigation>();
-
-                foreach (var menu in menus.Where(x => x.ParentId != 0 && x.IsActived == true).OrderBy(x => x.ParentId))
+                authorization.RoleMenus = new List<AuthorizationModel>();
+                foreach (var roleMenu in roleMenus)
                 {
-                    if (!(navigations.Any(x => x.id == menu.ParentId.ToString())))
+                    authorization.RoleMenus.Add(new AuthorizationModel()
                     {
-                        try
-                        {
-                            var children = new List<Child>();
-                            var existParent = parentMenus.Where(x => x.Id == menu.ParentId && x.IsActived == true).Single();
-
-                            children.Add(new Child()
-                            {
-                                id = menu.Id.ToString(),
-                                title = menu.Name,
-                                type = "item",
-                                url = menu.Path,
-                                icon = menu.Icon,
-                                children = new List<SubChild>()
-                            });
-                            var navigation = new Navigation()
-                            {
-                                id = existParent.Id.ToString(),
-                                title = existParent.Name,
-                                type = "group",
-                                children = children,
-                            };
-                            navigations.Add(navigation);
-                        }
-                        catch (Exception)
-                        {
-
-                            foreach (var item in navigations)
-                            {
-                                var existParent = item.children.Where(x => x.id == menu.ParentId.ToString()).FirstOrDefault();
-                                
-                                if (existParent != null)
-                                {
-                                    if (existParent.children == null)
-                                    {
-                                        existParent.children = new List<SubChild>();
-                                    }
-
-                                    var subChild = new SubChild()
-                                    {
-                                        id = menu.Id.ToString(),
-                                        title = menu.Name,
-                                        type = "item",
-                                        url = menu.Path,
-                                        icon = menu.Icon
-                                    };
-                                    existParent.children.Add(subChild);
-                                    existParent.type = "collapsable";
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var existNavigation = navigations.Where(x => x.id == menu.ParentId.ToString()).Single();
-                        var child = new Child()
-                        {
-                            id = menu.Id.ToString(),
-                            title = menu.Name,
-                            type = "item",
-                            url = menu.Path,
-                            icon = menu.Icon
-                        };
-                        existNavigation.children.Add(child);
-                    }
-                    authorization.IsSuccess = true;
+                        Id = roleMenu.MenuId,
+                        IsReadOnly = roleMenu.IsReadOnly
+                    });
                 }
-                authorization.Navigations = navigations;
+                authorization.IsSuccess = true;
             }
             catch (Exception ex)
             {

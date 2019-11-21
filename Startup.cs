@@ -41,6 +41,7 @@ namespace CSP_Redemption_WebApi
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
             services.AddScoped(typeof(IMenuRepository), typeof(MenuRepository));
+            services.AddScoped(typeof(IRoleMenuRepository), typeof(RoleMenuRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

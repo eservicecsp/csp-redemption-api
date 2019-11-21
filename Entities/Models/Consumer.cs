@@ -8,6 +8,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public Consumer()
         {
             QrCode = new HashSet<QrCode>();
+            Transaction = new HashSet<Transaction>();
         }
 
         public int Id { get; set; }
@@ -26,14 +27,16 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string Latitude { get; set; }
         public string Longitude { get; set; }
         public string Location { get; set; }
-        public int CampaignId { get; set; }
+        public int CompanyId { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int ConsumerTypeId { get; set; }
 
         public virtual Amphur AmphurCodeNavigation { get; set; }
+        public virtual Company Company { get; set; }
         public virtual ConsumerType ConsumerType { get; set; }
         public virtual Province ProvinceCodeNavigation { get; set; }
         public virtual Tumbol TumbolCodeNavigation { get; set; }
         public virtual ICollection<QrCode> QrCode { get; set; }
+        public virtual ICollection<Transaction> Transaction { get; set; }
     }
 }

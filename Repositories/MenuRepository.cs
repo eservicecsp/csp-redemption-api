@@ -11,7 +11,6 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface IMenuRepository
     {
         Task<List<Menu>> GetMenusAsync();
-        Task<List<Menu>> GetMenusByParentIdAsync(int parentId);
         Task<List<Menu>> GetMenusByRoleIdAsync(int roleId);
         Task<Menu> GetMenusBtIdAsync(int menuId);
     }
@@ -25,13 +24,6 @@ namespace CSP_Redemption_WebApi.Repositories
             }
         }
 
-        public async Task<List<Menu>> GetMenusByParentIdAsync(int parentId)
-        {
-            using (var Context = new CSP_RedemptionContext())
-            {
-                return await Context.Menu.Where(x => x.ParentId == parentId).ToListAsync();
-            }
-        }
         public async Task<List<Menu>> GetMenusByRoleIdAsync(int roleId)
         {
             var menus = new List<Menu>();
@@ -40,7 +32,7 @@ namespace CSP_Redemption_WebApi.Repositories
                 var menuRole = await Context.RoleMenu.Where(x => x.RoleId == roleId).ToListAsync();
                 foreach (var item in menuRole)
                 {
-                    var menu = await Context.Menu.SingleAsync(x => x.Id == item.MenuId);
+                    var menu = await Context.Menu.Where(x=>x.Id == item.MenuId).FirstOrDefaultAsync();
                     menus.Add(menu);
                 }
                 return menus;
