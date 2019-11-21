@@ -203,9 +203,15 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.Description).HasMaxLength(255);
 
+                entity.Property(e => e.Icon).HasMaxLength(50);
+
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
+
+                entity.Property(e => e.Path).HasMaxLength(100);
             });
 
             modelBuilder.Entity<Product>(entity =>
