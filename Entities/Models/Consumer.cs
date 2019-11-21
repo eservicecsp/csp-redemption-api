@@ -17,9 +17,15 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string Email { get; set; }
         public string Phone { get; set; }
         public DateTime BirthDate { get; set; }
+        public string Address1 { get; set; }
+        public string Address2 { get; set; }
         public string TumbolCode { get; set; }
         public string AmphurCode { get; set; }
         public string ProvinceCode { get; set; }
+        public string ZipCode { get; set; }
+        public string Latitude { get; set; }
+        public string Longitude { get; set; }
+        public string Location { get; set; }
         public int ConsumerSourceId { get; set; }
         public int BrandId { get; set; }
         public int? CampaignId { get; set; }
