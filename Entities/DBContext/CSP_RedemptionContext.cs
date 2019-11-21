@@ -143,6 +143,12 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .IsRequired()
                     .HasMaxLength(100);
 
+                entity.Property(e => e.Latitude).HasMaxLength(50);
+
+                entity.Property(e => e.Location).HasMaxLength(255);
+
+                entity.Property(e => e.Longitude).HasMaxLength(50);
+
                 entity.Property(e => e.Phone)
                     .IsRequired()
                     .HasMaxLength(10);
@@ -150,6 +156,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.ProvinceCode).HasMaxLength(10);
 
                 entity.Property(e => e.TumbolCode).HasMaxLength(10);
+
+                entity.Property(e => e.ZipCode).HasMaxLength(5);
 
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Consumer)
