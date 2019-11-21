@@ -38,6 +38,7 @@ namespace CSP_Redemption_WebApi
             // Services
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<IFunctionService, FunctionService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
