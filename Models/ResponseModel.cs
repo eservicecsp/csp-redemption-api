@@ -77,4 +77,69 @@ namespace CSP_Redemption_WebApi.Models
     }
 
     #endregion
+
+    #region Address
+    public class ZoneResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<ZoneModel> zones { get; set; }
+    }
+
+    public class ZoneModel
+    {
+   
+        public int Id { get; set; }
+        public string NameTh { get; set; }
+        public string NameEn { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class ProvinceResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<ProvinceModel> provinces { get; set; }
+    }
+
+    public class ProvinceModel
+    {
+
+        public string Code { get; set; }
+        public string NameTh { get; set; }
+        public string NameEn { get; set; }
+        public int ZoneId { get; set; }
+    }
+
+    public class AmphurResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<AmphurModel> amphurs { get; set; }
+    }
+
+    public class AmphurModel
+    {
+
+        public string Code { get; set; }
+        public string NameTh { get; set; }
+        public string NameEn { get; set; }
+        public string ProvinceCode { get; set; }
+    }
+    public class TumbolResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<TumbolModel> tumbols { get; set; }
+    }
+
+    public class TumbolModel
+    {
+
+        public string Code { get; set; }
+        public string NameTh { get; set; }
+        public string NameEn { get; set; }
+        public string AmphurCode { get; set; }
+    }
+    #endregion
 }
