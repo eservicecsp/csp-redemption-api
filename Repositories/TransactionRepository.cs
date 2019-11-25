@@ -35,13 +35,26 @@ namespace CSP_Redemption_WebApi.Repositories
                     try
                     {
                         Context.Transaction.Add(transaction);
-                        if(await Context.SaveChangesAsync() > 0)
+                        if (await Context.SaveChangesAsync() > 0)
                         {
-                            await this.qrCodeRepository.UpdateAsync(qrCode);
-                            isSuccess = true;
+                            var data = new QrCode
+                            {
+                                Token = qrCode.Token,
+                                CampaignId = qrCode.CampaignId,
+                                Peice = qrCode.Peice,
+                                ConsumerId = qrCode.ConsumerId,
+                                TransactionId = transaction.Id,
+                                Point = qrCode.Point,
+                                ScanDate = qrCode.ScanDate
+                            };
+                            // await this.qrCodeRepository.UpdateAsync(qrCode);
+                            var dbQrCode = await Context.QrCode.SingleAsync(x => x.Token == qrCode.Token && x.CampaignId == qrCode.CampaignId && x.ConsumerId == null);
+                            Context.Entry(dbQrCode).CurrentValues.SetValues(data);
+
+                            isSuccess = await Context.SaveChangesAsync() > 0;
                             tran.Commit();
                         }
-                      
+
                     }
                     catch (Exception)
                     {
@@ -50,8 +63,8 @@ namespace CSP_Redemption_WebApi.Repositories
                         throw;
                     }
                 }
-                   
-                
+
+
             }
             return isSuccess;
         }
@@ -66,16 +79,33 @@ namespace CSP_Redemption_WebApi.Repositories
                     try
                     {
                         Context.Transaction.Add(transaction);
-                        if(await Context.SaveChangesAsync() > 0)
+                        if (await Context.SaveChangesAsync() > 0)
                         {
-                            qrCode.TransactionId = transaction.Id;
-                            await this.qrCodeRepository.UpdateAsync(qrCode);
+                            var data = new QrCode
+                            {
+                                Token = qrCode.Token,
+                                CampaignId = qrCode.CampaignId,
+                                Peice = qrCode.Peice,
+                                ConsumerId = qrCode.ConsumerId,
+                                TransactionId = transaction.Id,
+                                Point = qrCode.Point,
+                                ScanDate = qrCode.ScanDate
+                            };
+                            var dbQrCode = await Context.QrCode.SingleAsync(x => x.Token == qrCode.Token && x.CampaignId == qrCode.CampaignId && x.ConsumerId == null);
+                            Context.Entry(dbQrCode).CurrentValues.SetValues(data);
+                            if (await Context.SaveChangesAsync() > 0)
+                            {
+                                var dbCosumer = await Context.Consumer.SingleAsync(x => x.Id == qrCode.ConsumerId);
+                                dbCosumer.Point = dbCosumer.Point + qrCode.Point;
+                                isSuccess = await Context.SaveChangesAsync() > 0;
+                            }
 
-                            isSuccess = true;
+                            
+
                             tran.Commit();
                         }
 
-                       
+
                     }
                     catch (Exception)
                     {

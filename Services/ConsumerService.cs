@@ -58,7 +58,13 @@ namespace CSP_Redemption_WebApi.Services
                         tran.Latitude = dataConsumer.Latitude;
                         tran.Longitude = dataConsumer.Longitude;
                         tran.Location = dataConsumer.Location;
-                        await this.Redemption(tran);
+                        //await this.Redemption(tran);
+                        var redemption = await this.Redemption(tran);
+                        response.IsSuccess = true;
+                        response.StatusTypeCode = redemption.StatusTypeCode;
+                        response.CampaignType = redemption.CampaignType;
+                        response.Message = redemption.Message;
+                        response.Pieces = redemption.Pieces;
                     }
                     else
                     {
@@ -127,7 +133,12 @@ namespace CSP_Redemption_WebApi.Services
                         tran.Latitude = consumerRequest.Latitude;
                         tran.Longitude = consumerRequest.Longitude;
                         tran.Location = consumerRequest.Location;
-                        await this.Redemption(tran);
+                        var redemption = await this.Redemption(tran);
+                        response.IsSuccess = true;
+                        response.StatusTypeCode = redemption.StatusTypeCode;
+                        response.CampaignType = redemption.CampaignType;
+                        response.Message = redemption.Message; 
+                        response.Pieces = redemption.Pieces;
                     }
                     else
                     {
@@ -151,6 +162,7 @@ namespace CSP_Redemption_WebApi.Services
             var tran = new Transaction();
             var qrCode = new QrCode();
             bool IsError = false;
+            int totalPoint = 0;
             try
             {
                 var campaign = await this.campaignRepository.GetCampaignByIdAsync(consumerRequest.CampaignId);
@@ -162,35 +174,35 @@ namespace CSP_Redemption_WebApi.Services
                 tran.Longitude = consumerRequest.Longitude;
                 tran.Location = consumerRequest.Location;
                 tran.CreatedDate = DateTime.Now;
+
+                response.ConsumerId = consumerRequest.ConsumerId;
+                response.CampaignType = campaign.CampaignTypeId;
                 if ((campaign.StartDate <= DateTime.Now) && (campaign.EndDate >= DateTime.Now))
                 {
+                    qrCode.Token = consumerRequest.Token;
+                    qrCode.CampaignId = consumerRequest.CampaignId;
+                    qrCode.ConsumerId = consumerRequest.ConsumerId;
+                    qrCode.ScanDate = DateTime.Now;
+
                     var dbQrCode = await this.qrCodeRepository.GetQrCode(qrCode);
 
                     if(dbQrCode != null)
                     {
                         if(dbQrCode.ConsumerId == null)
                         {
-                            qrCode.Token = consumerRequest.Token;
-                            qrCode.CampaignId = consumerRequest.CampaignId;
                             qrCode.Peice = dbQrCode.Peice;
-                            qrCode.ConsumerId = consumerRequest.ConsumerId;
                             qrCode.Point = dbQrCode.Point + consumerRequest.Point;
-                            qrCode.ScanDate = DateTime.Now;
-
-
 
                             if (campaign.CampaignTypeId == 1) //JigSaw
                             {
-                                var statusTran = await this.transactionRepository.CreateTransactionJigSawAsync(tran, qrCode);
-                                if (statusTran)
-                                {
-                                    response.Message = campaign.WinMessage;
-                                    response.StatusTypeCode = "SUCCESS";
+                                response.Message = campaign.WinMessage;
+                                response.StatusTypeCode = "SUCCESS";
 
-                                    tran.TransactionTypeId = 4;
-                                    tran.ResponseMessage = campaign.WinMessage;
-                                }
-                                else
+                                tran.TransactionTypeId = 4;
+                                tran.ResponseMessage = campaign.WinMessage;
+
+                                var statusTran = await this.transactionRepository.CreateTransactionJigSawAsync(tran, qrCode);
+                                if (!statusTran)
                                 {
                                     IsError = true;
                                     response.Message = "System error.";
@@ -199,21 +211,34 @@ namespace CSP_Redemption_WebApi.Services
                                     tran.TransactionTypeId = 1;
                                     tran.ResponseMessage = "System error.";
                                 }
+                                //else
+                                //{
+                                //    IsError = true;
+                                //    response.Message = "System error.";
+                                //    response.StatusTypeCode = "FAIL";
 
-                                response.Pieces = await this.qrCodeRepository.GetPiece(qrCode);
+                                //    tran.TransactionTypeId = 1;
+                                //    tran.ResponseMessage = "System error.";
+                                //}
+                               
                             } 
                             else if (campaign.CampaignTypeId == 2) //Point
                             {
 
+  
                                 var dbConsumer = await this.consumerRepository.GetConsumerByIdAsync(consumerRequest.ConsumerId);
-                                if(dbConsumer != null)
-                                {
-                                    int totalPoint = dbConsumer.Point != null ? Convert.ToInt32(dbConsumer.Point) : 0 + dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0;
-                                    qrCode.Point = totalPoint;
-                                    var statusTran = await this.transactionRepository.CreateTransactionPointAsync(tran, qrCode); 
-                                    response.Message = campaign.WinMessage + " และมีคะแนนรวม ( " + totalPoint + " ) คะแนน";
-                                }
-                                else
+                                tran.Point = dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0;
+                                totalPoint = (dbConsumer.Point != null ? Convert.ToInt32(dbConsumer.Point) : 0) + (dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0);
+                                qrCode.Point = totalPoint;
+
+                                response.Message = campaign.WinMessage + " และมีคะแนนรวม ( " + totalPoint + " ) คะแนน";
+                                response.StatusTypeCode = "SUCCESS";
+
+                                tran.TransactionTypeId = 4;
+                                tran.ResponseMessage = campaign.WinMessage + " และมีคะแนนรวม ( " + totalPoint + " ) คะแนน";
+
+                                var statusTran = await this.transactionRepository.CreateTransactionPointAsync(tran, qrCode);
+                                if (!statusTran)
                                 {
                                     IsError = true;
                                     response.Message = "System error.";
@@ -221,9 +246,10 @@ namespace CSP_Redemption_WebApi.Services
 
                                     tran.TransactionTypeId = 1;
                                     tran.ResponseMessage = "System error.";
+
                                 }
-                                
-                                
+
+
                             }
 
                         }
@@ -235,6 +261,12 @@ namespace CSP_Redemption_WebApi.Services
 
                             tran.TransactionTypeId = 3;
                             tran.ResponseMessage = campaign.DuplicateMessage;
+                        }
+
+
+                        if (campaign.CampaignTypeId == 1 && !IsError) //JigSaw
+                        {
+                            response.Pieces = await this.qrCodeRepository.GetPiece(qrCode);
                         }
                     }
                     else{
