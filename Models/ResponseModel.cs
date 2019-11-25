@@ -11,6 +11,24 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
     }
 
+    public class IsExistResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public bool IsExist { get; set; }
+        public int ConsumerId { get; set; }
+    }
+
+    public class RedemptionResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public string StatusTypeCode { get; set; }
+        public int CampaignType { get; set; }
+        public int[] Pieces { get; set; }
+    }
+
+
     #region Staff
     public class AuthenticationResponseModel
     {

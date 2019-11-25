@@ -89,13 +89,23 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.AlertMessage).HasMaxLength(255);
+
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Description).HasMaxLength(255);
 
+                entity.Property(e => e.DuplicateMessage).HasMaxLength(255);
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.WinMessage).HasMaxLength(255);
 
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Campaign)
@@ -142,12 +152,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.LastName)
                     .IsRequired()
                     .HasMaxLength(100);
-
-                entity.Property(e => e.Latitude).HasMaxLength(50);
-
-                entity.Property(e => e.Location).HasMaxLength(255);
-
-                entity.Property(e => e.Longitude).HasMaxLength(50);
 
                 entity.Property(e => e.Phone)
                     .IsRequired()
@@ -317,6 +321,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(255);
@@ -329,9 +335,15 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .IsRequired()
                     .HasMaxLength(100);
 
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(255);
+
+                entity.Property(e => e.Phone)
+                    .IsRequired()
+                    .HasMaxLength(10);
 
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Staff)
@@ -351,6 +363,14 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Latitude).HasMaxLength(50);
+
+                entity.Property(e => e.Location).HasMaxLength(255);
+
+                entity.Property(e => e.Longitude).HasMaxLength(50);
+
+                entity.Property(e => e.ResponseMessage).IsRequired();
 
                 entity.Property(e => e.Token)
                     .IsRequired()

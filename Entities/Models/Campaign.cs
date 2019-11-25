@@ -18,6 +18,12 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int CampaignTypeId { get; set; }
         public int BrandId { get; set; }
         public int Quantity { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string AlertMessage { get; set; }
+        public string DuplicateMessage { get; set; }
+        public string QrCodeNotExistMessage { get; set; }
+        public string WinMessage { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
 
