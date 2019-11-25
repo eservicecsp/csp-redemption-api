@@ -32,6 +32,38 @@ namespace CSP_Redemption_WebApi.Models
         public int[] Pieces { get; set; }
     }
 
+    #region Consumer
+    public class ConsumersResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<ConsumerModel> Consumers { get; set; }
+    }
+
+    public class ConsumerModel
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public DateTime BirthDate { get; set; }
+        public string Address1 { get; set; }
+        public string Address2 { get; set; }
+        public string TumbolCode { get; set; }
+        public string AmphurCode { get; set; }
+        public string ProvinceCode { get; set; }
+        public string ZipCode { get; set; }
+        public int ConsumerSourceId { get; set; }
+        public int BrandId { get; set; }
+        public int? CampaignId { get; set; }
+        public int? Point { get; set; }
+        public int? CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    #endregion
+
 
     #region Staff
     public class AuthenticationResponseModel
@@ -114,6 +146,7 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
+
     #region Brand
     public class BrandModel
     {
@@ -122,6 +155,7 @@ namespace CSP_Redemption_WebApi.Models
         public bool IsActived { get; set; }
     }
     #endregion
+
 
     #region Role
     public class RoleModel
@@ -133,6 +167,7 @@ namespace CSP_Redemption_WebApi.Models
     }
 
     #endregion
+
 
     #region Address
     public class ZoneResponseModel

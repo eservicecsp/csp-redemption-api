@@ -11,7 +11,7 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface IConsumerRepository
     {
         Task<Consumer> IsExist(Consumer consumer);
-        Task<List<Consumer>> GetConsumerByBrandIdAsync(int branId);
+        Task<List<Consumer>> GetConsumersByBrandIdAsync(int branId);
         Task<bool> CreateAsync(Consumer consumer);
         Task<Consumer> GetConsumerByIdAsync(int consumerId);
     }
@@ -24,7 +24,7 @@ namespace CSP_Redemption_WebApi.Repositories
                 return await Context.Consumer.FirstOrDefaultAsync(x => x.BrandId == consumer.BrandId && x.Phone == consumer.Phone);
             }
         }
-        public async Task<List<Consumer>> GetConsumerByBrandIdAsync(int branId)
+        public async Task<List<Consumer>> GetConsumersByBrandIdAsync(int branId)
         {
             using (var Context = new CSP_RedemptionContext())
             {

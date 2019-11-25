@@ -10,6 +10,7 @@ namespace CSP_Redemption_WebApi.Services
 {
     public interface IConsumerService
     {
+        Task<ConsumersResponseModel> GetConsumersByBrandIdAsync(int brandId);
         Task<IsExistResponseModel> IsExist(CheckExistConsumerRequestModel checkExistConsumerRequestModel);
         Task<RedemptionResponseModel> Register(ConsumerRequestModel consumerRequest);
         Task<RedemptionResponseModel> Redemption(CheckExistConsumerRequestModel consumerRequest);
@@ -34,6 +35,25 @@ namespace CSP_Redemption_WebApi.Services
             this.transactionRepository = transactionRepository;
             this.qrCodeRepository = qrCodeRepository;
         }
+        public async Task<ConsumersResponseModel> GetConsumersByBrandIdAsync(int brandId)
+        {
+            var response = new ConsumersResponseModel();
+            try
+            {
+                var consumers = await this.consumerRepository.GetConsumersByBrandIdAsync(brandId);
+                foreach(var item in consumers)
+                {
+
+                }
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public async Task<IsExistResponseModel> IsExist(CheckExistConsumerRequestModel dataConsumer)
         {
             var response = new IsExistResponseModel();
