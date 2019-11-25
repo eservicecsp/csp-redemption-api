@@ -376,6 +376,12 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .IsRequired()
                     .HasMaxLength(50);
 
+                entity.Property(e => e.Latitude).HasMaxLength(50);
+
+                entity.Property(e => e.Location).HasMaxLength(255);
+
+                entity.Property(e => e.Longitude).HasMaxLength(50);
+
                 entity.HasOne(d => d.Campaign)
                     .WithMany(p => p.Transaction)
                     .HasForeignKey(d => d.CampaignId)

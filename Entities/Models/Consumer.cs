@@ -22,10 +22,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string TumbolCode { get; set; }
         public string AmphurCode { get; set; }
         public string ProvinceCode { get; set; }
-        public string ZipCode { get; set; }
-        public string Latitude { get; set; }
-        public string Longitude { get; set; }
-        public string Location { get; set; }
+        public string ZipCode { get; set; } 
         public int ConsumerSourceId { get; set; }
         public int BrandId { get; set; }
         public int? CampaignId { get; set; }
