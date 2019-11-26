@@ -121,6 +121,24 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
+    #region Dealer
+    public class DealersResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<DealerModel> Dealers { get; set; }
+    }
+    public class DealerModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int BrandId { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    #endregion
+
     #region Staff
     public class AuthenticationResponseModel
     {
@@ -313,5 +331,25 @@ namespace CSP_Redemption_WebApi.Models
         public DateTime? ModifiedDate { get; set; }
     }
 
+    #endregion
+
+    #region Product
+
+    public class ProductsResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<ProductModel> Products { get; set; }
+    }
+    public class ProductModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int BrandId { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+
+    }
     #endregion
 }

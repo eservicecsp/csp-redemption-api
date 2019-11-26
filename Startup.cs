@@ -42,21 +42,25 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IConsumerService, ConsumerService>();
             services.AddScoped<ICampaignTypeService, CampaignTypeService>();
             services.AddScoped<ICampaignService, CampaignService>();
+            services.AddScoped<IDealerService, DealerService>();
+            services.AddScoped<IProductService, ProductService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
             services.AddScoped(typeof(IFunctionRepository), typeof(FunctionRepository));
             services.AddScoped(typeof(IRoleFunctionRepository), typeof(RoleFunctionRepository));
-            services.AddScoped(typeof(IZoneRepository),typeof(ZoneRepository));
-            services.AddScoped(typeof(IProvinceRepository),typeof(ProvinceRepository));
-            services.AddScoped(typeof(IAmphurRepository),typeof(AmphurRepository));
+            services.AddScoped(typeof(IZoneRepository), typeof(ZoneRepository));
+            services.AddScoped(typeof(IProvinceRepository), typeof(ProvinceRepository));
+            services.AddScoped(typeof(IAmphurRepository), typeof(AmphurRepository));
             services.AddScoped(typeof(ITumbolRepository), typeof(TumbolRepository));
-            services.AddScoped(typeof(IConsumerRepository),typeof(ConsumerRepository));
-            services.AddScoped(typeof(ICampaignRepository),typeof(CampaignRepository));
-            services.AddScoped(typeof(ITransactionRepository),typeof(TransactionRepository));
-            services.AddScoped(typeof(IQrCodeRepository),typeof(QrCodeRepository));
+            services.AddScoped(typeof(IConsumerRepository), typeof(ConsumerRepository));
+            services.AddScoped(typeof(ICampaignRepository), typeof(CampaignRepository));
+            services.AddScoped(typeof(ITransactionRepository), typeof(TransactionRepository));
+            services.AddScoped(typeof(IQrCodeRepository), typeof(QrCodeRepository));
             services.AddScoped(typeof(ICampaignTypeRepository), typeof(CampaignTypeRepository));
             services.AddScoped(typeof(ICampaignRepository), typeof(CampaignRepository));
+            services.AddScoped(typeof(IDealerRepository), typeof(DealerRepository));
+            services.AddScoped(typeof(IProductRepository), typeof(ProductRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

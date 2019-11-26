@@ -38,14 +38,15 @@ namespace CSP_Redemption_WebApi.Controllers
         public async Task<IActionResult> Authorize()
         {
             var response = await this.staffService.Authorize(Request.Headers["Authorization"]);
-
-            // var response = await this.staffService.getSta
             return Ok(response);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStaffsByBrandId(int brandId)
+        public async Task<IActionResult> GetStaffsByBrandId()
         {
+            var token = Request.Headers["Authorization"].ToString();
+            var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+
             return Ok(await this.staffService.GetStaffsByBrandIdAsync(brandId));
         }
     }
