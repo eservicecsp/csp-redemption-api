@@ -10,7 +10,7 @@ namespace CSP_Redemption_WebApi.Services
 {
     public interface IConsumerService
     {
-        Task<ConsumersResponseModel> GetConsumersByBrandIdAsync(int brandId);
+        Task<ConsumersByPaginationResponseModel> GetConsumersByBrandIdAsync(PaginationModel data);
         Task<IsExistResponseModel> IsExist(CheckExistConsumerRequestModel checkExistConsumerRequestModel);
         Task<RedemptionResponseModel> Register(ConsumerRequestModel consumerRequest);
         Task<RedemptionResponseModel> Redemption(CheckExistConsumerRequestModel consumerRequest);
@@ -35,15 +35,16 @@ namespace CSP_Redemption_WebApi.Services
             this.transactionRepository = transactionRepository;
             this.qrCodeRepository = qrCodeRepository;
         }
-        public async Task<ConsumersResponseModel> GetConsumersByBrandIdAsync(int brandId)
+        public async Task<ConsumersByPaginationResponseModel> GetConsumersByBrandIdAsync(PaginationModel data)
         {
-            var response = new ConsumersResponseModel();
+            var response = new ConsumersByPaginationResponseModel();
             try
             {
-                var consumers = await this.consumerRepository.GetConsumersByBrandIdAsync(brandId);
-                foreach(var item in consumers)
+                var consumers = await this.consumerRepository.GetConsumersByBrandIdAsync(data);
+                if (consumers != null)
                 {
-
+                    response.length = await this.consumerRepository.GetConsumersTotalByBrandIdAsync(data);
+                    response.data = consumers;
                 }
                 response.IsSuccess = true;
             }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSP_Redemption_WebApi.Entities.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -60,6 +61,14 @@ namespace CSP_Redemption_WebApi.Models
         public int? Point { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
+    }
+
+    public class ConsumersByPaginationResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public int length { get; set; }
+        public List<Consumer> data { get; set; }
     }
 
     #endregion
