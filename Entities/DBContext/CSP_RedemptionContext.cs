@@ -126,7 +126,13 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Title).HasMaxLength(100);
+
+                entity.Property(e => e.SubTitle).HasMaxLength(100);
+
                 entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.ImagePath).HasMaxLength(100);
 
                 entity.Property(e => e.Name)
                     .IsRequired()

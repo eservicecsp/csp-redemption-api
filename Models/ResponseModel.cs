@@ -64,6 +64,53 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
+    #region Campaign
+
+    public class CampaignsResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<CampaignModel> Campaigns { get; set; }
+    }
+    public class CampaignModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int CampaignTypeId { get; set; }
+        public int BrandId { get; set; }
+        public int Quantity { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string AlertMessage { get; set; }
+        public string DuplicateMessage { get; set; }
+        public string QrCodeNotExistMessage { get; set; }
+        public string WinMessage { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    #endregion
+
+    #region Campaign Type
+    public class CampaignTypesResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<CampaignTypeModel> CampaignTypes { get; set; }
+    }
+
+    public class CampaignTypeModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Title { get; set; }
+        public string SubTitle { get; set; }
+        public string ImagePath { get; set; }
+        public string Description { get; set; }
+    }
+
+    #endregion
 
     #region Staff
     public class AuthenticationResponseModel
@@ -146,7 +193,6 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
-
     #region Brand
     public class BrandModel
     {
@@ -155,7 +201,6 @@ namespace CSP_Redemption_WebApi.Models
         public bool IsActived { get; set; }
     }
     #endregion
-
 
     #region Role
     public class RoleModel
@@ -168,7 +213,6 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
-
     #region Address
     public class ZoneResponseModel
     {
@@ -179,7 +223,7 @@ namespace CSP_Redemption_WebApi.Models
 
     public class ZoneModel
     {
-   
+
         public int Id { get; set; }
         public string NameTh { get; set; }
         public string NameEn { get; set; }
@@ -234,7 +278,6 @@ namespace CSP_Redemption_WebApi.Models
     }
 
     #endregion
-
 
     #region Function
 

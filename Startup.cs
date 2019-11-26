@@ -40,6 +40,8 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<IFunctionService, FunctionService>();
             services.AddScoped<IConsumerService, ConsumerService>();
+            services.AddScoped<ICampaignTypeService, CampaignTypeService>();
+            services.AddScoped<ICampaignService, CampaignService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
@@ -53,6 +55,8 @@ namespace CSP_Redemption_WebApi
             services.AddScoped(typeof(ICampaignRepository),typeof(CampaignRepository));
             services.AddScoped(typeof(ITransactionRepository),typeof(TransactionRepository));
             services.AddScoped(typeof(IQrCodeRepository),typeof(QrCodeRepository));
+            services.AddScoped(typeof(ICampaignTypeRepository), typeof(CampaignTypeRepository));
+            services.AddScoped(typeof(ICampaignRepository), typeof(CampaignRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
