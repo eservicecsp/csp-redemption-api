@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,10 +19,10 @@ namespace CSP_Redemption_WebApi.Controllers
             this.consumerService = consumerService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetConsumers(int brandId)
+        [HttpPost]
+        public async Task<IActionResult> GetConsumers(PaginationModel data)
         {
-            return Ok(await this.consumerService.GetConsumersByBrandIdAsync(brandId));
+            return Ok(await this.consumerService.GetConsumersByBrandIdAsync(data));
         }
     }
 }
