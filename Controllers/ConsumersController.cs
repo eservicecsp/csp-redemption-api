@@ -22,6 +22,9 @@ namespace CSP_Redemption_WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> GetConsumers(PaginationModel data)
         {
+            var token = Request.Headers["Authorization"].ToString();
+            data.BrandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+
             return Ok(await this.consumerService.GetConsumersByBrandIdAsync(data));
         }
     }
