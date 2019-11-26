@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSP_Redemption_WebApi.Entities.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -57,6 +58,13 @@ namespace CSP_Redemption_WebApi.Models
         public string sortActive { get; set; }
         public string sortDirection { get; set; }
         public int BrandId { get; set; }
+    }
+
+    public class CreateCampaignRequestModel
+    {
+        public Campaign Campaign { get; set; }
+        public List<int> Peices { get; set; }
+        public int Point { get; set; }
     }
 
     #endregion
