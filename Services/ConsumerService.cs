@@ -86,6 +86,9 @@ namespace CSP_Redemption_WebApi.Services
                         response.CampaignType = redemption.CampaignType;
                         response.Message = redemption.Message;
                         response.Pieces = redemption.Pieces;
+
+                        response.IsSuccess = true;
+                        response.IsExist = true;
                     }
                     else
                     {

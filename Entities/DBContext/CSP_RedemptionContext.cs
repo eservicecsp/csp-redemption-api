@@ -80,6 +80,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Code).HasMaxLength(5);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(255);
@@ -94,6 +96,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.Url).HasMaxLength(255);
 
                 entity.Property(e => e.DuplicateMessage).HasMaxLength(255);
 

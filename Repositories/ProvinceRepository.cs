@@ -10,10 +10,19 @@ namespace CSP_Redemption_WebApi.Repositories
 {
     public interface IProvinceRepository
     {
+        Task<List<Province>> GetProvincesAsync();
         Task<List<Province>> GetProvincesByZoneAsync(int zoneId);
     }
     public class ProvinceRepository : IProvinceRepository
     {
+        public async Task<List<Province>> GetProvincesAsync()
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Province.ToListAsync();
+            }
+        }
+
         public async Task<List<Province>> GetProvincesByZoneAsync(int zoneId)
         {
             using (var Context = new CSP_RedemptionContext())
