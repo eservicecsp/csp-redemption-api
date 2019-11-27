@@ -288,7 +288,7 @@ namespace CSP_Redemption_WebApi.Services
                         }
 
 
-                        if (campaign.CampaignTypeId == 1 && !IsError) //JigSaw
+                        if (campaign.CampaignTypeId == 1) //JigSaw
                         {
                             response.Pieces = await this.qrCodeRepository.GetPiece(qrCode);
                         }
