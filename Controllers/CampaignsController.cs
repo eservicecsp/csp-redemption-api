@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CSP_Redemption_WebApi.Entities.Models;
 using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -15,9 +14,15 @@ namespace CSP_Redemption_WebApi.Controllers
     public class CampaignsController : ControllerBase
     {
         private readonly ICampaignService campaignService;
-        public CampaignsController(ICampaignService campaignService)
+        private readonly IQrCodeService qrCodeService;
+        public CampaignsController
+            (
+            ICampaignService campaignService ,
+            IQrCodeService qrCodeService
+            )
         {
             this.campaignService = campaignService;
+            this.qrCodeService = qrCodeService;
         }
 
         [HttpGet]
@@ -28,16 +33,21 @@ namespace CSP_Redemption_WebApi.Controllers
 
             return Ok(await this.campaignService.GetCampaignsByBrandIdAsync(brandId));
         }
-
-        [HttpPost("Create")]
-        public async Task<IActionResult> CreateCampaign(CreateCampaignRequestModel requestModel)
+        [HttpPost("transaction")]
+        public async Task<IActionResult> GetTransactionByCampaignsId(PaginationModel data)
         {
             var token = Request.Headers["Authorization"].ToString();
-            requestModel.Campaign.BrandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
-            requestModel.Campaign.CreatedBy = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
-            requestModel.Campaign.CreatedDate = DateTime.Now;
+            var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
 
-            return Ok(await this.campaignService.CreateCampaignAsync(requestModel));
-        } 
+            return Ok(await this.campaignService.GetTransactionByCampaignsIdAsync(data));
+        }
+        [HttpPost("qrcode")]
+        public async Task<IActionResult> GetqrCodeByCampaignsId(PaginationModel data)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+
+            return Ok(await this.qrCodeService.GetQrCodeByCampaignIdAsync(data));
+        }
     }
 }

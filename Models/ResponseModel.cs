@@ -73,6 +73,64 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
+    #region QrCode
+    public class QrCodeResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public int length { get; set; }
+        public List<QrCodeModel> data { get; set; }
+    }
+    public class QrCodeModel
+    {
+        public string Token { get; set; }
+        public int? Peice { get; set; }
+        public int? ConsumerId { get; set; }
+        public int? TransactionId { get; set; }
+        public int? Point { get; set; }
+        public DateTime? ScanDate { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+
+    }
+
+    #endregion
+
+    #region Transaction
+
+    public class TransactionResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public int length { get; set; }
+        public List<TransactionModel> data { get; set; }
+    }
+    public class TransactionModel
+    {
+        public int Id { get; set; }
+        public int ConsumerId { get; set; }
+        public string Token { get; set; }
+        public int Point { get; set; }
+        public string Latitude { get; set; }
+        public string Longitude { get; set; }
+        public string Location { get; set; }
+        public string TransactionType { get; set; }
+        public string ResponseMessage { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public DateTime BirthDate { get; set; }
+        public int TotalPoint { get; set; }
+
+    }
+    
+
+    #endregion
+
     #region Campaign
 
     public class CampaignsResponseModel
