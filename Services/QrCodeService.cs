@@ -41,10 +41,10 @@ namespace CSP_Redemption_WebApi.Services
                             TransactionId = item.TransactionId,
                             Point = item.Point,
                             ScanDate = item.ScanDate,
-                            FirstName = item.Consumer.FirstName,
-                            LastName = item.Consumer.LastName,
-                            Email = item.Consumer.Email,
-                            Phone = item.Consumer.Phone
+                            FirstName = item.Consumer == null ? null: item.Consumer.FirstName,
+                            LastName = item.Consumer == null ? null : item.Consumer.LastName,
+                            Email = item.Consumer == null ? null : item.Consumer.Email,
+                            Phone = item.Consumer == null ? null : item.Consumer.Phone
                         });
                     }
                     response.length = await this.qrCodeRepository.GetQrCodeTotalByCompanyIdAsync(data);

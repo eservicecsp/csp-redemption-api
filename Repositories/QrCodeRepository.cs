@@ -30,7 +30,13 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                //var consumers = Context.Consumer.AsQueryable();
+                //var qrCodes = (from qr in Context.QrCode
+                //                join c in Context.Consumer on qr.ConsumerId equals c.Id into d2
+                //               where qr.CampaignId == data.campaignId
+                //               from f in d2.DefaultIfEmpty()
+                //               select qr);
+
+
                 var qrCodes = Context.QrCode.Include(x=>x.Consumer).Where(x => x.CampaignId == data.campaignId);
                 if (data.filter != null)
                 {

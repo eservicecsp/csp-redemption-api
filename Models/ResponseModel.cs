@@ -123,7 +123,7 @@ namespace CSP_Redemption_WebApi.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
         public int TotalPoint { get; set; }
 
     }
