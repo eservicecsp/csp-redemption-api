@@ -47,6 +47,68 @@ namespace CSP_Redemption_WebApi.Repositories
                                                  x.Consumer.Phone.Contains(data.filter)
                                             );
                 }
+                if (data.sortActive != null)
+                {
+                    //Token
+                    if (data.sortActive == "token" && data.sortDirection == "desc")
+                    {
+                        qrCodes = qrCodes.OrderByDescending(x => x.Token);
+                    }
+                    else if (data.sortActive == "token")
+                    {
+                        qrCodes = qrCodes.OrderBy(x => x.Token);
+                    }
+
+                    //peice
+                    if (data.sortActive == "peice" && data.sortDirection == "desc")
+                    {
+                        qrCodes = qrCodes.OrderByDescending(x => x.Peice);
+                    }
+                    else if (data.sortActive == "peice")
+                    {
+                        qrCodes = qrCodes.OrderBy(x => x.Peice);
+                    }
+
+                    //fullName
+                    if (data.sortActive == "fullName" && data.sortDirection == "desc")
+                    {
+                        qrCodes = qrCodes.OrderByDescending(x => x.Consumer.FirstName);
+                    }
+                    else if (data.sortActive == "fullName")
+                    {
+                        qrCodes = qrCodes.OrderBy(x => x.Consumer.FirstName);
+                    }
+
+                    //email
+                    if (data.sortActive == "email" && data.sortDirection == "desc")
+                    {
+                        qrCodes = qrCodes.OrderByDescending(x => x.Consumer.Email);
+                    }
+                    else if (data.sortActive == "email")
+                    {
+                        qrCodes = qrCodes.OrderBy(x => x.Consumer.Email);
+                    }
+
+                    //phone
+                    if (data.sortActive == "phone" && data.sortDirection == "desc")
+                    {
+                        qrCodes = qrCodes.OrderByDescending(x => x.Consumer.Phone);
+                    }
+                    else if (data.sortActive == "phone")
+                    {
+                        qrCodes = qrCodes.OrderBy(x => x.Consumer.Phone);
+                    }
+
+                    //createDate
+                    if (data.sortActive == "createDate" && data.sortDirection == "desc")
+                    {
+                        qrCodes = qrCodes.OrderByDescending(x => x.ScanDate);
+                    }
+                    else if (data.sortActive == "createDate")
+                    {
+                        qrCodes = qrCodes.OrderBy(x => x.ScanDate);
+                    }
+                }
 
                 int length = await this.GetQrCodeTotalByCompanyIdAsync(data);
                 int index = 0;

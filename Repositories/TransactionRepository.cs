@@ -103,7 +103,7 @@ namespace CSP_Redemption_WebApi.Repositories
                                 isSuccess = await Context.SaveChangesAsync() > 0;
                             }
 
-                            
+
 
                             tran.Commit();
                         }
@@ -146,15 +146,18 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 //var consumers = Context.Consumer.AsQueryable();
-                var transactions = Context.Transaction.Include(x => x.Consumer).Include(x=>x.TransactionType).Where(x => x.CampaignId == data.campaignId);
-                //if (data.filter != null)
-                //{
-                //    transactions = transactions.Where(x => x.FirstName.Contains(data.filter) ||
-                //                                 x.LastName.Contains(data.filter) ||
-                //                                 x.Phone.Contains(data.filter) ||
-                //                                 x.Email.Contains(data.filter)
-                //                         );
-                //}
+                var transactions = Context.Transaction.Include(x => x.Consumer).Include(x => x.TransactionType).Where(x => x.CampaignId == data.campaignId);
+                if (data.filter != null)
+                {
+                    transactions = transactions.Where(x => x.Token.Contains(data.filter) ||
+                                                 x.TransactionType.Name.Contains(data.filter) ||
+                                                 x.ResponseMessage.Contains(data.filter) ||
+                                                 x.Consumer.FirstName.Contains(data.filter) ||
+                                                 x.Consumer.LastName.Contains(data.filter) ||
+                                                 x.Consumer.Phone.Contains(data.filter) ||
+                                                 x.Consumer.LastName.Contains(data.filter)
+                                         );
+                }
 
                 if (data.sortActive != null)
                 {
@@ -166,6 +169,16 @@ namespace CSP_Redemption_WebApi.Repositories
                     else if (data.sortActive == "token")
                     {
                         transactions = transactions.OrderBy(x => x.Token);
+                    }
+
+                    //status
+                    if (data.sortActive == "status" && data.sortDirection == "desc")
+                    {
+                        transactions = transactions.OrderByDescending(x => x.TransactionType.Name);
+                    }
+                    else if (data.sortActive == "status")
+                    {
+                        transactions = transactions.OrderBy(x => x.TransactionType.Name);
                     }
 
                     //ResponseMesage
@@ -218,6 +231,16 @@ namespace CSP_Redemption_WebApi.Repositories
                         transactions = transactions.OrderBy(x => x.Consumer.Email);
                     }
 
+                    //Email
+                    if (data.sortActive == "createDate" && data.sortDirection == "desc")
+                    {
+                        transactions = transactions.OrderByDescending(x => x.CreatedDate);
+                    }
+                    else if (data.sortActive == "createDate")
+                    {
+                        transactions = transactions.OrderBy(x => x.CreatedDate);
+                    }
+
                 }
 
                 int length = await this.GetTransactionTotalByCampaignsIdAsync(data);
@@ -245,16 +268,19 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 //var consumers = Context.Consumer.AsQueryable();
                 var transactions = Context.Transaction.Include(x => x.Consumer).Include(x => x.TransactionType).Where(x => x.CampaignId == data.campaignId);
-                //if (data.filter != null)
-                //{
-                //    transactions = transactions.Where(x => x.FirstName.Contains(data.filter) ||
-                //                                 x.LastName.Contains(data.filter) ||
-                //                                 x.Phone.Contains(data.filter) ||
-                //                                 x.Email.Contains(data.filter)
-                //                         );
-                //}
+                if (data.filter != null)
+                {
+                    transactions = transactions.Where(x => x.Token.Contains(data.filter) ||
+                                                x.TransactionType.Name.Contains(data.filter) ||
+                                                x.ResponseMessage.Contains(data.filter) ||
+                                                x.Consumer.FirstName.Contains(data.filter) ||
+                                                x.Consumer.LastName.Contains(data.filter) ||
+                                                x.Consumer.Phone.Contains(data.filter) ||
+                                                x.Consumer.LastName.Contains(data.filter)
+                                        );
+                }
 
-                
+
                 return await transactions.CountAsync();
             }
         }
