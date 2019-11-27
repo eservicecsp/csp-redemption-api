@@ -44,6 +44,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<ICampaignService, CampaignService>();
             services.AddScoped<IDealerService, DealerService>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IQrCodeService, QrCodeService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
