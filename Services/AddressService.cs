@@ -9,10 +9,11 @@ namespace CSP_Redemption_WebApi.Services
 {
     public interface IAddressService
     {
-        Task<ZoneResponseModel> GetZone();
-        Task<ProvinceResponseModel> GetProvinceByZoneId(int zoneId);
-        Task<AmphurResponseModel> GetAmphurByProvinceCode(string provinceCode);
-        Task<TumbolResponseModel> GetTumbolByAmphurCode(string amphurCode);
+        Task<ZoneResponseModel> GetZones();
+        Task<ProvincesResponseModel> GetProvincesByZoneId(int zoneId);
+        Task<AmphurResponseModel> GetAmphursByProvinceCode(string provinceCode);
+        Task<TumbolResponseModel> GetTumbolsByAmphurCode(string amphurCode);
+        Task<ProvincesResponseModel> GetProvincesAsync();
     }
     public class AddressService : IAddressService
     {
@@ -35,7 +36,7 @@ namespace CSP_Redemption_WebApi.Services
             this.tumbolRepository = tumbolRepository;
         }
 
-        public async Task<ZoneResponseModel> GetZone()
+        public async Task<ZoneResponseModel> GetZones()
         {
             var response = new ZoneResponseModel();
             try
@@ -62,9 +63,9 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<ProvinceResponseModel> GetProvinceByZoneId(int zoneId)
+        public async Task<ProvincesResponseModel> GetProvincesByZoneId(int zoneId)
         {
-            var response = new ProvinceResponseModel();
+            var response = new ProvincesResponseModel();
             try
             {
                 var provinces = new List<ProvinceModel>();
@@ -80,7 +81,7 @@ namespace CSP_Redemption_WebApi.Services
                     });
                 }
                 response.IsSuccess = true;
-                response.provinces = provinces;
+                response.Provinces = provinces;
             }
             catch (Exception ex)
             {
@@ -89,7 +90,7 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<AmphurResponseModel> GetAmphurByProvinceCode(string provinceCode)
+        public async Task<AmphurResponseModel> GetAmphursByProvinceCode(string provinceCode)
         {
             var response = new AmphurResponseModel();
             try
@@ -115,7 +116,7 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<TumbolResponseModel> GetTumbolByAmphurCode(string amphurCode)
+        public async Task<TumbolResponseModel> GetTumbolsByAmphurCode(string amphurCode)
         {
             var response = new TumbolResponseModel();
             try
@@ -126,6 +127,7 @@ namespace CSP_Redemption_WebApi.Services
                 {
                     tumbols.Add(new TumbolModel() { 
                         Code = item.Code,
+                        ZipCode = item.ZipCode,
                         NameTh =item.NameTh,
                         NameEn = item.NameEn,
                         AmphurCode = item.AmphurCode
@@ -139,6 +141,33 @@ namespace CSP_Redemption_WebApi.Services
                 response.Message = ex.Message;
             }
             
+            return response;
+        }
+
+        public async Task<ProvincesResponseModel> GetProvincesAsync()
+        {
+            var response = new ProvincesResponseModel();
+            try
+            {
+                var provinces = await this.provinceRepository.GetProvincesAsync();
+                response.Provinces = new List<ProvinceModel>();
+                foreach(var province in provinces)
+                {
+                    response.Provinces.Add(new ProvinceModel()
+                    {
+                        ZoneId = province.ZoneId,
+                        Code = province.Code,
+                        NameEn = province.NameEn,
+                        NameTh = province.NameTh,
+                    });
+                }
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+
             return response;
         }
     }

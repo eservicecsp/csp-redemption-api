@@ -22,28 +22,34 @@ namespace CSP_Redemption_WebApi.Controllers
             this.addressService = addressService;
         }
 
-        [HttpGet("zone")]
-        public async Task<IActionResult> GetZone()
+        [HttpGet("zones")]
+        public async Task<IActionResult> GetZones()
         {
-            return Ok(await this.addressService.GetZone());
+            return Ok(await this.addressService.GetZones());
         }
 
-        [HttpGet("province/{zoneId}")]
-        public async Task<IActionResult> GetProvince(int zoneId)
+        [HttpGet("provinces/{zoneId}")]
+        public async Task<IActionResult> GetProvinces(int zoneId)
         {
-            return Ok(await this.addressService.GetProvinceByZoneId(zoneId));
+            return Ok(await this.addressService.GetProvincesByZoneId(zoneId));
         }
 
-        [HttpGet("amphur/{provinceCode}")]
-        public async Task<IActionResult> GetAmphur(string provinceCode)
+        [HttpGet("amphurs/{provinceCode}")]
+        public async Task<IActionResult> GetAmphurs(string provinceCode)
         {
-            return Ok(await this.addressService.GetAmphurByProvinceCode(provinceCode));
+            return Ok(await this.addressService.GetAmphursByProvinceCode(provinceCode));
         }
 
-        [HttpGet("tumbol/{amphurCode}")]
-        public async Task<IActionResult> GetTumbol(string amphurCode)
+        [HttpGet("tumbols/{amphurCode}")]
+        public async Task<IActionResult> GetTumbols(string amphurCode)
         {
-            return Ok(await this.addressService.GetTumbolByAmphurCode(amphurCode));
+            return Ok(await this.addressService.GetTumbolsByAmphurCode(amphurCode));
+        }
+
+        [HttpGet("provinces")]
+        public async Task<IActionResult> GetProvinces()
+        {
+            return Ok(await this.addressService.GetProvincesAsync());
         }
     }
 }

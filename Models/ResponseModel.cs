@@ -315,11 +315,11 @@ namespace CSP_Redemption_WebApi.Models
         public string Description { get; set; }
     }
 
-    public class ProvinceResponseModel
+    public class ProvincesResponseModel
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
-        public List<ProvinceModel> provinces { get; set; }
+        public List<ProvinceModel> Provinces { get; set; }
     }
 
     public class ProvinceModel
@@ -357,6 +357,7 @@ namespace CSP_Redemption_WebApi.Models
     {
 
         public string Code { get; set; }
+        public string ZipCode { get; set; }
         public string NameTh { get; set; }
         public string NameEn { get; set; }
         public string AmphurCode { get; set; }
