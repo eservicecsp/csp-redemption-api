@@ -14,6 +14,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<AuthenticationResponseModel> Authenticate(Staff staff);
         Task<AuthorizationResponseModel> Authorize(string token);
         Task<StaffsResponseModel> GetStaffsByBrandIdAsync(int brandId);
+        Task<ResponseModel> CreateAsync(Staff staff);
     }
 
     public class StaffService : IStaffService
@@ -209,6 +210,23 @@ namespace CSP_Redemption_WebApi.Services
                 response.Message = ex.Message;
                 throw;
             }
+            return response;
+        }
+
+        public async Task<ResponseModel> CreateAsync(Staff staff)
+        {
+            var response = new ResponseModel();
+
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
             return response;
         }
     }

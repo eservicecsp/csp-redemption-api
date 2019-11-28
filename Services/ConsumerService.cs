@@ -35,6 +35,7 @@ namespace CSP_Redemption_WebApi.Services
             this.transactionRepository = transactionRepository;
             this.qrCodeRepository = qrCodeRepository;
         }
+
         public async Task<ConsumersByPaginationResponseModel> GetConsumersByBrandIdAsync(PaginationModel data)
         {
             var response = new ConsumersByPaginationResponseModel();

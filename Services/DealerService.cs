@@ -1,4 +1,5 @@
-﻿using CSP_Redemption_WebApi.Models;
+﻿using CSP_Redemption_WebApi.Entities.Models;
+using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Repositories;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace CSP_Redemption_WebApi.Services
     public interface IDealerService
     {
         Task<DealersResponseModel> GetDealersByBrandIdAsync(int brandId);
+        Task<ResponseModel> CreateAsync(Dealer dealer);
     }
 
     public class DealerService: IDealerService
@@ -43,6 +45,22 @@ namespace CSP_Redemption_WebApi.Services
                 }
 
                 response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+
+            return response;
+        }
+
+        public async Task<ResponseModel> CreateAsync(Dealer dealer)
+        {
+            var response = new ResponseModel();
+
+            try
+            {
+                response.IsSuccess = await this.dealerRepository.CreateAsync(dealer);
             }
             catch (Exception ex)
             {
