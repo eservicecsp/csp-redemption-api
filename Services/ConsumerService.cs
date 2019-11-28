@@ -253,7 +253,7 @@ namespace CSP_Redemption_WebApi.Services
                                 var dbConsumer = await this.consumerRepository.GetConsumerByIdAsync(consumerRequest.ConsumerId);
                                 tran.Point = dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0;
                                 totalPoint = (dbConsumer.Point != null ? Convert.ToInt32(dbConsumer.Point) : 0) + (dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0);
-                                qrCode.Point = totalPoint;
+                                // qrCode.Point = dbQrCode.Point;
 
                                 response.Message = campaign.WinMessage + " และมีคะแนนรวม ( " + totalPoint + " ) คะแนน";
                                 response.StatusTypeCode = "SUCCESS";
