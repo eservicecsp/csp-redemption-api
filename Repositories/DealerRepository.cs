@@ -11,6 +11,7 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface IDealerRepository
     {
         Task<List<Dealer>> GetDealersByBrandIdAsync(int brandId);
+        Task<bool> CreateAsync(Dealer dealer);
     }
     public class DealerRepository : IDealerRepository
     {
@@ -19,6 +20,15 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.Dealer.Where(x => x.BrandId == brandId).ToListAsync();
+            }
+        }
+
+        public async Task<bool> CreateAsync(Dealer dealer)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                await Context.Dealer.AddAsync(dealer);
+                return await Context.SaveChangesAsync() > 0;
             }
         }
     }
