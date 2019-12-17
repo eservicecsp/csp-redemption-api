@@ -258,8 +258,8 @@ namespace CSP_Redemption_WebApi.Services
                     var uProduct = new Product()
                     {
                         Id = dbProduct.Id,
-                        Description = dbProduct.Description,
-                        Name = dbProduct.Name,
+                        Description = product.Description,
+                        Name = product.Name,
                         CreatedDate = dbProduct.CreatedDate,
                         Brand = dbProduct.Brand,
                         BrandId = dbProduct.BrandId,
