@@ -15,8 +15,8 @@ namespace CSP_Redemption_WebApi.Services
     {
         Task<ProductsResponseModel> GetProductsByBrandIdAsync(int brandId);
         Task<ProductResponseModel> GetProductsByIdAsync(int id);
-        Task<ResponseModel> CreateAsync(Product product);
-        Task<ResponseModel> UpdateAsync(Product product);
+        Task<ResponseModel> CreateAsync(ProductModel product);
+        Task<ResponseModel> UpdateAsync(ProductModel product);
     }
     public class ProductService : IProductService
     {
@@ -130,16 +130,17 @@ namespace CSP_Redemption_WebApi.Services
                         Id = product.Id,
                         Name = product.Name,
                         Description = product.Description,
+                        Attachments = new List<ProductAttachmentModel>()
                     };
 
-                    foreach(var attachment in product.ProductAttachment)
+                    foreach (var attachment in product.ProductAttachment)
                     {
                         var filePath = Path.Combine(productAttachmentPath, attachment.Name);
 
                         byte[] imageBytes = System.IO.File.ReadAllBytes(filePath);
                         string base64String = Convert.ToBase64String(imageBytes);
 
-                        response.product.Attachments = new List<ProductAttachmentModel>();
+
                         response.product.Attachments.Add(new ProductAttachmentModel()
                         {
                             Id = attachment.Id,
@@ -162,13 +163,50 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<ResponseModel> CreateAsync(Product product)
+        public async Task<ResponseModel> CreateAsync(ProductModel product)
         {
             var response = new ResponseModel();
 
             try
             {
-                response.IsSuccess = await this.productRepository.CreateAsync(product);
+                var webRoot = hostingEnvironment.ContentRootPath;
+
+                string productAttachmentPath = string.Empty;
+                string subDomain = this.configuration["SubDomain"];
+                if (!string.IsNullOrEmpty(subDomain))
+                {
+                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
+                }
+                else
+                {
+                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
+                }
+
+                var iProductAttachments = new List<ProductAttachment>();
+                foreach (var item in product.Attachments)
+                {
+                    iProductAttachments.Add(new ProductAttachment()
+                    {
+                        Id = 0,
+                        Extension = item.Extension,
+                        Name = item.Name,
+                        Path = Path.Combine(productAttachmentPath, item.Name),
+                        ProductId = product.Id,
+                    });
+                }
+
+                var iProduct = new Product()
+                {
+                    Id = product.Id,
+                    Description = product.Description,
+                    CreatedDate = product.CreatedDate,
+                    BrandId = product.BrandId,
+                    CreatedBy = product.CreatedBy,
+                    Name = product.Name,
+                    ProductAttachment = iProductAttachments
+                };
+
+                response.IsSuccess = await this.productRepository.CreateAsync(iProduct);
             }
             catch (Exception ex)
             {
@@ -178,13 +216,59 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<ResponseModel> UpdateAsync(Product product)
+        public async Task<ResponseModel> UpdateAsync(ProductModel product)
         {
             var response = new ResponseModel();
 
             try
             {
-                response.IsSuccess = await this.productRepository.UpdateAsync(product);
+                var webRoot = hostingEnvironment.ContentRootPath;
+
+                string productAttachmentPath = string.Empty;
+                string subDomain = this.configuration["SubDomain"];
+                if (!string.IsNullOrEmpty(subDomain))
+                {
+                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
+                }
+                else
+                {
+                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
+                }
+
+                var dbProduct = await this.productRepository.GetProductsByIdAsync(product.Id);
+                if (dbProduct != null)
+                {
+                    var uProductAttachments = new List<ProductAttachment>();
+
+                    foreach (var item in product.Attachments)
+                    {
+                        File.WriteAllBytes(Path.Combine(productAttachmentPath, item.Name), Convert.FromBase64String(item.File));
+                        uProductAttachments.Add(new ProductAttachment()
+                        {
+                            Id = 0,
+                            Extension = item.Extension,
+                            Name = item.Name,
+                            Path = Path.Combine(productAttachmentPath, item.Name),
+                            ProductId = dbProduct.Id
+                        });
+                    }
+
+                   
+
+                    var uProduct = new Product()
+                    {
+                        Id = dbProduct.Id,
+                        Description = dbProduct.Description,
+                        Name = dbProduct.Name,
+                        CreatedDate = dbProduct.CreatedDate,
+                        Brand = dbProduct.Brand,
+                        BrandId = dbProduct.BrandId,
+                        CreatedBy = dbProduct.CreatedBy,
+                        ProductAttachment = uProductAttachments
+                    };
+
+                    response.IsSuccess = await this.productRepository.UpdateAsync(uProduct);
+                }
             }
             catch (Exception ex)
             {

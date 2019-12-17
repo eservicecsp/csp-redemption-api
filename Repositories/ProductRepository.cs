@@ -14,6 +14,8 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<Product> GetProductsByIdAsync(int id);
         Task<bool> CreateAsync(Product product);
         Task<bool> UpdateAsync(Product product);
+
+        //Task<List<ProductAttachment>> GetProductAttachmentsAsync(Product product);
     }
 
     public class ProductRepository : IProductRepository
@@ -37,22 +39,79 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                await Context.Product.AddAsync(product);
-                return await Context.SaveChangesAsync() > 0;
+                using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        await Context.Product.AddAsync(product);
+                        await Context.SaveChangesAsync();
+
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+
             }
         }
 
-        public async Task<bool> UpdateAsync(Product product)
+        public async Task<bool> UpdateAsync(Product uProduct)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                Product thisRow = await Context.Product.SingleAsync(x => x.Id == product.Id);
-                thisRow.Name = product.Name;
-                thisRow.Description = product.Description;
-                Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
-                return await Context.SaveChangesAsync() > 0;
+                using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        Product dbProduct = await Context.Product.Include(x => x.ProductAttachment).SingleAsync(x => x.Id == uProduct.Id);
+                        Context.Entry(dbProduct).CurrentValues.SetValues(uProduct);
+
+                        foreach(var dbAttachmentProduct in dbProduct.ProductAttachment.ToList())
+                        {
+                            if (!uProduct.ProductAttachment.Any(x => x.Id == dbAttachmentProduct.Id))
+                                Context.ProductAttachment.Remove(dbAttachmentProduct);
+                        }
+
+                        foreach(var uAttachmentProduct in uProduct.ProductAttachment)
+                        {
+                            Context.ProductAttachment.Attach(uAttachmentProduct);
+                        }
+
+
+                        //var productAttachmentsToRemove = Context.ProductAttachment.Where(x => x.ProductId == product.Id);
+                        //Context.ProductAttachment.RemoveRange(productAttachmentsToRemove);
+
+                        //await Context.AddRangeAsync(product.ProductAttachment);
+
+                        //Product thisRow = await Context.Product.SingleAsync(x => x.Id == product.Id);
+                        //thisRow.Name = product.Name;
+                        //thisRow.Description = product.Description;
+                        //Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
+                        await Context.SaveChangesAsync();
+
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
             }
         }
+
+        //public async Task<List<ProductAttachment>> GetProductAttachmentsAsync(Product product)
+        //{
+        //    using (var Context = new CSP_RedemptionContext())
+        //    {
+        //        return await Context.ProductAttachment.Where(x => x.ProductId == product.Id).ToListAsync();
+        //    }
+        //}
     }
 
 }
