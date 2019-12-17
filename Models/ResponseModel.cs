@@ -438,6 +438,17 @@ namespace CSP_Redemption_WebApi.Models
         public string CreatedName { get; set; }
         public DateTime CreatedDate { get; set; }
 
+        public List<ProductAttachmentModel> Attachments { get; set; } 
+
+    }
+
+    public class ProductAttachmentModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public string File { get; set; }
+        public string Extension { get; set; }
     }
     #endregion
 

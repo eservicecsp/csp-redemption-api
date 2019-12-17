@@ -1,8 +1,11 @@
 ﻿using CSP_Redemption_WebApi.Entities.Models;
 using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Repositories;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,9 +20,14 @@ namespace CSP_Redemption_WebApi.Services
     }
     public class ProductService : IProductService
     {
+        private readonly IHostingEnvironment hostingEnvironment;
+        private readonly IConfiguration configuration;
         private readonly ProductRepository productRepository;
-        public ProductService(ProductRepository productRepository)
+
+        public ProductService(IHostingEnvironment hostingEnvironment, IConfiguration configuration, ProductRepository productRepository)
         {
+            this.hostingEnvironment = hostingEnvironment;
+            this.configuration = configuration;
             this.productRepository = productRepository;
         }
 
@@ -29,11 +37,49 @@ namespace CSP_Redemption_WebApi.Services
 
             try
             {
+                var webRoot = hostingEnvironment.ContentRootPath;
+
+                string productAttachmentPath = string.Empty;
+                string subDomain = this.configuration["SubDomain"];
+                if (!string.IsNullOrEmpty(subDomain))
+                {
+                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
+                }
+                else
+                {
+                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
+                }
+
                 var products = await this.productRepository.GetProductsByBrandIdAsync(brandId);
                 response.Products = new List<ProductModel>();
 
                 foreach (var product in products)
                 {
+                    var attachments = new List<ProductAttachmentModel>();
+                    if (product.ProductAttachment.Count() > 0)
+                    {
+                        foreach (var attachment in product.ProductAttachment)
+                        {
+                            var filePath = Path.Combine(productAttachmentPath, attachment.Name);
+
+                            byte[] imageBytes = System.IO.File.ReadAllBytes(filePath);
+                            string base64String = Convert.ToBase64String(imageBytes);
+
+                            attachments.Add(new ProductAttachmentModel()
+                            {
+                                Id = attachment.Id,
+                                File = base64String,
+                                Name = attachment.Name,
+                                Path = null,
+                                Extension = attachment.Extension
+                            });
+                        }
+                    }
+                    else
+                    {
+                        attachments = null;
+                    }
+
                     response.Products.Add(new ProductModel()
                     {
                         Description = product.Description,
@@ -43,6 +89,7 @@ namespace CSP_Redemption_WebApi.Services
                         CreatedName = $"{product.CreatedByNavigation.FirstName} { product.CreatedByNavigation.LastName}",
                         Id = product.Id,
                         Name = product.Name,
+                        Attachments = attachments
                     });
                 }
 
@@ -61,19 +108,50 @@ namespace CSP_Redemption_WebApi.Services
 
             try
             {
-                var products = await this.productRepository.GetProductsByIdAsync(id);
-                //response.
-                var Products = new ProductModel();
+                var product = await this.productRepository.GetProductsByIdAsync(id);
 
-                if(products != null)
+                var webRoot = hostingEnvironment.ContentRootPath;
+
+                string productAttachmentPath = string.Empty;
+                string subDomain = this.configuration["SubDomain"];
+                if (!string.IsNullOrEmpty(subDomain))
                 {
-                    Products.Id = products.Id;
-                    Products.Name = products.Name;
-                    Products.Description = products.Description;
-
+                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
+                }
+                else
+                {
+                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
                 }
 
-                response.product = Products;
+                if (product != null)
+                {
+                    response.product = new ProductModel()
+                    {
+                        Id = product.Id,
+                        Name = product.Name,
+                        Description = product.Description,
+                    };
+
+                    foreach(var attachment in product.ProductAttachment)
+                    {
+                        var filePath = Path.Combine(productAttachmentPath, attachment.Name);
+
+                        byte[] imageBytes = System.IO.File.ReadAllBytes(filePath);
+                        string base64String = Convert.ToBase64String(imageBytes);
+
+                        response.product.Attachments = new List<ProductAttachmentModel>();
+                        response.product.Attachments.Add(new ProductAttachmentModel()
+                        {
+                            Id = attachment.Id,
+                            File = base64String,
+                            Name = attachment.Name,
+                            Path = null,
+                            Extension = attachment.Extension
+                        });
+                    }
+                }
+
+
                 response.IsSuccess = true;
             }
             catch (Exception ex)

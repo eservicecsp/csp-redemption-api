@@ -24,6 +24,7 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
         public virtual DbSet<Dealer> Dealer { get; set; }
         public virtual DbSet<Function> Function { get; set; }
         public virtual DbSet<Product> Product { get; set; }
+        public virtual DbSet<ProductAttachment> ProductAttachment { get; set; }
         public virtual DbSet<Province> Province { get; set; }
         public virtual DbSet<QrCode> QrCode { get; set; }
         public virtual DbSet<Role> Role { get; set; }
@@ -39,7 +40,7 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=CSP_Redemption;User ID=sa;Password=P@ssw0rd");
+                optionsBuilder.UseSqlServer("Server=172.1.240.60;Database=CSP_Redemption;User ID=sa;Password=P@ssw0rd");
             }
         }
 
@@ -240,6 +241,21 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Product_Staff");
+            });
+
+            modelBuilder.Entity<ProductAttachment>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Path).IsRequired();
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.ProductAttachment)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductAttachment_Product");
             });
 
             modelBuilder.Entity<Province>(entity =>
