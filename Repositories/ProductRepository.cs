@@ -81,16 +81,6 @@ namespace CSP_Redemption_WebApi.Repositories
                             Context.ProductAttachment.Attach(uAttachmentProduct);
                         }
 
-
-                        //var productAttachmentsToRemove = Context.ProductAttachment.Where(x => x.ProductId == product.Id);
-                        //Context.ProductAttachment.RemoveRange(productAttachmentsToRemove);
-
-                        //await Context.AddRangeAsync(product.ProductAttachment);
-
-                        //Product thisRow = await Context.Product.SingleAsync(x => x.Id == product.Id);
-                        //thisRow.Name = product.Name;
-                        //thisRow.Description = product.Description;
-                        //Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
                         await Context.SaveChangesAsync();
 
                         transaction.Commit();
