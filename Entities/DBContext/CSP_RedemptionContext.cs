@@ -28,6 +28,7 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
         public virtual DbSet<Dealer> Dealer { get; set; }
         public virtual DbSet<Function> Function { get; set; }
         public virtual DbSet<Product> Product { get; set; }
+        public virtual DbSet<ProductAttachment> ProductAttachment { get; set; }
         public virtual DbSet<Province> Province { get; set; }
         public virtual DbSet<QrCode> QrCode { get; set; }
         public virtual DbSet<Role> Role { get; set; }
@@ -78,8 +79,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
             modelBuilder.Entity<Brand>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Code)
                     .IsRequired()
                     .HasMaxLength(5);
@@ -246,6 +245,25 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Product_Staff");
+            });
+
+            modelBuilder.Entity<ProductAttachment>(entity =>
+            {
+                entity.Property(e => e.Extension)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Path).IsRequired();
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.ProductAttachment)
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductAttachment_Product");
             });
 
             modelBuilder.Entity<Province>(entity =>

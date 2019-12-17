@@ -15,7 +15,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Entities\Models_Temp\" />
     <Folder Include="Uploads\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Attachments\Products\0.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

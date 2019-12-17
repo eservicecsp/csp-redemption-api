@@ -5,6 +5,11 @@ namespace CSP_Redemption_WebApi.Entities.Models
 {
     public partial class Product
     {
+        public Product()
+        {
+            ProductAttachment = new HashSet<ProductAttachment>();
+        }
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -14,5 +19,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
 
         public virtual Brand Brand { get; set; }
         public virtual Staff CreatedByNavigation { get; set; }
+        public virtual ICollection<ProductAttachment> ProductAttachment { get; set; }
     }
 }

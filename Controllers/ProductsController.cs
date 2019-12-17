@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CSP_Redemption_WebApi.Entities.Models;
+using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ namespace CSP_Redemption_WebApi.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(Product product)
+        public async Task<IActionResult> Create(ProductModel product)
         {
             var token = Request.Headers["Authorization"].ToString();
             var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
@@ -43,7 +44,7 @@ namespace CSP_Redemption_WebApi.Controllers
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> Update(Product product)
+        public async Task<IActionResult> Update(ProductModel product)
         {
             return Ok(await this.productService.UpdateAsync(product));
         }

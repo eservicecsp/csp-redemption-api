@@ -16,20 +16,20 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<bool> UpdateAsync(Product product);
     }
 
-    public class ProductRepository: IProductRepository
+    public class ProductRepository : IProductRepository
     {
         public async Task<List<Product>> GetProductsByBrandIdAsync(int brandId)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Product.Include(x => x.CreatedByNavigation).Where(x => x.BrandId == brandId).ToListAsync();
+                return await Context.Product.Include(x => x.ProductAttachment).Include(x => x.CreatedByNavigation).Where(x => x.BrandId == brandId).ToListAsync();
             }
         }
         public async Task<Product> GetProductsByIdAsync(int id)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Product.Where(x => x.Id == id).FirstOrDefaultAsync();
+                return await Context.Product.Include(x => x.ProductAttachment).Where(x => x.Id == id).FirstOrDefaultAsync();
             }
         }
 
@@ -37,20 +37,59 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                await Context.Product.AddAsync(product);
-                return await Context.SaveChangesAsync() > 0;
+                using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        await Context.Product.AddAsync(product);
+                        await Context.SaveChangesAsync();
+
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+
             }
         }
 
-        public async Task<bool> UpdateAsync(Product product)
+        public async Task<bool> UpdateAsync(Product uProduct)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                Product thisRow = await Context.Product.SingleAsync(x => x.Id == product.Id);
-                thisRow.Name = product.Name;
-                thisRow.Description = product.Description;
-                Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
-                return await Context.SaveChangesAsync() > 0;
+                using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        Product dbProduct = await Context.Product.Include(x => x.ProductAttachment).SingleAsync(x => x.Id == uProduct.Id);
+                        Context.Entry(dbProduct).CurrentValues.SetValues(uProduct);
+
+                        foreach(var dbAttachmentProduct in dbProduct.ProductAttachment.ToList())
+                        {
+                            if (!uProduct.ProductAttachment.Any(x => x.Id == dbAttachmentProduct.Id))
+                                Context.ProductAttachment.Remove(dbAttachmentProduct);
+                        }
+
+                        foreach(var uAttachmentProduct in uProduct.ProductAttachment)
+                        {
+                            Context.ProductAttachment.Attach(uAttachmentProduct);
+                        }
+
+                        await Context.SaveChangesAsync();
+
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
             }
         }
     }
