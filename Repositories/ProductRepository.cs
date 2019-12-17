@@ -14,8 +14,6 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<Product> GetProductsByIdAsync(int id);
         Task<bool> CreateAsync(Product product);
         Task<bool> UpdateAsync(Product product);
-
-        //Task<List<ProductAttachment>> GetProductAttachmentsAsync(Product product);
     }
 
     public class ProductRepository : IProductRepository
@@ -86,7 +84,7 @@ namespace CSP_Redemption_WebApi.Repositories
                         transaction.Commit();
                         return true;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         transaction.Rollback();
                         throw;
@@ -94,14 +92,6 @@ namespace CSP_Redemption_WebApi.Repositories
                 }
             }
         }
-
-        //public async Task<List<ProductAttachment>> GetProductAttachmentsAsync(Product product)
-        //{
-        //    using (var Context = new CSP_RedemptionContext())
-        //    {
-        //        return await Context.ProductAttachment.Where(x => x.ProductId == product.Id).ToListAsync();
-        //    }
-        //}
     }
 
 }

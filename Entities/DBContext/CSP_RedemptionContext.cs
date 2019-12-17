@@ -79,8 +79,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
             modelBuilder.Entity<Brand>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Code)
                     .IsRequired()
                     .HasMaxLength(5);
@@ -251,6 +249,10 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
             modelBuilder.Entity<ProductAttachment>(entity =>
             {
+                entity.Property(e => e.Extension)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(255);
