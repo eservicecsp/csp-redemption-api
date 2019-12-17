@@ -49,6 +49,7 @@ namespace CSP_Redemption_WebApi.Services
                         StartDate = campaign.StartDate,
                         AlertMessage = campaign.AlertMessage,
                         BrandId = campaign.BrandId,
+                        Url = campaign.Url,
                         CampaignTypeId = campaign.CampaignTypeId,
                         CreatedBy = campaign.CreatedBy,
                         Id = campaign.Id,
@@ -85,6 +86,7 @@ namespace CSP_Redemption_WebApi.Services
                             Id = item.Id,
                             ConsumerId = item.ConsumerId,
                             Token = item.Token,
+                            Code = item.Code,
                             Point = item.Point,
                             Latitude = item.Latitude,
                             Longitude = item.Longitude,
@@ -114,19 +116,52 @@ namespace CSP_Redemption_WebApi.Services
 
         public async Task<ResponseModel> CreateCampaignAsync(CreateCampaignRequestModel requestModel)
         {
+            
             var reponse = new ResponseModel();
             try
             {
-                var qrCodes = this.GenerateTokens(requestModel.Campaign.Quantity);
-                var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
-                if (hasSaved.IsSuccess)
+                 if(requestModel.Campaign.CampaignTypeId == 3)  //Enrollment & Member
                 {
-                    reponse.IsSuccess = true;
+                    var qrToken = this.GenerateTokens(1);
+                    var qrCodes = this.GenerateCode(qrToken[0].Token, requestModel.Campaign.Quantity);
+                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
+                    if (hasSaved.IsSuccess)
+                    {
+                        reponse.IsSuccess = true;
+                    }
+                    else
+                    {
+                        reponse.Message = hasSaved.Message;
+                    }
+
                 }
-                else
+                else if(requestModel.Campaign.CampaignTypeId == 1)//Collecting
                 {
-                    reponse.Message = hasSaved.Message;
+                    var qrCodes = this.GenerateTokens(requestModel.Campaign.Quantity);
+                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
+                    if (hasSaved.IsSuccess)
+                    {
+                        reponse.IsSuccess = true;
+                    }
+                    else
+                    {
+                        reponse.Message = hasSaved.Message;
+                    }
                 }
+                else //Point & Reward
+                {
+                    var qrCodes = this.GenerateTokensPoint(requestModel.Campaign.Quantity, requestModel.Point);
+                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
+                    if (hasSaved.IsSuccess)
+                    {
+                        reponse.IsSuccess = true;
+                    }
+                    else
+                    {
+                        reponse.Message = hasSaved.Message;
+                    }
+                }
+  
             }
             catch(Exception ex)
             {
@@ -146,7 +181,8 @@ namespace CSP_Redemption_WebApi.Services
                     string token = Helpers.ShortenerHelper.GenerateToken(10);
                     qrCodes.Add(new QrCode()
                     {
-                        Token = $"{token}{Guid.NewGuid().ToString("N")}"
+                        Token = $"{token}{Guid.NewGuid().ToString("N")}" ,
+                        Code = null
                     });
                     i++;
                 }
@@ -158,6 +194,65 @@ namespace CSP_Redemption_WebApi.Services
                 if (dupplicateTokens.Count() > 0)
                 {
                     
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            return qrCodes;
+        }
+        public List<QrCode> GenerateTokensPoint(int quantity,int point)
+        {
+            List<QrCode> qrCodes = new List<QrCode>();
+            try
+            {
+                int i = 0;
+                while (i < quantity)
+                {
+                    string token = Helpers.ShortenerHelper.GenerateToken(10);
+                    qrCodes.Add(new QrCode()
+                    {
+                        Token = $"{token}{Guid.NewGuid().ToString("N")}",
+                        Point = point
+                    });
+                    i++;
+                }
+
+                // Check dupplicate token
+                var dupplicateTokens = qrCodes.GroupBy(x => x.Token)
+                    .Where(group => group.Count() > 1)
+                    .Select(group => group.Key);
+                if (dupplicateTokens.Count() > 0)
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            return qrCodes;
+        }
+        public List<QrCode> GenerateCode(string token ,int quantity)
+        {
+            List<QrCode> qrCodes = new List<QrCode>();
+            try
+            {
+                int length = Convert.ToString(quantity).Length;
+                int i = 1;
+                while (i <= quantity)
+                {
+
+                    string value = String.Format("{0:D"+ length + "}", i);
+
+                    qrCodes.Add(new QrCode()
+                    {
+                        Token = token,
+                        Code = value
+                    });
+                    i++;
+
                 }
             }
             catch (Exception ex)

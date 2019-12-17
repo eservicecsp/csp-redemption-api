@@ -12,11 +12,14 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface ITransactionRepository
     {
         Task<bool> CreateTransactionJigSawAsync(Transaction transaction, QrCode qrCode);
+        Task<bool> CreateTransactionEnrollmentAsync(Transaction transaction, QrCode qrCode);
         Task<bool> CreateTransactionPointAsync(Transaction transaction, QrCode qrCode);
         Task<bool> CreateTransactionErrorAsync(Transaction transaction);
         Task<Transaction> GetWinTransactionAsync(Transaction transaction);
         Task<List<Transaction>> GetTransactionByCampaignsIdAsync(PaginationModel data);
         Task<int> GetTransactionTotalByCampaignsIdAsync(PaginationModel data);
+        Task<int> GetCountTransactionByTypeId(int campaignId, int typeId);
+        Task<int> GetCountAllTransaction(int campaignId);
     }
     public class TransactionRepository : ITransactionRepository
     {
@@ -42,6 +45,7 @@ namespace CSP_Redemption_WebApi.Repositories
                         {
                             var data = new QrCode
                             {
+                                Id = qrCode.Id,
                                 Token = qrCode.Token,
                                 CampaignId = qrCode.CampaignId,
                                 Peice = qrCode.Peice,
@@ -71,6 +75,52 @@ namespace CSP_Redemption_WebApi.Repositories
             }
             return isSuccess;
         }
+        public async Task<bool> CreateTransactionEnrollmentAsync(Transaction transaction, QrCode qrCode)
+        {
+            bool isSuccess = false;
+            using (var Context = new CSP_RedemptionContext())
+            {
+                using (var tran = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        Context.Transaction.Add(transaction);
+                        if (await Context.SaveChangesAsync() > 0)
+                        {
+                            var data = new QrCode
+                            {
+                                Id = qrCode.Id,
+                                Token = qrCode.Token,
+                                CampaignId = qrCode.CampaignId,
+                                Code = qrCode.Code,
+                                Peice = qrCode.Peice,
+                                ConsumerId = qrCode.ConsumerId,
+                                TransactionId = transaction.Id,
+                                Point = qrCode.Point,
+                                ScanDate = qrCode.ScanDate
+                            };
+                            // await this.qrCodeRepository.UpdateAsync(qrCode);
+                            var dbQrCode = await Context.QrCode.SingleAsync(x => x.Token == qrCode.Token && x.CampaignId == qrCode.CampaignId && x.Code == qrCode.Code && x.ConsumerId == null);
+                            Context.Entry(dbQrCode).CurrentValues.SetValues(data);
+
+                            isSuccess = await Context.SaveChangesAsync() > 0;
+                            tran.Commit();
+                        }
+
+                    }
+                    catch (Exception)
+                    {
+                        tran.Rollback();
+                        isSuccess = false;
+                        throw;
+                    }
+                }
+
+
+            }
+            return isSuccess;
+        }
+        
 
         public async Task<bool> CreateTransactionPointAsync(Transaction transaction, QrCode qrCode)
         {
@@ -86,6 +136,7 @@ namespace CSP_Redemption_WebApi.Repositories
                         {
                             var data = new QrCode
                             {
+                                Id = qrCode.Id,
                                 Token = qrCode.Token,
                                 CampaignId = qrCode.CampaignId,
                                 Peice = qrCode.Peice,
@@ -282,6 +333,21 @@ namespace CSP_Redemption_WebApi.Repositories
 
 
                 return await transactions.CountAsync();
+            }
+        }
+
+        public async Task<int> GetCountTransactionByTypeId(int campaignId, int typeId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Transaction.Where(x => x.CampaignId == campaignId && x.TransactionTypeId == typeId).CountAsync();
+            }
+        }
+        public async Task<int> GetCountAllTransaction(int campaignId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Transaction.Where(x => x.CampaignId == campaignId).CountAsync();
             }
         }
     }

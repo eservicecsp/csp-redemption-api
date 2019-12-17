@@ -13,8 +13,10 @@ namespace CSP_Redemption_WebApi.Services
     {
         Task<AuthenticationResponseModel> Authenticate(Staff staff);
         Task<AuthorizationResponseModel> Authorize(string token);
-        Task<StaffsResponseModel> GetStaffsByBrandIdAsync(int brandId);
+        Task<StaffsResponseModel> GetStaffsByBrandIdAsync(int brandId); 
         Task<ResponseModel> CreateAsync(Staff staff);
+        Task<StaffResponseModel> GetStaffsById(int id);
+        Task<ResponseModel> UpdateAsync(Staff staff);
     }
 
     public class StaffService : IStaffService
@@ -80,6 +82,13 @@ namespace CSP_Redemption_WebApi.Services
             AuthorizationResponseModel authorization = new AuthorizationResponseModel();
             try
             {
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    authorization.Message = "Unauthorized";
+                    return authorization;
+                }
+
                 var staffId = Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId");
 
                 var staff = await this.staffRepository.GetStaffByIdAsync(Convert.ToInt32(staffId));
@@ -219,15 +228,72 @@ namespace CSP_Redemption_WebApi.Services
 
             try
             {
-
+                var checkDup = await this.staffRepository.GetStaffByEmailAndBrandIdAsync(staff.Email, staff.BrandId);
+                if (checkDup != null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Email is duplicated.";
+                }
+                else
+                {
+                    response.IsSuccess = await this.staffRepository.CreateAsync(staff);
+                }
+               
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw;
+                response.Message = ex.Message;
             }
 
             return response;
         }
+
+        public async Task<StaffResponseModel> GetStaffsById(int id)
+        {
+            var response = new StaffResponseModel();
+            try
+            {
+                var staff = await this.staffRepository.GetStaffByIdAsync(id);
+                var data = new StaffModel();
+                if(staff != null)
+                {
+                    data.Id = staff.Id;
+                    data.FirstName = staff.FirstName;
+                    data.LastName = staff.LastName;
+                    data.Phone = staff.Phone;
+                    data.RoleId = staff.RoleId;
+                    data.IsActived = staff.IsActived;
+                    data.Email = staff.Email;
+
+                }
+                response.Staff = data;
+                response.IsSuccess = true;
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ResponseModel> UpdateAsync(Staff staff)
+        {
+            var response = new ResponseModel();
+
+            try
+            {
+                response.IsSuccess = await this.staffRepository.UpdateAsync(staff);
+
+            }
+            catch (Exception ex)
+            {
+
+                response.Message = ex.Message;
+            }
+
+            return response;
+        }
+
     }
 }

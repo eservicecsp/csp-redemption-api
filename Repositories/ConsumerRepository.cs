@@ -1,9 +1,12 @@
 ﻿using CSP_Redemption_WebApi.Entities.DBContext;
 using CSP_Redemption_WebApi.Entities.Models;
 using CSP_Redemption_WebApi.Models;
+using FastMember;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,9 +20,20 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<int> GetConsumersTotalByBrandIdAsync(PaginationModel data);
         Task<bool> CreateAsync(Consumer consumer);
         Task<Consumer> GetConsumerByIdAsync(int consumerId);
+        Task<bool> UpdateAsync(Consumer consumer);
+        Task<bool> ImportFileAsync(List<Consumer>  consumers);
     }
     public class ConsumerRepository : IConsumerRepository
     {
+        private readonly IConfiguration configuration;
+
+        public ConsumerRepository
+            (
+                IConfiguration configuration
+            )
+        {
+            this.configuration = configuration;
+        }
         public async Task<Consumer> IsExist(Consumer consumer)
         {
             using (var Context = new CSP_RedemptionContext())
@@ -147,6 +161,95 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 return await Context.Consumer.FirstOrDefaultAsync(x => x.Id == consumerId);
             }
+        }
+
+        public async Task<bool> UpdateAsync(Consumer consumer)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+              
+                var dbConsumer = await Context.Consumer.SingleAsync(x => x.Id == consumer.Id);
+                var data = new Consumer
+                {
+                    Id = consumer.Id,
+                    FirstName = consumer.FirstName,
+                    LastName = consumer.LastName,
+                    Email = consumer.Email,
+                    Phone = consumer.Phone,
+                    BirthDate = consumer.BirthDate,
+                    Address1 = consumer.Address1,
+                    Address2 = consumer.Address2,
+                    TumbolCode = consumer.TumbolCode,
+                    AmphurCode = consumer.AmphurCode,
+                    ProvinceCode = consumer.ProvinceCode,
+                    ZipCode = consumer.ZipCode,
+                    ConsumerSourceId = dbConsumer.ConsumerSourceId,
+                    BrandId = dbConsumer.BrandId,
+                    CampaignId = consumer.CampaignId,
+                    Point = consumer.Point,
+                    CreatedBy = dbConsumer.CreatedBy,
+                    CreatedDate = dbConsumer.CreatedDate
+                };
+                Context.Entry(dbConsumer).CurrentValues.SetValues(data);
+                return await Context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<bool> ImportFileAsync(List<Consumer> consumers)
+        {
+            bool isSuccess = false;
+            using (var Context = new CSP_RedemptionContext())
+            {
+                using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        string connectionstring = this.configuration["ConnectionStrings:ApiDatabase"];
+                        var copyParameters = new[]
+                        {
+                            nameof(Consumer.FirstName),
+                            nameof(Consumer.LastName),
+                            nameof(Consumer.Phone),
+                            nameof(Consumer.Email),
+                            nameof(Consumer.BrandId),
+                            nameof(Consumer.ConsumerSourceId),
+                            nameof(Consumer.CreatedDate)
+                        };
+                        using (var bcp = new SqlBulkCopy(connectionstring))
+                        {
+                            using (var reader = ObjectReader.Create(consumers, copyParameters))
+                            {
+                                SqlBulkCopyColumnMapping mapFirstName = new SqlBulkCopyColumnMapping(copyParameters[0], "FirstName");
+                                SqlBulkCopyColumnMapping mapLastName = new SqlBulkCopyColumnMapping(copyParameters[1], "LastName");
+                                SqlBulkCopyColumnMapping mapPhone = new SqlBulkCopyColumnMapping(copyParameters[2], "Phone");
+                                SqlBulkCopyColumnMapping mapEmail = new SqlBulkCopyColumnMapping(copyParameters[3], "Email");
+                                SqlBulkCopyColumnMapping mapBrandId = new SqlBulkCopyColumnMapping(copyParameters[4], "BrandId");
+                                SqlBulkCopyColumnMapping mapConsumerSourceId = new SqlBulkCopyColumnMapping(copyParameters[5], "ConsumerSourceId");
+                                SqlBulkCopyColumnMapping mapCreatedDate = new SqlBulkCopyColumnMapping(copyParameters[6], "CreatedDate");
+
+                                bcp.ColumnMappings.Add(mapFirstName);
+                                bcp.ColumnMappings.Add(mapLastName);
+                                bcp.ColumnMappings.Add(mapPhone);
+                                bcp.ColumnMappings.Add(mapEmail);
+                                bcp.ColumnMappings.Add(mapBrandId);
+                                bcp.ColumnMappings.Add(mapConsumerSourceId);
+                                bcp.ColumnMappings.Add(mapCreatedDate);
+                                bcp.DestinationTableName = "[Consumer]";
+                                bcp.WriteToServer(reader);
+                            }
+                        }
+                        isSuccess = true;
+                        transaction.Commit();
+                    }
+                    catch(Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                    
+                }
+            }
+                return isSuccess;
         }
     }
 }

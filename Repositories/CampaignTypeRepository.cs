@@ -19,7 +19,7 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using(var Context = new CSP_RedemptionContext())
             {
-                return await Context.CampaignType.ToListAsync();
+                return await Context.CampaignType.Where(x=>x.IsActive == true).ToListAsync();
             }
         }
 

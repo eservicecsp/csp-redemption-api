@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSP_Redemption_WebApi.Entities.Models
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
     public partial class Campaign
     {
         public Campaign()
         {
-            Consumer = new HashSet<Consumer>();
             Transaction = new HashSet<Transaction>();
         }
 
@@ -30,7 +29,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
 
         public virtual Brand Brand { get; set; }
         public virtual CampaignType CampaignType { get; set; }
-        public virtual ICollection<Consumer> Consumer { get; set; }
         public virtual ICollection<Transaction> Transaction { get; set; }
     }
 }

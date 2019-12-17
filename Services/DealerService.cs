@@ -11,6 +11,8 @@ namespace CSP_Redemption_WebApi.Services
     public interface IDealerService
     {
         Task<DealersResponseModel> GetDealersByBrandIdAsync(int brandId);
+        Task<DealerResponseModel> GetDealersByIdAsync(int id);
+        Task<DealerResponseModel> UpdateAsync(Dealer dealer);
         Task<ResponseModel> CreateAsync(Dealer dealer);
     }
 
@@ -40,6 +42,11 @@ namespace CSP_Redemption_WebApi.Services
                         CreatedBy = dealer.CreatedBy,
                         Id = dealer.Id,
                         Name = dealer.Name,
+                        Email = dealer.Email,
+                        TaxNo = dealer.TaxNo,
+                        Phone = dealer.Phone,
+                        Tel = dealer.Tel
+                        
                         
                     });
                 }
@@ -51,6 +58,49 @@ namespace CSP_Redemption_WebApi.Services
                 response.Message = ex.Message;
             }
 
+            return response;
+        }
+
+        public async Task<DealerResponseModel> GetDealersByIdAsync(int id)
+        {
+            var response = new DealerResponseModel();
+            try
+            {
+               
+                var dealers = await this.dealerRepository.GetDealersByIdAsync(id);
+                var dealer = new DealerModel();
+                if (dealers != null)
+                {
+                    dealer.Id = dealers.Id;
+                    dealer.Name = dealers.Name;
+                    dealer.Email = dealers.Email;
+                    dealer.TaxNo = dealers.TaxNo;
+                    dealer.Phone = dealers.Phone;
+                    dealer.Tel = dealers.Tel;
+                }
+
+                response.Dealer = dealer;
+                response.IsSuccess = true;
+           
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<DealerResponseModel> UpdateAsync(Dealer dealer)
+        {
+            var response = new DealerResponseModel();
+            try
+            {
+                response.IsSuccess = await this.dealerRepository.UpdateAsync(dealer);
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
             return response;
         }
 

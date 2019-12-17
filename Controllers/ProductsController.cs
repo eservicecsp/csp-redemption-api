@@ -41,5 +41,16 @@ namespace CSP_Redemption_WebApi.Controllers
 
             return Ok(await this.productService.CreateAsync(product));
         }
+
+        [HttpPost("update")]
+        public async Task<IActionResult> Update(Product product)
+        {
+            return Ok(await this.productService.UpdateAsync(product));
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProductById(int id)
+        {
+            return Ok(await this.productService.GetProductsByIdAsync(id));
+        }
     }
 }

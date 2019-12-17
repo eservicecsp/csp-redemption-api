@@ -6,6 +6,14 @@ using System.Threading.Tasks;
 
 namespace CSP_Redemption_WebApi.Models
 {
+
+    public class ImportDataBinding
+    {
+        public string file { get; set; }
+        public string fileName { get; set; }
+        public int brandId { get; set; }
+        public int createBy { get; set; }
+    }
     #region Brand
     public class BrandRegisterRequestModel
     {
@@ -21,6 +29,7 @@ namespace CSP_Redemption_WebApi.Models
         public int CampaignId { get; set; }
         public int ConsumerId { get; set; }
         public string Token { get; set; }
+        public string Code { get; set; }
         public int Point { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
@@ -37,7 +46,7 @@ namespace CSP_Redemption_WebApi.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }
         public string TumbolCode { get; set; }
@@ -52,6 +61,7 @@ namespace CSP_Redemption_WebApi.Models
         public int CampaignId { get; set; }
         public int? Point { get; set; }
         public string Token { get; set; }
+        public string Code { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
     }
@@ -77,4 +87,6 @@ namespace CSP_Redemption_WebApi.Models
     }
 
     #endregion
+
+   
 }

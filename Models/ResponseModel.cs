@@ -21,6 +21,7 @@ namespace CSP_Redemption_WebApi.Models
         public string StatusTypeCode { get; set; }
         public int CampaignType { get; set; }
         public int[] Pieces { get; set; }
+        public ConsumerRequestModel consumer { get; set; }
     }
 
     public class RedemptionResponseModel
@@ -85,6 +86,7 @@ namespace CSP_Redemption_WebApi.Models
     {
         public string Token { get; set; }
         public int? Peice { get; set; }
+        public string Code { get; set; }
         public int? ConsumerId { get; set; }
         public int? TransactionId { get; set; }
         public int? Point { get; set; }
@@ -93,6 +95,7 @@ namespace CSP_Redemption_WebApi.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
+        public string FullUrl { get; set; }
 
     }
 
@@ -112,6 +115,7 @@ namespace CSP_Redemption_WebApi.Models
         public int Id { get; set; }
         public int ConsumerId { get; set; }
         public string Token { get; set; }
+        public string Code { get; set; }
         public int Point { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
@@ -146,9 +150,10 @@ namespace CSP_Redemption_WebApi.Models
         public string Description { get; set; }
         public int CampaignTypeId { get; set; }
         public int BrandId { get; set; }
+        public string Url { get; set; }
         public int Quantity { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string AlertMessage { get; set; }
         public string DuplicateMessage { get; set; }
         public string QrCodeNotExistMessage { get; set; }
@@ -186,10 +191,20 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
         public List<DealerModel> Dealers { get; set; }
     }
+    public class DealerResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public DealerModel  Dealer { get; set; }
+    }
     public class DealerModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string Email { get; set; }
+        public string TaxNo { get; set; }
+        public string Phone { get; set; }
+        public string Tel { get; set; }
         public int BrandId { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
@@ -210,6 +225,12 @@ namespace CSP_Redemption_WebApi.Models
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
         public List<StaffModel> Staffs { get; set; }
+    }
+    public class StaffResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public StaffModel Staff { get; set; }
     }
 
     public class StaffModel
@@ -400,6 +421,13 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
         public List<ProductModel> Products { get; set; }
     }
+
+    public class ProductResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public ProductModel product { get; set; }
+    }
     public class ProductModel
     {
         public int Id { get; set; }
@@ -407,8 +435,35 @@ namespace CSP_Redemption_WebApi.Models
         public string Description { get; set; }
         public int BrandId { get; set; }
         public int CreatedBy { get; set; }
+        public string CreatedName { get; set; }
         public DateTime CreatedDate { get; set; }
 
+    }
+    #endregion
+
+    #region Role
+    public class RoleResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<Role> roles { get; set; }
+    }
+
+    #endregion
+
+    #region Chart
+
+    public class ChartResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+
+        public List<ChartsModel> charts { get; set; }
+    }
+    public class ChartsModel
+    {
+        public string name { get; set; }
+        public int value { get; set; }
     }
     #endregion
 }

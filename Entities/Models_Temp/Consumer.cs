@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSP_Redemption_WebApi.Entities.Models
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
     public partial class Consumer
     {
@@ -30,9 +30,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int? CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        public virtual Brand Brand { get; set; }
-        public virtual Campaign Campaign { get; set; }
-        public virtual ConsumerSource ConsumerSource { get; set; }
         public virtual ICollection<QrCode> QrCode { get; set; }
         public virtual ICollection<Transaction> Transaction { get; set; }
     }

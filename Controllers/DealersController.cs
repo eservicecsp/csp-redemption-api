@@ -40,5 +40,16 @@ namespace CSP_Redemption_WebApi.Controllers
 
             return Ok(await this.dealerService.CreateAsync(dealer));
         }
+
+        [HttpPost("update")]
+        public async Task<IActionResult> Update(Dealer dealer)
+        {
+            return Ok(await this.dealerService.UpdateAsync(dealer));
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDealersById(int id)
+        {
+            return Ok(await this.dealerService.GetDealersByIdAsync(id));
+        }
     }
 }

@@ -45,6 +45,8 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IDealerService, DealerService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IQrCodeService, QrCodeService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IChartService, ChartService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
@@ -62,6 +64,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped(typeof(ICampaignRepository), typeof(CampaignRepository));
             services.AddScoped(typeof(IDealerRepository), typeof(DealerRepository));
             services.AddScoped(typeof(ProductRepository), typeof(ProductRepository));
+            services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -109,6 +112,7 @@ namespace CSP_Redemption_WebApi
                     .SetPreflightMaxAge(TimeSpan.MaxValue)
                     .AllowAnyMethod()
                     .WithOrigins("http://localhost:4200")
+                    .WithOrigins("https://etax.chanwanich.com/csp-redemption-ui/")
                     .AllowCredentials()
                     .AllowAnyHeader();
             });

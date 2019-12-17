@@ -27,5 +27,17 @@ namespace CSP_Redemption_WebApi.Controllers
 
             return Ok(await this.consumerService.GetConsumersByBrandIdAsync(data));
         }
+
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> ImportJob(ImportDataBinding data)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            data.brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            data.createBy = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
+            return Ok(await this.consumerService.ImportJob(data));
+        }
+
+        // public async Task<IActionResult> ImportJob(ImportDataBinding data) => Ok(await this.enrollmentService.ImportFile(data));
     }
 }

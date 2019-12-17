@@ -13,5 +13,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public DateTime CreatedDate { get; set; }
 
         public virtual Brand Brand { get; set; }
+        public virtual Staff CreatedByNavigation { get; set; }
     }
 }

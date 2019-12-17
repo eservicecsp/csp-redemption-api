@@ -61,6 +61,7 @@ namespace CSP_Redemption_WebApi.Repositories
                         {
                             nameof(QrCode.Token),
                             nameof(QrCode.CampaignId),
+                            nameof(QrCode.Code),
                             nameof(QrCode.Peice),
                             nameof(QrCode.ConsumerId),
                             nameof(QrCode.TransactionId),
@@ -107,11 +108,11 @@ namespace CSP_Redemption_WebApi.Repositories
                                         {
                                             SqlBulkCopyColumnMapping mapToken = new SqlBulkCopyColumnMapping(copyParameters[0], "Token");
                                             SqlBulkCopyColumnMapping mapCampaignId = new SqlBulkCopyColumnMapping(copyParameters[1], "CampaignId");
-                                            SqlBulkCopyColumnMapping mapPeice = new SqlBulkCopyColumnMapping(copyParameters[2], "Peice");
-                                            SqlBulkCopyColumnMapping mapConsumerId = new SqlBulkCopyColumnMapping(copyParameters[3], "ConsumerId");
-                                            SqlBulkCopyColumnMapping mapTransactionId = new SqlBulkCopyColumnMapping(copyParameters[4], "TransactionId");
-                                            SqlBulkCopyColumnMapping mapPoint = new SqlBulkCopyColumnMapping(copyParameters[5], "Point");
-                                            SqlBulkCopyColumnMapping mapScanDate = new SqlBulkCopyColumnMapping(copyParameters[6], "ScanDate");
+                                            SqlBulkCopyColumnMapping mapPeice = new SqlBulkCopyColumnMapping(copyParameters[3], "Peice");
+                                            SqlBulkCopyColumnMapping mapConsumerId = new SqlBulkCopyColumnMapping(copyParameters[4], "ConsumerId");
+                                            SqlBulkCopyColumnMapping mapTransactionId = new SqlBulkCopyColumnMapping(copyParameters[5], "TransactionId");
+                                            SqlBulkCopyColumnMapping mapPoint = new SqlBulkCopyColumnMapping(copyParameters[6], "Point");
+                                            SqlBulkCopyColumnMapping mapScanDate = new SqlBulkCopyColumnMapping(copyParameters[7], "ScanDate");
 
                                             bcp.ColumnMappings.Add(mapToken);
                                             bcp.ColumnMappings.Add(mapCampaignId);
@@ -140,11 +141,11 @@ namespace CSP_Redemption_WebApi.Repositories
                                         {
                                             SqlBulkCopyColumnMapping mapToken = new SqlBulkCopyColumnMapping(copyParameters[0], "Token");
                                             SqlBulkCopyColumnMapping mapCampaignId = new SqlBulkCopyColumnMapping(copyParameters[1], "CampaignId");
-                                            SqlBulkCopyColumnMapping mapPeice = new SqlBulkCopyColumnMapping(copyParameters[2], "Peice");
-                                            SqlBulkCopyColumnMapping mapConsumerId = new SqlBulkCopyColumnMapping(copyParameters[3], "ConsumerId");
-                                            SqlBulkCopyColumnMapping mapTransactionId = new SqlBulkCopyColumnMapping(copyParameters[4], "TransactionId");
-                                            SqlBulkCopyColumnMapping mapPoint = new SqlBulkCopyColumnMapping(copyParameters[5], "Point");
-                                            SqlBulkCopyColumnMapping mapScanDate = new SqlBulkCopyColumnMapping(copyParameters[6], "ScanDate");
+                                            SqlBulkCopyColumnMapping mapPeice = new SqlBulkCopyColumnMapping(copyParameters[3], "Peice");
+                                            SqlBulkCopyColumnMapping mapConsumerId = new SqlBulkCopyColumnMapping(copyParameters[4], "ConsumerId");
+                                            SqlBulkCopyColumnMapping mapTransactionId = new SqlBulkCopyColumnMapping(copyParameters[5], "TransactionId");
+                                            SqlBulkCopyColumnMapping mapPoint = new SqlBulkCopyColumnMapping(copyParameters[6], "Point");
+                                            SqlBulkCopyColumnMapping mapScanDate = new SqlBulkCopyColumnMapping(copyParameters[7], "ScanDate");
 
                                             bcp.ColumnMappings.Add(mapToken);
                                             bcp.ColumnMappings.Add(mapCampaignId);
@@ -172,15 +173,17 @@ namespace CSP_Redemption_WebApi.Repositories
                                         using (var reader = ObjectReader.Create(qrCodes, copyParameters))
                                         {
                                             SqlBulkCopyColumnMapping mapToken = new SqlBulkCopyColumnMapping(copyParameters[0], "Token");
-                                            SqlBulkCopyColumnMapping mapCampaignId = new SqlBulkCopyColumnMapping(copyParameters[1], "CampaignId");
-                                            SqlBulkCopyColumnMapping mapPeice = new SqlBulkCopyColumnMapping(copyParameters[2], "Peice");
-                                            SqlBulkCopyColumnMapping mapConsumerId = new SqlBulkCopyColumnMapping(copyParameters[3], "ConsumerId");
-                                            SqlBulkCopyColumnMapping mapTransactionId = new SqlBulkCopyColumnMapping(copyParameters[4], "TransactionId");
-                                            SqlBulkCopyColumnMapping mapPoint = new SqlBulkCopyColumnMapping(copyParameters[5], "Point");
-                                            SqlBulkCopyColumnMapping mapScanDate = new SqlBulkCopyColumnMapping(copyParameters[6], "ScanDate");
+                                            SqlBulkCopyColumnMapping mapCampaignId = new SqlBulkCopyColumnMapping(copyParameters[1], "CampaignId"); 
+                                            SqlBulkCopyColumnMapping mapCode = new SqlBulkCopyColumnMapping(copyParameters[2], "Code");
+                                            SqlBulkCopyColumnMapping mapPeice = new SqlBulkCopyColumnMapping(copyParameters[3], "Peice");
+                                            SqlBulkCopyColumnMapping mapConsumerId = new SqlBulkCopyColumnMapping(copyParameters[4], "ConsumerId");
+                                            SqlBulkCopyColumnMapping mapTransactionId = new SqlBulkCopyColumnMapping(copyParameters[5], "TransactionId");
+                                            SqlBulkCopyColumnMapping mapPoint = new SqlBulkCopyColumnMapping(copyParameters[6], "Point");
+                                            SqlBulkCopyColumnMapping mapScanDate = new SqlBulkCopyColumnMapping(copyParameters[7], "ScanDate");
 
                                             bcp.ColumnMappings.Add(mapToken);
                                             bcp.ColumnMappings.Add(mapCampaignId);
+                                            bcp.ColumnMappings.Add(mapCode);
                                             bcp.ColumnMappings.Add(mapPeice);
                                             bcp.ColumnMappings.Add(mapConsumerId);
                                             bcp.ColumnMappings.Add(mapTransactionId);
