@@ -47,6 +47,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IQrCodeService, QrCodeService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IChartService, ChartService>();
+            services.AddScoped<IBrandService, BrandService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
@@ -65,6 +66,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped(typeof(IDealerRepository), typeof(DealerRepository));
             services.AddScoped(typeof(ProductRepository), typeof(ProductRepository));
             services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
+            services.AddScoped(typeof(IBrandRepository), typeof(BrandRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

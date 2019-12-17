@@ -21,6 +21,7 @@ namespace CSP_Redemption_WebApi.Models
         public string StatusTypeCode { get; set; }
         public int CampaignType { get; set; }
         public int[] Pieces { get; set; }
+        public int? TotalPieces { get; set; }
         public ConsumerRequestModel consumer { get; set; }
     }
 
@@ -32,6 +33,7 @@ namespace CSP_Redemption_WebApi.Models
         public string StatusTypeCode { get; set; }
         public int CampaignType { get; set; }
         public int[] Pieces { get; set; }
+        public int? TotalPieces { get; set; }
     }
 
     #region Consumer
@@ -303,6 +305,7 @@ namespace CSP_Redemption_WebApi.Models
     public class BrandModel
     {
         public int Id { get; set; }
+        public string Code { get; set; }
         public string Name { get; set; }
         public bool IsActived { get; set; }
     }

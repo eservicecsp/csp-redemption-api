@@ -146,6 +146,7 @@ namespace CSP_Redemption_WebApi.Services
                             response.CampaignType = redemption.CampaignType;
                             response.Message = redemption.Message;
                             response.Pieces = redemption.Pieces;
+                            response.TotalPieces = redemption.TotalPieces;
 
                             response.IsSuccess = true;
                             response.IsExist = true;
@@ -227,6 +228,7 @@ namespace CSP_Redemption_WebApi.Services
                             response.CampaignType = redemption.CampaignType;
                             response.Message = redemption.Message;
                             response.Pieces = redemption.Pieces;
+                            response.TotalPieces = redemption.TotalPieces;
                         }
                         else
                         {
@@ -257,6 +259,7 @@ namespace CSP_Redemption_WebApi.Services
                             response.CampaignType = redemption.CampaignType;
                             response.Message = redemption.Message;
                             response.Pieces = redemption.Pieces;
+                            response.TotalPieces = redemption.TotalPieces;
                         }
                         else
                         {
@@ -298,6 +301,7 @@ namespace CSP_Redemption_WebApi.Services
 
                 response.ConsumerId = consumerRequest.ConsumerId;
                 response.CampaignType = campaign.CampaignTypeId;
+                response.TotalPieces = campaign.TotalPeice;
                 if ((campaign.StartDate <= DateTime.Now) && (campaign.EndDate >= DateTime.Now))
                 {
                     qrCode.Token = consumerRequest.Token;
