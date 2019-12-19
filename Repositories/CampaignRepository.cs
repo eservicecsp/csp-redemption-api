@@ -38,7 +38,7 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Campaign.Where(x => x.BrandId == brandId).ToListAsync();
+                return await Context.Campaign.Where(x => x.BrandId == brandId).OrderByDescending(x=>x.Id).ToListAsync();
             }
         }
 
