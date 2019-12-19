@@ -175,16 +175,19 @@ namespace CSP_Redemption_WebApi.Services
                 string subDomain = this.configuration["SubDomain"];
                 if (!string.IsNullOrEmpty(subDomain))
                 {
-                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
+                    productAttachmentPath = Path.Combine(webRoot, subDomain, @"Attachments\Products");
                 }
                 else
                 {
-                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
+                    productAttachmentPath = Path.Combine(webRoot, @"Attachments\Products");
                 }
+
+                
 
                 var iProductAttachments = new List<ProductAttachment>();
                 foreach (var item in product.Attachments)
                 {
+                    File.WriteAllBytes(Path.Combine(productAttachmentPath, item.Name), Convert.FromBase64String(item.File));
                     iProductAttachments.Add(new ProductAttachment()
                     {
                         Id = 0,
