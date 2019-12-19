@@ -303,7 +303,7 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
             modelBuilder.Entity<Role>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Description).HasMaxLength(255);
 
