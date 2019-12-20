@@ -1,12 +1,8 @@
 ﻿using System;
-using System.IO;
-using CSP_Redemption_WebApi.Entities.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
 
-
-namespace CSP_Redemption_WebApi.Entities.DBContext
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
     public partial class CSP_RedemptionContext : DbContext
     {
@@ -45,10 +41,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
         {
             if (!optionsBuilder.IsConfigured)
             {
-                IConfigurationRoot configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-                                                                                                             .AddJsonFile("appsettings.json")
-                                                                                                             .Build();
-                optionsBuilder.UseSqlServer(configuration.GetConnectionString("APIDatabase"));
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("Server=172.1.240.60;Database=CSP_Redemption;User ID=sa;Password=P@ssw0rd");
             }
         }
 

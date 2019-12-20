@@ -14,9 +14,15 @@ namespace CSP_Redemption_WebApi.Controllers
     public class ConsumersController : ControllerBase
     {
         private readonly IConsumerService consumerService;
-        public ConsumersController(IConsumerService consumerService)
+        private readonly IEnrollmentService enrollmentService;
+        public ConsumersController
+            (
+            IConsumerService consumerService,
+            IEnrollmentService enrollmentService
+            )
         {
             this.consumerService = consumerService;
+            this.enrollmentService = enrollmentService;
         }
 
         [HttpPost]
@@ -35,7 +41,25 @@ namespace CSP_Redemption_WebApi.Controllers
             var token = Request.Headers["Authorization"].ToString();
             data.brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
             data.createBy = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
-            return Ok(await this.consumerService.ImportJob(data));
+           // return Ok(await this.consumerService.ImportJob(data));
+            return Ok(await this.enrollmentService.ImportJob(data));
+        }
+
+        [HttpGet("Download/{brandId}")]
+        public async Task<IActionResult> ExportJobError(int brandId)
+        {
+            var response = await this.consumerService.ExportTextFileConsumerByBrandId(brandId);
+
+            // Create file text index
+            if (response.IsSuccess)
+            {
+                byte[] bytes = System.Convert.FromBase64String(response.Message.Split(',').Last());
+                return File(bytes, "text/plain", response.Message.Split(',').First());
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
 
         // public async Task<IActionResult> ImportJob(ImportDataBinding data) => Ok(await this.enrollmentService.ImportFile(data));

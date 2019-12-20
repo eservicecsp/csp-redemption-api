@@ -12,6 +12,7 @@ namespace CSP_Redemption_WebApi.Models
         public string file { get; set; }
         public string fileName { get; set; }
         public int brandId { get; set; }
+        public int CampaignId { get; set; }
         public int createBy { get; set; }
     }
     #region Brand
@@ -84,6 +85,7 @@ namespace CSP_Redemption_WebApi.Models
         public Campaign Campaign { get; set; }
         public List<int> Peices { get; set; }
         public int Point { get; set; }
+        public int Product { get; set; }
     }
 
     #endregion

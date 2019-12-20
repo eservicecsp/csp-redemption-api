@@ -202,6 +202,15 @@ namespace CSP_Redemption_WebApi.Repositories
                                 }
                         }
 
+                        var campProduct = new CampaignProduct()
+                        {
+                            CampaignId = requestModel.Campaign.Id,
+                            ProductId = requestModel.Product
+                        };
+                        await Context.CampaignProduct.AddAsync(campProduct);
+                        await Context.SaveChangesAsync();
+                        
+
                         transaction.Commit();
                         response.IsSuccess = true;
                     }

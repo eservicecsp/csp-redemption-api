@@ -22,6 +22,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<Consumer> GetConsumerByIdAsync(int consumerId);
         Task<bool> UpdateAsync(Consumer consumer);
         Task<bool> ImportFileAsync(List<Consumer>  consumers);
+        Task<List<Consumer>> ExportTextFileConsumerByBrandIdAsync(int brandId);
     }
     public class ConsumerRepository : IConsumerRepository
     {
@@ -250,6 +251,20 @@ namespace CSP_Redemption_WebApi.Repositories
                 }
             }
                 return isSuccess;
+        }
+
+        public async Task<List<Consumer>> ExportTextFileConsumerByBrandIdAsync(int brandId)
+        {
+            var consumers = new List<Consumer>();
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Consumer
+                            .Where(x=>x.BrandId == brandId)
+                            .Include(x=>x.ProvinceCodeNavigation)
+                            .Include(x=>x.AmphurCodeNavigation)
+                            .Include(x=>x.TumbolCodeNavigation)
+                            .ToListAsync();
+            }
         }
     }
 }

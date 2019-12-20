@@ -12,6 +12,12 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
     }
 
+    public class FileResponseDataBinding
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public byte[] File { get; set; }
+    }
     public class IsExistResponseModel
     {
         public bool IsSuccess { get; set; }
@@ -65,6 +71,20 @@ namespace CSP_Redemption_WebApi.Models
         public int? CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
     }
+    public class ExportConsumerModel
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public string BirthDate { get; set; }
+        public string Address1 { get; set; }
+        public string Tumbol { get; set; }
+        public string Amphur { get; set; }
+        public string Province { get; set; }
+        public string ZipCode { get; set; }
+        public int? Point { get; set; }
+    }
 
     public class ConsumersByPaginationResponseModel
     {
@@ -72,6 +92,14 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
         public int length { get; set; }
         public List<Consumer> data { get; set; }
+    }
+
+    public class EnrollmentsByPaginationResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public int length { get; set; }
+        public List<Enrollment> data { get; set; }
     }
 
     #endregion

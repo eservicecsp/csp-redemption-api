@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSP_Redemption_WebApi.Entities.Models
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
     public partial class Consumer
     {

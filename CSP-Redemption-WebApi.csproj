@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\Models_Temp\" />
     <Folder Include="Uploads\" />
   </ItemGroup>
 

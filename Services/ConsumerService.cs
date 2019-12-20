@@ -19,6 +19,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<RedemptionResponseModel> Register(ConsumerRequestModel consumerRequest);
         Task<RedemptionResponseModel> Redemption(CheckExistConsumerRequestModel consumerRequest);
         Task<ResponseModel> ImportJob(ImportDataBinding data);
+        Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(int brandId);
     }
     public class ConsumerService : IConsumerService
     {
@@ -302,7 +303,7 @@ namespace CSP_Redemption_WebApi.Services
                 response.ConsumerId = consumerRequest.ConsumerId;
                 response.CampaignType = campaign.CampaignTypeId;
                 response.TotalPieces = campaign.TotalPeice;
-                if ((campaign.StartDate <= DateTime.Now) && (campaign.EndDate >= DateTime.Now))
+                if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
                 {
                     qrCode.Token = consumerRequest.Token;
                     qrCode.CampaignId = consumerRequest.CampaignId;
@@ -550,6 +551,58 @@ namespace CSP_Redemption_WebApi.Services
             }
 
             return response;
+        }
+
+        public async Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(int brandId)
+        {
+            FileResponseDataBinding result = new FileResponseDataBinding();
+            try
+            {
+                var consumersDb = await this.consumerRepository.ExportTextFileConsumerByBrandIdAsync(brandId);
+                if (consumersDb.Count() > 0)
+                {
+                    string fileName = DateTime.Now.ToString("yyyy-MM-dd")+"_"+ brandId+"_"+"Consumers.txt";
+                    string filePath = Path.Combine(@"Upload\" + fileName);
+                    if (!File.Exists(filePath))
+                    {
+                        using (StreamWriter writer = File.CreateText(filePath))
+                        //using (StreamWriter writer = new StreamWriter(pathFile, true))
+                        {
+                            writer.WriteLine("FirstName|LastName|Email|Phone|BirthDate|Address|Tumbol|Amphur|Province|ZipCode");
+
+                            foreach (var item in consumersDb)
+                            {
+                                writer.WriteLine(item.FirstName + "|" + 
+                                    item.LastName + "|" + 
+                                    item.Email + "|" + 
+                                    item.Phone + "|" + 
+                                    item.BirthDate.Value.ToString("yyyy-MM-dd")+ "|" + 
+                                    item.Address1+ "|" + 
+                                    item.TumbolCodeNavigation.NameTh+ "|" + 
+                                    item.AmphurCodeNavigation.NameTh +"|" +
+                                    item.ProvinceCodeNavigation.NameTh+ "|" +
+                                    item.ZipCode);
+                            }
+                        }
+
+                        byte[] bytes = System.IO.File.ReadAllBytes(filePath);
+                        String base64File = Convert.ToBase64String(bytes);
+
+                        // delete file txt
+                        //if (File.Exists(filePath)) File.Delete(filePath);
+
+                        result.IsSuccess = true;
+                        result.Message = fileName + "," + base64File;
+                        //result.File = bytes;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+            }
+
+            return result;
         }
 
     }
