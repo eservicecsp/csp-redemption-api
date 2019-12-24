@@ -3,10 +3,12 @@ using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,7 +21,9 @@ namespace CSP_Redemption_WebApi.Services
         Task<RedemptionResponseModel> Register(ConsumerRequestModel consumerRequest);
         Task<RedemptionResponseModel> Redemption(CheckExistConsumerRequestModel consumerRequest);
         Task<ResponseModel> ImportJob(ImportDataBinding data);
-        Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(int brandId);
+        Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(FiltersModel data, int brandId);
+        Task<ResponseModel> SendSelected(List<Consumer> enrollments, string channel, int brandId);
+        Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId);
     }
     public class ConsumerService : IConsumerService
     {
@@ -53,7 +57,7 @@ namespace CSP_Redemption_WebApi.Services
             var response = new ConsumersByPaginationResponseModel();
             try
             {
-                var consumers = await this.consumerRepository.GetConsumersByBrandIdAsync(data);
+                var consumers = await this.consumerRepository.GetConsumersByBrandIdAsync(data, "WEB");
                 if (consumers != null)
                 {
                     response.length = await this.consumerRepository.GetConsumersTotalByBrandIdAsync(data);
@@ -203,7 +207,7 @@ namespace CSP_Redemption_WebApi.Services
                     BrandId = campaign.BrandId,
                     CampaignId = consumerRequest.CampaignId,
                     Point = 0,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
                 };
                 try
                 {   if(consumerRequest.Id > 0)
@@ -240,6 +244,11 @@ namespace CSP_Redemption_WebApi.Services
                     }
                     else
                     {
+                        consumer.IsSkincare = consumerRequest.IsSkincare;
+                        consumer.IsMakeup = consumerRequest.IsMakeup;
+                        consumer.IsBodycare = consumerRequest.IsBodycare;
+                        consumer.IsSupplements = consumerRequest.IsSupplements;
+                        consumer.CreatedBy = 0;
                         var isCreated = await this.consumerRepository.CreateAsync(consumer);
                         if (isCreated)
                         {
@@ -553,12 +562,12 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(int brandId)
+        public async Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(FiltersModel data , int brandId)
         {
             FileResponseDataBinding result = new FileResponseDataBinding();
             try
             {
-                var consumersDb = await this.consumerRepository.ExportTextFileConsumerByBrandIdAsync(brandId);
+                var consumersDb = await this.consumerRepository.ExportTextFileConsumerByBrandIdAsync(data, brandId);
                 if (consumersDb.Count() > 0)
                 {
                     string fileName = DateTime.Now.ToString("yyyy-MM-dd")+"_"+ brandId+"_"+"Consumers.txt";
@@ -572,15 +581,18 @@ namespace CSP_Redemption_WebApi.Services
 
                             foreach (var item in consumersDb)
                             {
+                                string Tumbol = item.TumbolCodeNavigation == null ? "" : item.TumbolCodeNavigation.NameTh;
+                                string Amphur = item.AmphurCodeNavigation == null ? "" : item.AmphurCodeNavigation.NameTh;
+                                string Province = item.ProvinceCodeNavigation == null ? "" : item.ProvinceCodeNavigation.NameTh;
                                 writer.WriteLine(item.FirstName + "|" + 
                                     item.LastName + "|" + 
                                     item.Email + "|" + 
                                     item.Phone + "|" + 
                                     item.BirthDate.Value.ToString("yyyy-MM-dd")+ "|" + 
-                                    item.Address1+ "|" + 
-                                    item.TumbolCodeNavigation.NameTh+ "|" + 
-                                    item.AmphurCodeNavigation.NameTh +"|" +
-                                    item.ProvinceCodeNavigation.NameTh+ "|" +
+                                    item.Address1+ "|" +
+                                    Tumbol + "|" +
+                                    Amphur + "|" +
+                                    Province + "|" +
                                     item.ZipCode);
                             }
                         }
@@ -589,7 +601,7 @@ namespace CSP_Redemption_WebApi.Services
                         String base64File = Convert.ToBase64String(bytes);
 
                         // delete file txt
-                        //if (File.Exists(filePath)) File.Delete(filePath);
+                        if (File.Exists(filePath)) File.Delete(filePath);
 
                         result.IsSuccess = true;
                         result.Message = fileName + "," + base64File;
@@ -603,6 +615,82 @@ namespace CSP_Redemption_WebApi.Services
             }
 
             return result;
+        }
+
+        public async Task<ResponseModel> SendSelected(List<Consumer> enrollments, string channel, int brandId)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var intArray = enrollments.Select(x => x.Id).ToArray();
+                var mainUri = this.configuration["GMCServices:Uri"];
+                var apiPath = this.configuration["GMCServices:AutomationApiPath"];
+                //var stringPayload = JsonConvert.SerializeObject(intArray);
+                var stringPayload = JsonConvert.SerializeObject(new
+                {
+                    channel = channel,
+                    type = "consumer",
+                    id = intArray,
+
+                });
+                var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                using (var client = new HttpClient())
+                {
+                    var responseFromApi = await client.PostAsync(mainUri + apiPath, content);
+                    var result = await responseFromApi.Content.ReadAsStringAsync();
+                }
+
+                response.IsSuccess = true;
+
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                data.BrandId = brandId;
+                var consumers = await this.consumerRepository.GetConsumersByBrandIdAsync(data, "API");
+                if (consumers != null)
+                {
+                    var intArray = consumers.Select(x => x.Id).ToArray();
+                    var mainUri = this.configuration["GMCServices:Uri"];
+                    var apiPath = this.configuration["GMCServices:AutomationApiPath"];
+                    var stringPayload = JsonConvert.SerializeObject(new
+                    {
+                        channel = channel,
+                        type = "consumer",
+                        id = intArray,
+
+                    });
+                    var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                    using (var client = new HttpClient())
+                    {
+                        var responseFromApi = await client.PostAsync(mainUri + apiPath, content);
+                        var result = await responseFromApi.Content.ReadAsStringAsync();
+                    }
+
+                    response.IsSuccess = true;
+
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Not found consumer.";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
         }
 
     }

@@ -65,6 +65,10 @@ namespace CSP_Redemption_WebApi.Models
         public string Code { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
+        public bool IsSkincare { get; set; }
+        public bool IsMakeup { get; set; }
+        public bool IsBodycare { get; set; }
+        public bool IsSupplements { get; set; }
     }
 
     public class PaginationModel
@@ -74,10 +78,25 @@ namespace CSP_Redemption_WebApi.Models
         public int pageSize { get; set; }
         //public int previousPageIndex { get; set; }
         public string filter { get; set; }
+        public FiltersModel filters { get; set; }
         public string sortActive { get; set; }
         public string sortDirection { get; set; }
         public int BrandId { get; set; }
         public int campaignId { get; set; }
+    }
+
+    public class FiltersModel
+    {
+        public int startAge { get; set; }
+        public int endAge { get; set; }
+        public int birthOfMonth { get; set; }
+        public string phone { get; set; }
+        public string email { get; set; }
+        public bool isSkincare { get; set; }
+        public bool isMakeup { get; set; }
+        public bool isBodycare { get; set; }
+        public bool isSupplements { get; set; }
+
     }
 
     public class CreateCampaignRequestModel

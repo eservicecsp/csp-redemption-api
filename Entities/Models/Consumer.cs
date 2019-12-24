@@ -27,6 +27,10 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int BrandId { get; set; }
         public int? CampaignId { get; set; }
         public int? Point { get; set; }
+        public bool? IsSkincare { get; set; }
+        public bool? IsMakeup { get; set; }
+        public bool? IsBodycare { get; set; }
+        public bool? IsSupplements { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
 

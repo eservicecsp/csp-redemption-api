@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSP_Redemption_WebApi.Entities.Models;
 using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -45,15 +46,40 @@ namespace CSP_Redemption_WebApi.Controllers
             return Ok(await this.enrollmentService.ImportJob(data));
         }
 
-        [HttpGet("Download/{brandId}")]
-        public async Task<IActionResult> ExportJobError(int brandId)
+        [HttpGet("Download")]
+        public async Task<IActionResult> ExportJobError(
+            int startAge, int endAge,
+            int birthOfMonth = 0,
+            string phone = null,
+            string email = null,
+            bool isSkincare = false,
+            bool isMakeup = false,
+            bool isBodycare = false,
+            bool isSupplement = false
+            )
         {
-            var response = await this.consumerService.ExportTextFileConsumerByBrandId(brandId);
+            var data = new FiltersModel()
+            {
+                startAge = startAge,
+                endAge = endAge,
+                birthOfMonth = birthOfMonth,
+                phone = phone,
+                email = email,
+                isSkincare = isSkincare,
+                isMakeup = isMakeup,
+                isBodycare = isBodycare,
+                isSupplements = isSupplement
+
+            };
+            var token = Request.Headers["Authorization"].ToString();
+            int brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            var response = await this.consumerService.ExportTextFileConsumerByBrandId(data, brandId);
 
             // Create file text index
             if (response.IsSuccess)
             {
                 byte[] bytes = System.Convert.FromBase64String(response.Message.Split(',').Last());
+                //byte[] bytes = response.File;
                 return File(bytes, "text/plain", response.Message.Split(',').First());
             }
             else
@@ -63,5 +89,22 @@ namespace CSP_Redemption_WebApi.Controllers
         }
 
         // public async Task<IActionResult> ImportJob(ImportDataBinding data) => Ok(await this.enrollmentService.ImportFile(data));
+        [HttpPost("SendSelected")]
+        public async Task<IActionResult> SendSelected(List<Consumer> consumers, string channel)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            return Ok(await this.consumerService.SendSelected(consumers, channel, Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"))));
+        }
+
+        [HttpPost("SendAll")]
+        public async Task<IActionResult> SendAll(FiltersModel data, string channel)
+        {
+            var dataModel = new PaginationModel()
+            {
+                filters = data
+            };
+            var token = Request.Headers["Authorization"].ToString();
+            return Ok(await this.consumerService.SendAll(dataModel, channel, Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"))));
+        }
     }
 }

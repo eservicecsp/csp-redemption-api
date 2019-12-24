@@ -17,6 +17,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<Campaign> GetCampaignByIdAsync(int campaignId);
         Task<List<Campaign>> GetCampaignsByBrandIdAsync(int brandId);
         Task<ResponseModel> CreateAsync(CreateCampaignRequestModel requestModel, List<QrCode> qrCodes);
+        Task<bool> UpdateAsync(Campaign campaign);
     }
     public class CampaignRepository : ICampaignRepository
     {
@@ -30,7 +31,10 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Campaign.Where(x => x.Id.Equals(campaignId)).FirstOrDefaultAsync();
+                return await Context.Campaign
+                                    .Include(x=>x.CampaignProduct)
+                                    .Where(x => x.Id.Equals(campaignId))
+                                    .FirstOrDefaultAsync();
             }
         }
 
@@ -223,6 +227,25 @@ namespace CSP_Redemption_WebApi.Repositories
             }
 
             return response;
+        }
+
+        public async Task<bool> UpdateAsync(Campaign campaign)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                Campaign thisRow = await Context.Campaign.SingleAsync(x => x.Id == campaign.Id);
+                thisRow.Name = campaign.Name;
+                thisRow.Description = campaign.Description;
+                thisRow.StartDate = campaign.StartDate;
+                thisRow.EndDate = campaign.EndDate;
+                thisRow.AlertMessage = campaign.AlertMessage;
+                thisRow.DuplicateMessage = campaign.DuplicateMessage;
+                thisRow.QrCodeNotExistMessage = campaign.QrCodeNotExistMessage;
+                thisRow.WinMessage = campaign.WinMessage;
+                Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
+                return await Context.SaveChangesAsync() > 0;
+
+            }
         }
     }
 }

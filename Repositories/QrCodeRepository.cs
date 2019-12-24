@@ -19,6 +19,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<int[]> GetPiece(QrCode qrCode);
         Task<int> GetCountQrCode(int campaignId);
         Task<int> GetCountQrCodeUsed(int campaignId);
+        Task<QrCode> GetTokenByCompanyIdAsync(int campaignId);
     }
     public class QrCodeRepository : IQrCodeRepository
     {
@@ -203,6 +204,13 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.QrCode.Where(x => x.CampaignId == campaignId && x.ConsumerId != null ).CountAsync();
+            }
+        }
+        public async Task<QrCode> GetTokenByCompanyIdAsync(int campaignId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.QrCode.FirstOrDefaultAsync(x => x.CampaignId == campaignId);
             }
         }
     }

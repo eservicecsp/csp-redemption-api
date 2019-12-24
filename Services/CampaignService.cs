@@ -14,6 +14,8 @@ namespace CSP_Redemption_WebApi.Services
         Task<CampaignsResponseModel> GetCampaignsByBrandIdAsync(int brandId);
         Task<TransactionResponseModel> GetTransactionByCampaignsIdAsync(PaginationModel data);
         Task<ResponseModel> CreateCampaignAsync(CreateCampaignRequestModel requestModel);
+        Task<CampaignsResponseModel> GetCampaignsByCampaignIdAsync(int campaignId);
+        Task<ResponseModel> UpdateAsync(Campaign campaign);
 
     }
 
@@ -260,6 +262,55 @@ namespace CSP_Redemption_WebApi.Services
                 Debug.WriteLine(ex.Message);
             }
             return qrCodes;
+        }
+
+        public async Task<CampaignsResponseModel> GetCampaignsByCampaignIdAsync(int campaignId)
+        {
+            var response = new CampaignsResponseModel();
+            try
+            {
+                var campaignDb = await this.campaignRepository.GetCampaignByIdAsync(campaignId);
+                if(campaignDb != null)
+                {
+                    int ProductId = 0;
+                    if (campaignDb.CampaignProduct.Count() > 0)
+                    {
+                        ProductId = campaignDb.CampaignProduct.FirstOrDefault(x=>x.CampaignId == campaignId).ProductId;
+                    }
+                    var campaign = new CampaignModel()
+                    {
+                       Id = campaignDb.Id,
+                       Name = campaignDb.Name,
+                       Description = campaignDb.Description,
+                       ProductId = ProductId,
+                       StartDate = campaignDb.StartDate,
+                       EndDate = campaignDb.EndDate,
+                       AlertMessage = campaignDb.AlertMessage,
+                       DuplicateMessage = campaignDb.DuplicateMessage,
+                       QrCodeNotExistMessage = campaignDb.QrCodeNotExistMessage,
+                       WinMessage = campaignDb.WinMessage
+                    };
+                    response.Campaign = campaign;
+                    response.IsSuccess = true;
+                }
+            }catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+        public async Task<ResponseModel> UpdateAsync(Campaign campaign)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                response.IsSuccess = await this.campaignRepository.UpdateAsync(campaign);
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
         }
     }
 }

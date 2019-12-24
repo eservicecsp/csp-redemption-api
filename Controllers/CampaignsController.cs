@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSP_Redemption_WebApi.Entities.Models;
 using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Http;
@@ -58,6 +59,18 @@ namespace CSP_Redemption_WebApi.Controllers
             requestModel.Campaign.CreatedDate = DateTime.Now;
 
             return Ok(await this.campaignService.CreateCampaignAsync(requestModel));
+        }
+        [HttpGet("detail/{campaignId}")]
+        public async Task<IActionResult> GetCampaignsByCampaignId(int campaignId)
+        {
+            return Ok(await this.campaignService.GetCampaignsByCampaignIdAsync(campaignId));
+        }
+
+        [HttpPost("update")]
+        public async Task<IActionResult> UpdateCampaign(Campaign campaign)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            return Ok(await this.campaignService.UpdateAsync(campaign));
         }
     }
 }

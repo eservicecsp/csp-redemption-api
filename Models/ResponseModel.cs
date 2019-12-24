@@ -172,6 +172,7 @@ namespace CSP_Redemption_WebApi.Models
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
         public List<CampaignModel> Campaigns { get; set; }
+        public CampaignModel Campaign { get; set; }
     }
     public class CampaignModel
     {
@@ -179,6 +180,7 @@ namespace CSP_Redemption_WebApi.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int CampaignTypeId { get; set; }
+        public int ProductId { get; set; }
         public int BrandId { get; set; }
         public string Url { get; set; }
         public int Quantity { get; set; }

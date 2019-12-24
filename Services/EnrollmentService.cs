@@ -3,10 +3,12 @@ using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,22 +18,30 @@ namespace CSP_Redemption_WebApi.Services
     {
         Task<ResponseModel> ImportJob(ImportDataBinding data);
         Task<EnrollmentsByPaginationResponseModel> GetEnrollmentsByCampaignIdAsync(PaginationModel data);
+        Task<ResponseModel> SendSelected(List<Enrollment> enrollments, string channel, int campaignId);
+        Task<ResponseModel> SendAll(PaginationModel data, string channel, int campaignId);
     }
     public class EnrollmentService : IEnrollmentService
     {
         private readonly IEnrollmentRepository enrollmentRepository;
         private readonly IHostingEnvironment hostingEnvironment;
         private readonly IConfiguration configuration;
+        private readonly ICampaignRepository campaignRepository;
+        private readonly IQrCodeRepository qrCodeRepository;
         public EnrollmentService
            (
              IEnrollmentRepository enrollmentRepository,
              IHostingEnvironment hostingEnvironment,
-             IConfiguration configuration
+             IConfiguration configuration,
+             ICampaignRepository campaignRepository ,
+             IQrCodeRepository qrCodeRepository
            )
         {
             this.enrollmentRepository = enrollmentRepository;
             this.hostingEnvironment = hostingEnvironment;
             this.configuration = configuration;
+            this.campaignRepository = campaignRepository;
+            this.qrCodeRepository = qrCodeRepository;
         }
         public async Task<ResponseModel> ImportJob(ImportDataBinding data)
         {
@@ -120,13 +130,124 @@ namespace CSP_Redemption_WebApi.Services
             var response = new EnrollmentsByPaginationResponseModel();
             try
             {
-                var enrollments = await this.enrollmentRepository.GetEnrollmentsByBrandIdAsync(data);
+                var enrollments = await this.enrollmentRepository.GetEnrollmentsByBrandIdAsync(data, "WEB");
                 if (enrollments != null)
                 {
                     response.length = await this.enrollmentRepository.GetEnrollmentTotalByBrandIdAsync(data);
                     response.data = enrollments;
                 }
                 response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ResponseModel> SendSelected(List<Enrollment> enrollments, string channel, int campaignId)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                // int[] enrollmentIds;
+                var campaign = await this.campaignRepository.GetCampaignByIdAsync(campaignId);
+                if (campaign != null)
+                {
+                    var token = await this.qrCodeRepository.GetTokenByCompanyIdAsync(campaignId);
+                    if(token != null)
+                    {
+                        string url = campaign.Url.Replace("[#campaignId#]", campaignId.ToString());
+                        url = url.Replace("[#token#]", token.Token);
+                        var intArray = enrollments.Select(x => x.Id).ToArray();
+                        var mainUri = this.configuration["GMCServices:Uri"];
+                        var apiPath = this.configuration["GMCServices:AutomationApiPath"];
+                        //var stringPayload = JsonConvert.SerializeObject(intArray);
+                        var stringPayload = JsonConvert.SerializeObject(new
+                        {
+                            channel = channel,
+                            type = "enrollment",
+                            id = intArray,
+                            url = url.ToString()
+
+                        });
+                        var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                        using (var client = new HttpClient())
+                        {
+                            var responseFromApi = await client.PostAsync(mainUri + apiPath, content);
+                            var result = await responseFromApi.Content.ReadAsStringAsync();
+                        }
+
+                        response.IsSuccess = true;
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = "Not found Token.";
+                    }
+                   
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Not found campaign.";
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ResponseModel> SendAll(PaginationModel data, string channel, int campaignId)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var campaign = await this.campaignRepository.GetCampaignByIdAsync(campaignId);
+                if (campaign != null)
+                {
+                    var token = await this.qrCodeRepository.GetTokenByCompanyIdAsync(campaignId);
+                    if (token != null)
+                    {
+                        var enrollments = await this.enrollmentRepository.GetEnrollmentsByBrandIdAsync(data, "API");
+                        string url = campaign.Url.Replace("[#campaignId#]", campaignId.ToString());
+                        url = url.Replace("[#token#]", token.Token);
+                        var intArray = enrollments.Select(x => x.Id).ToArray();
+                        var mainUri = this.configuration["GMCServices:Uri"];
+                        var apiPath = this.configuration["GMCServices:AutomationApiPath"];
+                        var stringPayload = JsonConvert.SerializeObject(new
+                        {
+                            channel = channel,
+                            type = "enrollment",
+                            id = intArray,
+                            url = url.ToString()
+
+                        });
+                        var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                        using (var client = new HttpClient())
+                        {
+                            var responseFromApi = await client.PostAsync(mainUri + apiPath, content);
+                            var result = await responseFromApi.Content.ReadAsStringAsync();
+                        }
+
+                        response.IsSuccess = true;
+                    }
+                    else
+                    {
+                        response.IsSuccess = false;
+                        response.Message = "Not found Token.";
+                    }
+
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Not found campaign.";
+                }
+
             }
             catch (Exception ex)
             {

@@ -15,7 +15,7 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface IEnrollmentRepository
     {
         Task<bool> ImportFileAsync(List<Enrollment> enrollments);
-        Task<List<Enrollment>> GetEnrollmentsByBrandIdAsync(PaginationModel data);
+        Task<List<Enrollment>> GetEnrollmentsByBrandIdAsync(PaginationModel data, string type);
         Task<int> GetEnrollmentTotalByBrandIdAsync(PaginationModel data);
     }
     public class EnrollmentRepository: IEnrollmentRepository
@@ -88,7 +88,7 @@ namespace CSP_Redemption_WebApi.Repositories
             }
             return isSuccess;
         }
-        public async Task<List<Enrollment>> GetEnrollmentsByBrandIdAsync(PaginationModel data)
+        public async Task<List<Enrollment>> GetEnrollmentsByBrandIdAsync(PaginationModel data, string type)
         {
             using (var Context = new CSP_RedemptionContext())
             {
@@ -103,66 +103,70 @@ namespace CSP_Redemption_WebApi.Repositories
                                          );
                 }
 
-                if (data.sortActive != null)
+                if(type == "WEB")
                 {
-                    //FirstName
-                    if (data.sortActive == "FirstName" && data.sortDirection == "desc")
+                    if (data.sortActive != null)
                     {
-                        enrollments = enrollments.OrderByDescending(x => x.FirstName);
-                    }
-                    else if (data.sortActive == "FirstName")
-                    {
-                        enrollments = enrollments.OrderBy(x => x.FirstName);
+                        //FirstName
+                        if (data.sortActive == "FirstName" && data.sortDirection == "desc")
+                        {
+                            enrollments = enrollments.OrderByDescending(x => x.FirstName);
+                        }
+                        else if (data.sortActive == "FirstName")
+                        {
+                            enrollments = enrollments.OrderBy(x => x.FirstName);
+                        }
+
+                        //LastName
+                        if (data.sortActive == "LastName" && data.sortDirection == "desc")
+                        {
+                            enrollments = enrollments.OrderByDescending(x => x.LastName);
+                        }
+                        else if (data.sortActive == "LastName")
+                        {
+                            enrollments = enrollments.OrderBy(x => x.LastName);
+                        }
+
+                        //Phone
+                        if (data.sortActive == "Tel" && data.sortDirection == "desc")
+                        {
+                            enrollments = enrollments.OrderByDescending(x => x.Tel);
+                        }
+                        else if (data.sortActive == "Tel")
+                        {
+                            enrollments = enrollments.OrderBy(x => x.Tel);
+                        }
+
+                        //Email
+                        if (data.sortActive == "Email" && data.sortDirection == "desc")
+                        {
+                            enrollments = enrollments.OrderByDescending(x => x.Email);
+                        }
+                        else if (data.sortActive == "Email")
+                        {
+                            enrollments = enrollments.OrderBy(x => x.Email);
+                        }
+
                     }
 
-                    //LastName
-                    if (data.sortActive == "LastName" && data.sortDirection == "desc")
+                    int length = await this.GetEnrollmentTotalByBrandIdAsync(data);
+                    int index = 0;
+                    if (data.pageIndex > 0)
                     {
-                        enrollments = enrollments.OrderByDescending(x => x.LastName);
-                    }
-                    else if (data.sortActive == "LastName")
-                    {
-                        enrollments = enrollments.OrderBy(x => x.LastName);
+                        index = (data.pageIndex * data.pageSize);
                     }
 
-                    //Phone
-                    if (data.sortActive == "Tel" && data.sortDirection == "desc")
-                    {
-                        enrollments = enrollments.OrderByDescending(x => x.Tel);
-                    }
-                    else if (data.sortActive == "Tel")
-                    {
-                        enrollments = enrollments.OrderBy(x => x.Tel);
-                    }
 
-                    //Email
-                    if (data.sortActive == "Email" && data.sortDirection == "desc")
+                    if (index >= length)
                     {
-                        enrollments = enrollments.OrderByDescending(x => x.Email);
+                        enrollments = enrollments.Skip(0).Take(data.pageSize);
                     }
-                    else if (data.sortActive == "Email")
+                    else
                     {
-                        enrollments = enrollments.OrderBy(x => x.Email);
+                        enrollments = enrollments.Skip(index).Take(data.pageSize);
                     }
-
                 }
-
-                int length = await this.GetEnrollmentTotalByBrandIdAsync(data);
-                int index = 0;
-                if (data.pageIndex > 0)
-                {
-                    index = (data.pageIndex * data.pageSize);
-                }
-
-
-                if (index >= length)
-                {
-                    enrollments = enrollments.Skip(0).Take(data.pageSize);
-                }
-                else
-                {
-                    enrollments = enrollments.Skip(index).Take(data.pageSize);
-                }
+                
                 return await enrollments.ToListAsync();
             }
         }
