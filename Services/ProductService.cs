@@ -39,16 +39,16 @@ namespace CSP_Redemption_WebApi.Services
             {
                 var webRoot = hostingEnvironment.ContentRootPath;
 
-                string productAttachmentPath = string.Empty;
-                string subDomain = this.configuration["SubDomain"];
-                if (!string.IsNullOrEmpty(subDomain))
-                {
-                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
-                }
-                else
-                {
-                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
-                }
+                string productAttachmentPath = this.configuration["Attachments:Product"];
+                //string subDomain = this.configuration["SubDomain"];
+                //if (!string.IsNullOrEmpty(subDomain))
+                //{
+                //    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
+                //}
+                //else
+                //{
+                //    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
+                //}
 
                 var products = await this.productRepository.GetProductsByBrandIdAsync(brandId);
                 response.Products = new List<ProductModel>();
@@ -102,6 +102,7 @@ namespace CSP_Redemption_WebApi.Services
 
             return response;
         }
+
         public async Task<ProductResponseModel> GetProductsByIdAsync(int id)
         {
             var response = new ProductResponseModel();
@@ -112,16 +113,7 @@ namespace CSP_Redemption_WebApi.Services
 
                 var webRoot = hostingEnvironment.ContentRootPath;
 
-                string productAttachmentPath = string.Empty;
-                string subDomain = this.configuration["SubDomain"];
-                if (!string.IsNullOrEmpty(subDomain))
-                {
-                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
-                }
-                else
-                {
-                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
-                }
+                string productAttachmentPath = this.configuration["Attachments:Product"];
 
                 if (product != null)
                 {
@@ -171,18 +163,18 @@ namespace CSP_Redemption_WebApi.Services
             {
                 var webRoot = hostingEnvironment.ContentRootPath;
 
-                string productAttachmentPath = string.Empty;
-                string subDomain = this.configuration["SubDomain"];
-                if (!string.IsNullOrEmpty(subDomain))
-                {
-                    productAttachmentPath = Path.Combine(webRoot, subDomain, @"Attachments\Products");
-                }
-                else
-                {
-                    productAttachmentPath = Path.Combine(webRoot, @"Attachments\Products");
-                }
+                string productAttachmentPath = this.configuration["Attachments:Product"];
+                //string subDomain = this.configuration["SubDomain"];
+                //if (!string.IsNullOrEmpty(subDomain))
+                //{
+                //    productAttachmentPath = Path.Combine(webRoot, subDomain, @"Attachments\Products");
+                //}
+                //else
+                //{
+                //    productAttachmentPath = Path.Combine(webRoot, @"Attachments\Products");
+                //}
 
-                
+
 
                 var iProductAttachments = new List<ProductAttachment>();
                 foreach (var item in product.Attachments)
@@ -227,16 +219,16 @@ namespace CSP_Redemption_WebApi.Services
             {
                 var webRoot = hostingEnvironment.ContentRootPath;
 
-                string productAttachmentPath = string.Empty;
-                string subDomain = this.configuration["SubDomain"];
-                if (!string.IsNullOrEmpty(subDomain))
-                {
-                    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
-                }
-                else
-                {
-                    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
-                }
+                string productAttachmentPath = this.configuration["Attachments:Product"];
+                //string subDomain = this.configuration["SubDomain"];
+                //if (!string.IsNullOrEmpty(subDomain))
+                //{
+                //    productAttachmentPath = Path.Combine(webRoot, subDomain, "Attachments/Products");
+                //}
+                //else
+                //{
+                //    productAttachmentPath = Path.Combine(webRoot, "Attachments/Products");
+                //}
 
                 var dbProduct = await this.productRepository.GetProductsByIdAsync(product.Id);
                 if (dbProduct != null)
