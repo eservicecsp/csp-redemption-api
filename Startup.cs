@@ -49,6 +49,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IChartService, ChartService>();
             services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<IEnrollmentService, EnrollmentService>();
+            services.AddScoped<IProductTypeService, ProductTypeService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));

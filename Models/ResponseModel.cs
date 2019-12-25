@@ -510,4 +510,29 @@ namespace CSP_Redemption_WebApi.Models
         public int value { get; set; }
     }
     #endregion
+
+    #region ReoductType
+
+    public class ProductsTypeResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<ProductTypeModel>  ProductTypes { get; set; }
+    }
+
+    public class ProductTypeModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int BrandId { get; set; }
+        public bool IsActived { get; set; }
+        public int CreatedBy { get; set; }
+        public string CreatedByName { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public int? ModifiedBy { get; set; }
+        public string ModifiedByName { get; set; }
+        public DateTime? ModifiedDate { get; set; }
+    }
+    #endregion
 }
