@@ -400,12 +400,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.PromotionTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Promotion_PromotionType");
-
-                entity.HasOne(d => d.Theme)
-                    .WithMany(p => p.Promotion)
-                    .HasForeignKey(d => d.ThemeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Promotion_Theme");
             });
 
             modelBuilder.Entity<PromotionType>(entity =>
@@ -553,12 +547,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.Twitter).HasMaxLength(100);
 
                 entity.Property(e => e.WebSite).HasMaxLength(100);
-
-                entity.HasOne(d => d.Brand)
-                    .WithMany(p => p.ThemeConfig)
-                    .HasForeignKey(d => d.BrandId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_ThemeConfig_Dealer");
 
                 entity.HasOne(d => d.Theme)
                     .WithMany(p => p.ThemeConfig)
