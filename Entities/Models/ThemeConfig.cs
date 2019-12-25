@@ -21,7 +21,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
 
-        public virtual Dealer Brand { get; set; }
         public virtual Theme Theme { get; set; }
     }
 }

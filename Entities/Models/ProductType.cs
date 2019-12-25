@@ -22,6 +22,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public DateTime? ModifiedDate { get; set; }
 
         public virtual Brand Brand { get; set; }
+        public virtual Staff CreatedByNavigation { get; set; }
         public virtual ICollection<ConsumerProductType> ConsumerProductType { get; set; }
         public virtual ICollection<Product> Product { get; set; }
     }

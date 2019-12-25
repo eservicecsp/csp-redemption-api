@@ -5,11 +5,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
 {
     public partial class Dealer
     {
-        public Dealer()
-        {
-            ThemeConfig = new HashSet<ThemeConfig>();
-        }
-
         public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
@@ -21,6 +16,5 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public DateTime CreatedDate { get; set; }
 
         public virtual Brand Brand { get; set; }
-        public virtual ICollection<ThemeConfig> ThemeConfig { get; set; }
     }
 }
