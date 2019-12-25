@@ -29,7 +29,9 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var context = new CSP_RedemptionContext())
             {
-                return await context.Promotion.FirstOrDefaultAsync(x => x.BrandId == brandId && x.Id == promotionId);
+                return await context.Promotion
+                    .Include(x => x.CreatedByNavigation)
+                    .FirstOrDefaultAsync(x => x.BrandId == brandId && x.Id == promotionId);
             }
         }
     }

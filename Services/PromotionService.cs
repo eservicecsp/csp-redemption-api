@@ -38,6 +38,7 @@ namespace CSP_Redemption_WebApi.Services
                         ModifiedDate = promotion.ModifiedDate,
                         BrandId = promotion.BrandId,
                         CreatedBy = promotion.CreatedBy,
+                        CreatedByName = $"{promotion.CreatedByNavigation.FirstName} {promotion.CreatedByNavigation.LastName}",
                         ModifiedBy = promotion.ModifiedBy,
                         Name = promotion.Name,
                         PromotionTypeId = promotion.PromotionTypeId,
