@@ -7,6 +7,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
     {
         public Consumer()
         {
+            ConsumerProductType = new HashSet<ConsumerProductType>();
             QrCode = new HashSet<QrCode>();
             Transaction = new HashSet<Transaction>();
         }
@@ -37,6 +38,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public virtual Amphur AmphurCodeNavigation { get; set; }
         public virtual Province ProvinceCodeNavigation { get; set; }
         public virtual Tumbol TumbolCodeNavigation { get; set; }
+        public virtual ICollection<ConsumerProductType> ConsumerProductType { get; set; }
         public virtual ICollection<QrCode> QrCode { get; set; }
         public virtual ICollection<Transaction> Transaction { get; set; }
     }

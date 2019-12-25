@@ -25,17 +25,23 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
         public virtual DbSet<CampaignProduct> CampaignProduct { get; set; }
         public virtual DbSet<CampaignType> CampaignType { get; set; }
         public virtual DbSet<Consumer> Consumer { get; set; }
+        public virtual DbSet<ConsumerProductType> ConsumerProductType { get; set; }
         public virtual DbSet<ConsumerSource> ConsumerSource { get; set; }
         public virtual DbSet<Dealer> Dealer { get; set; }
         public virtual DbSet<Enrollment> Enrollment { get; set; }
         public virtual DbSet<Function> Function { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductAttachment> ProductAttachment { get; set; }
+        public virtual DbSet<ProductType> ProductType { get; set; }
+        public virtual DbSet<Promotion> Promotion { get; set; }
+        public virtual DbSet<PromotionType> PromotionType { get; set; }
         public virtual DbSet<Province> Province { get; set; }
         public virtual DbSet<QrCode> QrCode { get; set; }
         public virtual DbSet<Role> Role { get; set; }
         public virtual DbSet<RoleFunction> RoleFunction { get; set; }
         public virtual DbSet<Staff> Staff { get; set; }
+        public virtual DbSet<Theme> Theme { get; set; }
+        public virtual DbSet<ThemeConfig> ThemeConfig { get; set; }
         public virtual DbSet<Transaction> Transaction { get; set; }
         public virtual DbSet<TransactionType> TransactionType { get; set; }
         public virtual DbSet<Tumbol> Tumbol { get; set; }
@@ -207,6 +213,23 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasConstraintName("FK_Consumer_Tumbol");
             });
 
+            modelBuilder.Entity<ConsumerProductType>(entity =>
+            {
+                entity.HasKey(e => new { e.ProductTypeId, e.ConsumerId });
+
+                entity.HasOne(d => d.Consumer)
+                    .WithMany(p => p.ConsumerProductType)
+                    .HasForeignKey(d => d.ConsumerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ConsumerProductType_Consumer");
+
+                entity.HasOne(d => d.ProductType)
+                    .WithMany(p => p.ConsumerProductType)
+                    .HasForeignKey(d => d.ProductTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ConsumerProductType_ProductType");
+            });
+
             modelBuilder.Entity<ConsumerSource>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -298,7 +321,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Product)
                     .HasForeignKey(d => d.BrandId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Product_Brand");
 
                 entity.HasOne(d => d.CreatedByNavigation)
@@ -306,6 +328,11 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Product_Staff");
+
+                entity.HasOne(d => d.ProductType)
+                    .WithMany(p => p.Product)
+                    .HasForeignKey(d => d.ProductTypeId)
+                    .HasConstraintName("FK_Product_ProductType");
             });
 
             modelBuilder.Entity<ProductAttachment>(entity =>
@@ -325,6 +352,73 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ProductAttachment_Product");
+            });
+
+            modelBuilder.Entity<ProductType>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.ProductType)
+                    .HasForeignKey(d => d.BrandId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductType_Brand");
+            });
+
+            modelBuilder.Entity<Promotion>(entity =>
+            {
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.Promotion)
+                    .HasForeignKey(d => d.BrandId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Promotion_Brand");
+
+                entity.HasOne(d => d.PromotionType)
+                    .WithMany(p => p.Promotion)
+                    .HasForeignKey(d => d.PromotionTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Promotion_PromotionType");
+
+                entity.HasOne(d => d.Theme)
+                    .WithMany(p => p.Promotion)
+                    .HasForeignKey(d => d.ThemeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Promotion_Theme");
+            });
+
+            modelBuilder.Entity<PromotionType>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<Province>(entity =>
@@ -425,6 +519,52 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Staff_Role");
+            });
+
+            modelBuilder.Entity<Theme>(entity =>
+            {
+                entity.Property(e => e.HtmlCode).IsRequired();
+
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ThemeName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<ThemeConfig>(entity =>
+            {
+                entity.HasKey(e => new { e.BrandId, e.ThemeId });
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Facebook).HasMaxLength(100);
+
+                entity.Property(e => e.Line).HasMaxLength(100);
+
+                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TextValue01).HasMaxLength(50);
+
+                entity.Property(e => e.TextValue02).HasMaxLength(50);
+
+                entity.Property(e => e.TextValue03).HasMaxLength(50);
+
+                entity.Property(e => e.Twitter).HasMaxLength(100);
+
+                entity.Property(e => e.WebSite).HasMaxLength(100);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.ThemeConfig)
+                    .HasForeignKey(d => d.BrandId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ThemeConfig_Dealer");
+
+                entity.HasOne(d => d.Theme)
+                    .WithMany(p => p.ThemeConfig)
+                    .HasForeignKey(d => d.ThemeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ThemeConfig_Theme");
             });
 
             modelBuilder.Entity<Transaction>(entity =>
