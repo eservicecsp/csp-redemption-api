@@ -8,6 +8,8 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public Staff()
         {
             Product = new HashSet<Product>();
+            ProductType = new HashSet<ProductType>();
+            Promotion = new HashSet<Promotion>();
         }
 
         public int Id { get; set; }
@@ -27,5 +29,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public virtual Brand Brand { get; set; }
         public virtual Role Role { get; set; }
         public virtual ICollection<Product> Product { get; set; }
+        public virtual ICollection<ProductType> ProductType { get; set; }
+        public virtual ICollection<Promotion> Promotion { get; set; }
     }
 }

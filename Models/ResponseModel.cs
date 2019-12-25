@@ -161,7 +161,7 @@ namespace CSP_Redemption_WebApi.Models
         public int TotalPoint { get; set; }
 
     }
-    
+
 
     #endregion
 
@@ -227,7 +227,7 @@ namespace CSP_Redemption_WebApi.Models
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
-        public DealerModel  Dealer { get; set; }
+        public DealerModel Dealer { get; set; }
     }
     public class DealerModel
     {
@@ -471,7 +471,7 @@ namespace CSP_Redemption_WebApi.Models
         public string CreatedName { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        public List<ProductAttachmentModel> Attachments { get; set; } 
+        public List<ProductAttachmentModel> Attachments { get; set; }
 
     }
 
@@ -482,6 +482,35 @@ namespace CSP_Redemption_WebApi.Models
         public string Path { get; set; }
         public string File { get; set; }
         public string Extension { get; set; }
+    }
+    #endregion
+
+    #region Promotion
+    public class PromotionsResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<PromotionModel> Promotions { get; set; }
+    }
+
+    public class PromotionResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public PromotionModel Promotion { get; set; }
+    }
+    public class PromotionModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int BrandId { get; set; }
+        public int PromotionTypeId { get; set; }
+        public int CreatedBy { get; set; }
+        public string CreatedByName { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public int? ModifiedBy { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
     #endregion
 

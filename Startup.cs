@@ -50,6 +50,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<IEnrollmentService, EnrollmentService>();
             services.AddScoped<IProductTypeService, ProductTypeService>();
+            services.AddScoped<IPromotionService, PromotionService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
@@ -71,6 +72,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped(typeof(IBrandRepository), typeof(BrandRepository));
             services.AddScoped(typeof(IEnrollmentRepository), typeof(EnrollmentRepository));
             services.AddScoped(typeof(IProductTypeRepository), typeof(ProductTypeRepository));
+            services.AddScoped(typeof(IPromotionRepository), typeof(PromotionRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

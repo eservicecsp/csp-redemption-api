@@ -7,7 +7,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
     {
         public Theme()
         {
-            Promotion = new HashSet<Promotion>();
             ThemeConfig = new HashSet<ThemeConfig>();
         }
 
@@ -17,7 +16,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int ModifiedBy { get; set; }
         public DateTime ModifiedDate { get; set; }
 
-        public virtual ICollection<Promotion> Promotion { get; set; }
         public virtual ICollection<ThemeConfig> ThemeConfig { get; set; }
     }
 }

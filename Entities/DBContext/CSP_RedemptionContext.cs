@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 
-
 namespace CSP_Redemption_WebApi.Entities.DBContext
 {
     public partial class CSP_RedemptionContext : DbContext
@@ -54,7 +53,7 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 IConfigurationRoot configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
                                                                                                              .AddJsonFile("appsettings.json")
                                                                                                              .Build();
-                optionsBuilder.UseSqlServer(configuration.GetConnectionString("APIDatabase"));
+                optionsBuilder.UseSqlServer(configuration.GetConnectionString("ApiDatabase"));
             }
         }
 
@@ -375,6 +374,12 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.BrandId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ProductType_Brand");
+
+                entity.HasOne(d => d.CreatedByNavigation)
+                    .WithMany(p => p.ProductType)
+                    .HasForeignKey(d => d.CreatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ProductType_Staff");
             });
 
             modelBuilder.Entity<Promotion>(entity =>
@@ -395,6 +400,12 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Promotion_Brand");
 
+                entity.HasOne(d => d.CreatedByNavigation)
+                    .WithMany(p => p.Promotion)
+                    .HasForeignKey(d => d.CreatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Promotion_Staff");
+
                 entity.HasOne(d => d.PromotionType)
                     .WithMany(p => p.Promotion)
                     .HasForeignKey(d => d.PromotionTypeId)
@@ -404,8 +415,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
             modelBuilder.Entity<PromotionType>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Description)
                     .IsRequired()
                     .HasMaxLength(255);
