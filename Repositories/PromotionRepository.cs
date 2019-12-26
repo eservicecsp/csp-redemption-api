@@ -12,29 +12,45 @@ namespace CSP_Redemption_WebApi.Repositories
     {
         Task<List<Promotion>> GetPromotionsAsync(int brandId);
         Task<Promotion> GetPromotionAsync(int brandId, int promotionId);
+        Task<bool> CreateAsync(Promotion promotion);
+        Task<bool> UpdateAsync(Promotion promotion);
     }
 
     public class PromotionRepository : IPromotionRepository
     {
+        private readonly CSP_RedemptionContext _context;
+        public PromotionRepository(CSP_RedemptionContext context)
+        {
+            _context = context;
+        }
+
         public async Task<List<Promotion>> GetPromotionsAsync(int brandId)
         {
-            using (var context = new CSP_RedemptionContext())
-            {
-                return await context.Promotion
+            return await _context.Promotion
                     .Include(x => x.CreatedByNavigation)
                     .Include(x => x.PromotionType)
                     .Where(x => x.BrandId == brandId).ToListAsync();
-            }
         }
         public async Task<Promotion> GetPromotionAsync(int brandId, int promotionId)
         {
-            using (var context = new CSP_RedemptionContext())
-            {
-                return await context.Promotion
+            return await _context.Promotion
                     .Include(x => x.CreatedByNavigation)
                     .Include(x => x.PromotionType)
                     .FirstOrDefaultAsync(x => x.BrandId == brandId && x.Id == promotionId);
-            }
+        }
+        public async Task<bool> CreateAsync(Promotion promotion)
+        {
+            await _context.Promotion.AddAsync(promotion);
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateAsync(Promotion promotion)
+        {
+            Promotion dbPromotion = await _context.Promotion.Include(x => x.PromotionType).SingleAsync(x => x.Id == promotion.Id);
+            _context.Entry(dbPromotion).CurrentValues.SetValues(promotion);
+
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

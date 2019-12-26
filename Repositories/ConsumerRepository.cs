@@ -340,7 +340,7 @@ namespace CSP_Redemption_WebApi.Repositories
                         isSuccess = true;
                         transaction.Commit();
                     }
-                    catch(Exception ex)
+                    catch(Exception)
                     {
                         transaction.Rollback();
                         throw;

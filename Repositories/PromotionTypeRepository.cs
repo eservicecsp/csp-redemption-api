@@ -15,20 +15,20 @@ namespace CSP_Redemption_WebApi.Repositories
     }
     public class PromotionTypeRepository: IPromotionTypeRepository
     {
+        private readonly CSP_RedemptionContext _context;
+        public PromotionTypeRepository(CSP_RedemptionContext context)
+        {
+            _context = context;
+        }
+
         public async Task<List<PromotionType>> GetPromotionTypesAsync()
         {
-            using(var context = new CSP_RedemptionContext())
-            {
-                return await context.PromotionType.ToListAsync();
-            }
+            return await _context.PromotionType.ToListAsync();
         }
 
         public async Task<PromotionType> GetPromotionTypeAsync(int id)
         {
-            using (var context = new CSP_RedemptionContext())
-            {
-                return await context.PromotionType.FirstOrDefaultAsync(x=>x.Id == id);
-            }
+            return await _context.PromotionType.FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 }

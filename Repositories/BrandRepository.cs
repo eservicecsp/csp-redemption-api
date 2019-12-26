@@ -12,9 +12,16 @@ namespace CSP_Redemption_WebApi.Repositories
     {
         Task<bool> CreateAsync(Brand brand, Staff staff);
         Task<bool> GetBrandByCodeAsync(string code);
+        Task<Brand> GetBrandAsync(int id);
     }
     public class BrandRepository : IBrandRepository
     {
+        private readonly CSP_RedemptionContext _context;
+        public BrandRepository(CSP_RedemptionContext context)
+        {
+            this._context = context;
+        }
+
         public async Task<bool> CreateAsync(Brand brand, Staff staff)
         {
             bool isSuccess = false;
@@ -45,12 +52,13 @@ namespace CSP_Redemption_WebApi.Repositories
 
                             var functions = await Context.Function.Where(x => x.IsExternal == true).ToListAsync();
                             var funcRole = new List<RoleFunction>();
-                            foreach(var item in functions)
+                            foreach (var item in functions)
                             {
-                                funcRole.Add(new RoleFunction() { 
-                                   RoleId = role.Id,
-                                   FunctionId = item.Id,
-                                   IsReadOnly = false
+                                funcRole.Add(new RoleFunction()
+                                {
+                                    RoleId = role.Id,
+                                    FunctionId = item.Id,
+                                    IsReadOnly = false
                                 });
                             };
                             await Context.RoleFunction.AddRangeAsync(funcRole);
@@ -59,7 +67,7 @@ namespace CSP_Redemption_WebApi.Repositories
                         }
                         else
                         {
-                            
+
                             return isSuccess;
                         }
                     }
@@ -79,6 +87,11 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 return await Context.Brand.AnyAsync(x => x.Code == code.ToUpper());
             }
+        }
+
+        public async Task<Brand> GetBrandAsync(int id)
+        {
+            return await _context.Brand.FirstOrDefaultAsync(x=>x.Id == id);
         }
     }
 }

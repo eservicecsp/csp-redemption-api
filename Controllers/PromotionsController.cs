@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +13,10 @@ namespace CSP_Redemption_WebApi.Controllers
     [ApiController]
     public class PromotionsController : ControllerBase
     {
-        private readonly IPromotionService promotionService;
+        private readonly IPromotionService _promotionService;
         public PromotionsController(IPromotionService promotionService)
         {
-            this.promotionService = promotionService;
+            _promotionService = promotionService;
         }
 
         [HttpGet]
@@ -24,7 +25,7 @@ namespace CSP_Redemption_WebApi.Controllers
             var token = Request.Headers["Authorization"].ToString();
             var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
 
-            return Ok(await this.promotionService.GetPromotionsAsync(brandId));
+            return Ok(await _promotionService.GetPromotionsAsync(brandId));
         }
 
         [HttpGet("{id}")]
@@ -33,7 +34,27 @@ namespace CSP_Redemption_WebApi.Controllers
             var token = Request.Headers["Authorization"].ToString();
             var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
 
-            return Ok(await this.promotionService.GetPromotionAsync(brandId, id));
+            return Ok(await _promotionService.GetPromotionAsync(brandId, id));
+        }
+
+        [HttpPost("Create")]
+        public async Task<IActionResult> CreateAsync(PromotionModel promotion)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            promotion.BrandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            promotion.CreatedBy = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
+
+            return Ok(await _promotionService.CreateAsync(promotion));
+        }
+
+        [HttpPost("Update")]
+        public async Task<IActionResult> UpdateAsync(PromotionModel promotion)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            promotion.BrandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            promotion.ModifiedBy = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
+
+            return Ok(await _promotionService.UpdateAsync(promotion));
         }
     }
 }
