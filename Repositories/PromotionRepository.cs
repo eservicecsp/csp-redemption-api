@@ -22,6 +22,7 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 return await context.Promotion
                     .Include(x => x.CreatedByNavigation)
+                    .Include(x => x.PromotionType)
                     .Where(x => x.BrandId == brandId).ToListAsync();
             }
         }
@@ -31,6 +32,7 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 return await context.Promotion
                     .Include(x => x.CreatedByNavigation)
+                    .Include(x => x.PromotionType)
                     .FirstOrDefaultAsync(x => x.BrandId == brandId && x.Id == promotionId);
             }
         }
