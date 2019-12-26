@@ -70,6 +70,8 @@ namespace CSP_Redemption_WebApi.Services
                             Description = item.Description,
                             BrandId = item.BrandId,
                             IsActived = item.IsActived,
+                            CreatedByName = $"{ item.CreatedByNavigation.FirstName} {item.CreatedByNavigation.LastName}" ,
+                            CreatedDate = item.CreatedDate
                         });
                     }
                 }
