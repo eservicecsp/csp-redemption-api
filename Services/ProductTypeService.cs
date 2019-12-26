@@ -13,6 +13,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<ResponseModel> CreateAsync(ProductType productType);
         Task<ResponseModel> UpdateAsync(ProductType productType);
         Task<ProductsTypeResponseModel> GetProductTypesByBrandIdAsync(int brandId);
+        Task<ProductsTypeResponseModel> GetProductTypesByIdAsync(int id);
     }
     public class ProductTypeService : IProductTypeService
     {
@@ -79,6 +80,31 @@ namespace CSP_Redemption_WebApi.Services
                 response.IsSuccess = true;
             }
             catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ProductsTypeResponseModel> GetProductTypesByIdAsync(int id)
+        {
+            var response = new ProductsTypeResponseModel();
+            try
+            {
+                var productTypesDb = await this.productTypeRepository.GetProductTypesByIdAsync(id);
+                var productTypes = new ProductTypeModel();
+                if (productTypesDb != null)
+                {
+                    productTypes.Id = productTypesDb.Id;
+                    productTypes.Name = productTypesDb.Name;
+                    productTypes.Description = productTypesDb.Description;
+                    productTypes.IsActived = productTypesDb.IsActived;
+
+                }
+                response.productType = productTypes;
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
             }

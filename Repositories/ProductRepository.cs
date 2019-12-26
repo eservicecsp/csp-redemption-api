@@ -22,14 +22,14 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Product.Include(x => x.ProductAttachment).Include(x => x.CreatedByNavigation).Where(x => x.BrandId == brandId).ToListAsync();
+                return await Context.Product.Include(x => x.ProductAttachment).Include(x => x.CreatedByNavigation).Include(x => x.ProductType).Where(x => x.BrandId == brandId).ToListAsync();
             }
         }
         public async Task<Product> GetProductsByIdAsync(int id)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Product.Include(x => x.ProductAttachment).Where(x => x.Id == id).FirstOrDefaultAsync();
+                return await Context.Product.Include(x => x.ProductAttachment).Include(x=>x.ProductType).Where(x => x.Id == id).FirstOrDefaultAsync();
             }
         }
 

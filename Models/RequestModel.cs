@@ -69,6 +69,7 @@ namespace CSP_Redemption_WebApi.Models
         public bool IsMakeup { get; set; }
         public bool IsBodycare { get; set; }
         public bool IsSupplements { get; set; }
+        public List<string> ProductType { get; set; }
     }
 
     public class PaginationModel
