@@ -106,23 +106,48 @@ namespace CSP_Redemption_WebApi.Services
                             var children = new List<ChildModel>();
                             var existParent = parentFunctions.Where(x => x.Id == function.ParentId).Single();
 
-                            children.Add(new ChildModel()
+                            if ((!function.IsExternal) && (staff.Brand.IsOwner))
                             {
-                                id = function.Id.ToString(),
-                                title = function.Name,
-                                type = "item",
-                                url = function.Path,
-                                icon = function.Icon,
-                                children = new List<SubChild>()
-                            });
-                            var navigation = new NavigationModel()
+                                children.Add(new ChildModel()
+                                {
+                                    id = function.Id.ToString(),
+                                    title = function.Name,
+                                    type = "item",
+                                    url = function.Path,
+                                    icon = function.Icon,
+                                    children = new List<SubChild>()
+                                });
+                                var navigation = new NavigationModel()
+                                {
+                                    id = existParent.Id.ToString(),
+                                    title = existParent.Name,
+                                    type = "group",
+                                    children = children,
+                                };
+                                navigations.Add(navigation);
+                            }
+                            else if(function.IsExternal)
                             {
-                                id = existParent.Id.ToString(),
-                                title = existParent.Name,
-                                type = "group",
-                                children = children,
-                            };
-                            navigations.Add(navigation);
+                                children.Add(new ChildModel()
+                                {
+                                    id = function.Id.ToString(),
+                                    title = function.Name,
+                                    type = "item",
+                                    url = function.Path,
+                                    icon = function.Icon,
+                                    children = new List<SubChild>()
+                                });
+                                var navigation = new NavigationModel()
+                                {
+                                    id = existParent.Id.ToString(),
+                                    title = existParent.Name,
+                                    type = "group",
+                                    children = children,
+                                };
+                                navigations.Add(navigation);
+                            }
+
+                            
                         }
                         catch (Exception)
                         {
