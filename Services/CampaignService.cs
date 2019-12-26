@@ -288,7 +288,8 @@ namespace CSP_Redemption_WebApi.Services
                        AlertMessage = campaignDb.AlertMessage,
                        DuplicateMessage = campaignDb.DuplicateMessage,
                        QrCodeNotExistMessage = campaignDb.QrCodeNotExistMessage,
-                       WinMessage = campaignDb.WinMessage
+                       WinMessage = campaignDb.WinMessage,
+                       BrandId = campaignDb.BrandId
                     };
                     response.Campaign = campaign;
                     response.IsSuccess = true;
