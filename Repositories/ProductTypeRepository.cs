@@ -13,6 +13,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<List<ProductType>> GetProductTypesByBrandIdAsync(int brandId);
         Task<bool> CreateAsync(ProductType productType);
         Task<bool> UpdateAsync(ProductType productType);
+        Task<ProductType> GetProductTypesByIdAsync(int id);
     }
     public class ProductTypeRepository  : IProductTypeRepository
     {
@@ -47,6 +48,14 @@ namespace CSP_Redemption_WebApi.Repositories
                 thisRow.ModifiedDate = productType.ModifiedDate;
                 Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
                 return await Context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<ProductType> GetProductTypesByIdAsync(int id)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.ProductType.FirstOrDefaultAsync(x => x.Id == id);
             }
         }
     }

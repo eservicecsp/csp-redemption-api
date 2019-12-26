@@ -467,6 +467,8 @@ namespace CSP_Redemption_WebApi.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int? BrandId { get; set; }
+        public int? ProductTypeId { get; set; }
+        public string ProductTypeName { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedName { get; set; }
         public DateTime CreatedDate { get; set; }
@@ -547,6 +549,7 @@ namespace CSP_Redemption_WebApi.Models
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
         public List<ProductTypeModel>  ProductTypes { get; set; }
+        public ProductTypeModel  productType { get; set; }
     }
 
     public class ProductTypeModel

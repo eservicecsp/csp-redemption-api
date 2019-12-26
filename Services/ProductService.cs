@@ -86,6 +86,8 @@ namespace CSP_Redemption_WebApi.Services
                         CreatedDate = product.CreatedDate,
                         BrandId = product.BrandId,
                         CreatedBy = product.CreatedBy,
+                        ProductTypeId = product.ProductTypeId,
+                        ProductTypeName = product.ProductType.Name,
                         CreatedName = $"{product.CreatedByNavigation.FirstName} { product.CreatedByNavigation.LastName}",
                         Id = product.Id,
                         Name = product.Name,
@@ -122,6 +124,7 @@ namespace CSP_Redemption_WebApi.Services
                         Id = product.Id,
                         Name = product.Name,
                         Description = product.Description,
+                        ProductTypeId = product.ProductTypeId,
                         Attachments = new List<ProductAttachmentModel>()
                     };
 
@@ -197,6 +200,7 @@ namespace CSP_Redemption_WebApi.Services
                     CreatedDate = product.CreatedDate,
                     BrandId = product.BrandId,
                     CreatedBy = product.CreatedBy,
+                    ProductTypeId = product.ProductTypeId,
                     Name = product.Name,
                     ProductAttachment = iProductAttachments
                 };
@@ -259,6 +263,7 @@ namespace CSP_Redemption_WebApi.Services
                         Brand = dbProduct.Brand,
                         BrandId = dbProduct.BrandId,
                         CreatedBy = dbProduct.CreatedBy,
+                        ProductTypeId = product.ProductTypeId,
                         ProductAttachment = uProductAttachments
                     };
 

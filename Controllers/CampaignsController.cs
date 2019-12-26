@@ -16,14 +16,17 @@ namespace CSP_Redemption_WebApi.Controllers
     {
         private readonly ICampaignService campaignService;
         private readonly IQrCodeService qrCodeService;
+        private readonly IProductTypeService productTypeService;
         public CampaignsController
             (
-            ICampaignService campaignService ,
-            IQrCodeService qrCodeService
+            ICampaignService campaignService,
+            IQrCodeService qrCodeService,
+            IProductTypeService productTypeService
             )
         {
             this.campaignService = campaignService;
             this.qrCodeService = qrCodeService;
+            this.productTypeService = productTypeService;
         }
 
         [HttpGet]
@@ -72,5 +75,12 @@ namespace CSP_Redemption_WebApi.Controllers
             var token = Request.Headers["Authorization"].ToString();
             return Ok(await this.campaignService.UpdateAsync(campaign));
         }
+
+        [HttpGet("productType/{brandId}")]
+        public async Task<IActionResult> GetProductTypesByBrandId(int brandId)
+        {
+            return Ok(await this.productTypeService.GetProductTypesByBrandIdAsync(brandId));
+        }
+
     }
 }
