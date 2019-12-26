@@ -12,6 +12,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int PromotionTypeId { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
+        public bool IsActived { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
 

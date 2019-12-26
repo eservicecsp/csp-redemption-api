@@ -15,24 +15,23 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<bool> UpdateAsync(ProductType productType);
         Task<ProductType> GetProductTypesByIdAsync(int id);
     }
-    public class ProductTypeRepository  : IProductTypeRepository
+    public class ProductTypeRepository : IProductTypeRepository
     {
         public async Task<List<ProductType>> GetProductTypesByBrandIdAsync(int brandId)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.ProductType.Include(x=>x.CreatedByNavigation).Where(x => x.BrandId == brandId).ToListAsync();
+                return await Context.ProductType.Include(x => x.CreatedByNavigation).Where(x => x.BrandId == brandId).ToListAsync();
             }
         }
 
-        public async Task<bool> CreateAsync(ProductType  productType)
+        public async Task<bool> CreateAsync(ProductType productType)
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                 Context.ProductType.AddAsync(productType);
+                await Context.ProductType.AddAsync(productType);
                 return await Context.SaveChangesAsync() > 0;
             }
-            
         }
 
         public async Task<bool> UpdateAsync(ProductType productType)

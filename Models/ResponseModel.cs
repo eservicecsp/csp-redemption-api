@@ -501,6 +501,7 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
         public PromotionModel Promotion { get; set; }
     }
+
     public class PromotionModel
     {
         public int Id { get; set; }
@@ -508,11 +509,33 @@ namespace CSP_Redemption_WebApi.Models
         public string Description { get; set; }
         public int BrandId { get; set; }
         public int PromotionTypeId { get; set; }
+        public bool IsActived { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedByName { get; set; }
         public DateTime CreatedDate { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
+    }
+
+    public class PromotionTypesResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<PromotionTypeModel> PromotionTypes { get; set; }
+    }
+
+    public class PromotionTypeResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public PromotionTypeModel PromotionType { get; set; }
+    }
+
+    public class PromotionTypeModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
     #endregion
 
