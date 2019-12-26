@@ -12,6 +12,8 @@ namespace CSP_Redemption_WebApi.Repositories
     {
         Task<List<PromotionType>> GetPromotionTypesAsync();
         Task<PromotionType> GetPromotionTypeAsync(int id);
+        Task<bool> CreateAsync(PromotionType promotionType);
+        Task<bool> UpdateAsync(PromotionType promotionType);
     }
     public class PromotionTypeRepository: IPromotionTypeRepository
     {
@@ -29,6 +31,21 @@ namespace CSP_Redemption_WebApi.Repositories
         public async Task<PromotionType> GetPromotionTypeAsync(int id)
         {
             return await _context.PromotionType.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<bool> CreateAsync(PromotionType promotionType)
+        {
+            await _context.PromotionType.AddAsync(promotionType);
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateAsync(PromotionType promotionType)
+        {
+            PromotionType dbPromotionType = await _context.PromotionType.SingleAsync(x => x.Id == promotionType.Id);
+            _context.Entry(dbPromotionType).CurrentValues.SetValues(promotionType);
+
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }
