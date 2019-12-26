@@ -509,6 +509,7 @@ namespace CSP_Redemption_WebApi.Models
         public string Description { get; set; }
         public int BrandId { get; set; }
         public int PromotionTypeId { get; set; }
+        public PromotionTypeModel PromotionType { get; set; }
         public bool IsActived { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedByName { get; set; }
