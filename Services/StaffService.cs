@@ -97,7 +97,7 @@ namespace CSP_Redemption_WebApi.Services
                 var parentFunctions = functions.Where(x => x.ParentId == 0).ToList();
 
                 var navigations = new List<NavigationModel>();
-                foreach (var function in functions.Where(x => x.ParentId != 0).OrderBy(x => x.ParentId))
+                foreach (var function in functions.Where(x => x.ParentId != 0 && x.IsInternal == true && x.IsExternal == true).OrderBy(x => x.ParentId))
                 {
                     if (!(navigations.Any(x => x.id == function.ParentId.ToString())))
                     {
@@ -106,48 +106,23 @@ namespace CSP_Redemption_WebApi.Services
                             var children = new List<ChildModel>();
                             var existParent = parentFunctions.Where(x => x.Id == function.ParentId).Single();
 
-                            if ((!function.IsExternal) && (staff.Brand.IsOwner))
+                            children.Add(new ChildModel()
                             {
-                                children.Add(new ChildModel()
-                                {
-                                    id = function.Id.ToString(),
-                                    title = function.Name,
-                                    type = "item",
-                                    url = function.Path,
-                                    icon = function.Icon,
-                                    children = new List<SubChild>()
-                                });
-                                var navigation = new NavigationModel()
-                                {
-                                    id = existParent.Id.ToString(),
-                                    title = existParent.Name,
-                                    type = "group",
-                                    children = children,
-                                };
-                                navigations.Add(navigation);
-                            }
-                            else if(function.IsExternal)
+                                id = function.Id.ToString(),
+                                title = function.Name,
+                                type = "item",
+                                url = function.Path,
+                                icon = function.Icon,
+                                children = new List<SubChild>()
+                            });
+                            var navigation = new NavigationModel()
                             {
-                                children.Add(new ChildModel()
-                                {
-                                    id = function.Id.ToString(),
-                                    title = function.Name,
-                                    type = "item",
-                                    url = function.Path,
-                                    icon = function.Icon,
-                                    children = new List<SubChild>()
-                                });
-                                var navigation = new NavigationModel()
-                                {
-                                    id = existParent.Id.ToString(),
-                                    title = existParent.Name,
-                                    type = "group",
-                                    children = children,
-                                };
-                                navigations.Add(navigation);
-                            }
-
-                            
+                                id = existParent.Id.ToString(),
+                                title = existParent.Name,
+                                type = "group",
+                                children = children,
+                            };
+                            navigations.Add(navigation);
                         }
                         catch (Exception)
                         {
@@ -188,6 +163,78 @@ namespace CSP_Redemption_WebApi.Services
                         catch (Exception)
                         {
 
+                        }
+                    }
+                }
+                if (staff.Brand.IsOwner)
+                {
+                    foreach (var function in functions.Where(x => x.ParentId != 0 && x.IsInternal == true && x.IsExternal == false))
+                    {
+                        if (!(navigations.Any(x => x.id == function.ParentId.ToString())))
+                        {
+                            try
+                            {
+                                var children = new List<ChildModel>();
+                                var existParent = parentFunctions.Where(x => x.Id == function.ParentId).Single();
+
+                                children.Add(new ChildModel()
+                                {
+                                    id = function.Id.ToString(),
+                                    title = function.Name,
+                                    type = "item",
+                                    url = function.Path,
+                                    icon = function.Icon,
+                                    children = new List<SubChild>()
+                                });
+                                var navigation = new NavigationModel()
+                                {
+                                    id = existParent.Id.ToString(),
+                                    title = existParent.Name,
+                                    type = "group",
+                                    children = children,
+                                };
+                                navigations.Add(navigation);
+                            }
+                            catch (Exception)
+                            {
+                                foreach (var item in navigations)
+                                {
+                                    var existParent = item.children.Where(x => x.id == function.ParentId.ToString()).FirstOrDefault();
+                                    if (existParent != null)
+                                    {
+                                        var subChild = new SubChild()
+                                        {
+                                            id = function.Id.ToString(),
+                                            title = function.Name,
+                                            type = "item",
+                                            url = function.Path,
+                                            icon = function.Icon
+                                        };
+                                        existParent.children.Add(subChild);
+                                        existParent.type = "collapsable";
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                var existNavigation = navigations.Where(x => x.id == function.ParentId.ToString()).Single();
+                                var child = new ChildModel()
+                                {
+                                    id = function.Id.ToString(),
+                                    title = function.Name,
+                                    type = "item",
+                                    url = function.Path,
+                                    icon = function.Icon
+                                };
+                                existNavigation.children.Add(child);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
                         }
                     }
                 }

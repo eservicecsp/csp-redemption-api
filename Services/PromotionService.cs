@@ -50,6 +50,12 @@ namespace CSP_Redemption_WebApi.Services
                         ModifiedBy = promotion.ModifiedBy,
                         Name = promotion.Name,
                         PromotionTypeId = promotion.PromotionTypeId,
+                        PromotionType = new PromotionTypeModel()
+                        {
+                            Id = promotion.PromotionType.Id,
+                            Name = promotion.PromotionType.Name,
+                            Description = promotion.PromotionType.Description
+                        }
                     });
                 }
 
