@@ -20,7 +20,7 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.ProductType.Where(x => x.BrandId == brandId).ToListAsync();
+                return await Context.ProductType.Include(x=>x.CreatedByNavigation).Where(x => x.BrandId == brandId).ToListAsync();
             }
         }
 
