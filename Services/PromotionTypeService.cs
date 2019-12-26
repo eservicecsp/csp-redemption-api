@@ -10,6 +10,7 @@ namespace CSP_Redemption_WebApi.Services
     public interface IPromotionTypeService
     {
         Task<PromotionTypesResponseModel> GetPromotionTypesAsync();
+        Task<PromotionTypeResponseModel> GetPromotionTypeAsync(int id);
     }
 
     public class PromotionTypeService: IPromotionTypeService
@@ -36,6 +37,28 @@ namespace CSP_Redemption_WebApi.Services
                         Name = promotionType.Name
                     });
                 }
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<PromotionTypeResponseModel> GetPromotionTypeAsync(int id)
+        {
+            var response = new PromotionTypeResponseModel();
+            try
+            {
+                var promotionType = await this.promotionTypeRepository.GetPromotionTypeAsync(id);
+                response.PromotionType = new PromotionTypeModel()
+                {
+                    Id = promotionType.Id,
+                    Description = promotionType.Description,
+                    Name = promotionType.Name
+                };
                 response.IsSuccess = true;
             }
             catch (Exception ex)

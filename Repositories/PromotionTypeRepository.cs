@@ -11,6 +11,7 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface IPromotionTypeRepository
     {
         Task<List<PromotionType>> GetPromotionTypesAsync();
+        Task<PromotionType> GetPromotionTypeAsync(int id);
     }
     public class PromotionTypeRepository: IPromotionTypeRepository
     {
@@ -19,6 +20,14 @@ namespace CSP_Redemption_WebApi.Repositories
             using(var context = new CSP_RedemptionContext())
             {
                 return await context.PromotionType.ToListAsync();
+            }
+        }
+
+        public async Task<PromotionType> GetPromotionTypeAsync(int id)
+        {
+            using (var context = new CSP_RedemptionContext())
+            {
+                return await context.PromotionType.FirstOrDefaultAsync(x=>x.Id == id);
             }
         }
     }

@@ -28,12 +28,12 @@ namespace CSP_Redemption_WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPromotionByIdAsync(int id)
+        public async Task<IActionResult> GetPromotionAsync(int id)
         {
             var token = Request.Headers["Authorization"].ToString();
             var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
 
-            return Ok(await this.promotionService.GetPromotionsByIdAsync(brandId, id));
+            return Ok(await this.promotionService.GetPromotionAsync(brandId, id));
         }
     }
 }

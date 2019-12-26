@@ -23,5 +23,11 @@ namespace CSP_Redemption_WebApi.Controllers
         {
             return Ok(await this.promotionTypeService.GetPromotionTypesAsync());
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPromotionAsync(int id)
+        {
+            return Ok(await this.promotionTypeService.GetPromotionTypeAsync(id));
+        }
     }
 }

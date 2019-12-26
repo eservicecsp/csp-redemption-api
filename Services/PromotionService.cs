@@ -10,7 +10,7 @@ namespace CSP_Redemption_WebApi.Services
     public interface IPromotionService
     {
         Task<PromotionsResponseModel> GetPromotionsAsync(int brandId);
-        Task<PromotionResponseModel> GetPromotionsByIdAsync(int brandId, int promotionId);
+        Task<PromotionResponseModel> GetPromotionAsync(int brandId, int promotionId);
     }
 
     public class PromotionService : IPromotionService
@@ -56,12 +56,12 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<PromotionResponseModel> GetPromotionsByIdAsync(int brandId, int promotionId)
+        public async Task<PromotionResponseModel> GetPromotionAsync(int brandId, int promotionId)
         {
             var response = new PromotionResponseModel();
             try
             {
-                var promotion = await this.promotionRepository.GetPromotionByIdAsync(brandId, promotionId);
+                var promotion = await this.promotionRepository.GetPromotionAsync(brandId, promotionId);
                 if (promotion != null)
                 {
                     response.Promotion = new PromotionModel()

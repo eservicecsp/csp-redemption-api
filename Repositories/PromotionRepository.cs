@@ -11,7 +11,7 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface IPromotionRepository
     {
         Task<List<Promotion>> GetPromotionsAsync(int brandId);
-        Task<Promotion> GetPromotionByIdAsync(int brandId, int promotionId);
+        Task<Promotion> GetPromotionAsync(int brandId, int promotionId);
     }
 
     public class PromotionRepository : IPromotionRepository
@@ -26,7 +26,7 @@ namespace CSP_Redemption_WebApi.Repositories
                     .Where(x => x.BrandId == brandId).ToListAsync();
             }
         }
-        public async Task<Promotion> GetPromotionByIdAsync(int brandId, int promotionId)
+        public async Task<Promotion> GetPromotionAsync(int brandId, int promotionId)
         {
             using (var context = new CSP_RedemptionContext())
             {

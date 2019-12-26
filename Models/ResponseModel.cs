@@ -522,6 +522,13 @@ namespace CSP_Redemption_WebApi.Models
         public List<PromotionTypeModel> PromotionTypes { get; set; }
     }
 
+    public class PromotionTypeResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public PromotionTypeModel PromotionType { get; set; }
+    }
+
     public class PromotionTypeModel
     {
         public int Id { get; set; }
