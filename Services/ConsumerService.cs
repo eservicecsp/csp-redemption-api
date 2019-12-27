@@ -249,8 +249,8 @@ namespace CSP_Redemption_WebApi.Services
                         consumer.IsBodycare = consumerRequest.IsBodycare;
                         consumer.IsSupplements = consumerRequest.IsSupplements;
                         consumer.CreatedBy = 0;
-                        var isCreated = await this.consumerRepository.CreateAsync(consumer);
-                        if (isCreated)
+                        var isCreated = await this.consumerRepository.CreateAsync(consumer, consumerRequest.ProductType);
+                        if (isCreated.IsSuccess)
                         {
                             Consumer isExist = await this.consumerRepository.IsExist(consumer);
 

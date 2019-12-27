@@ -76,10 +76,11 @@ namespace CSP_Redemption_WebApi.Controllers
             return Ok(await this.campaignService.UpdateAsync(campaign));
         }
 
-        [HttpGet("productType/{brandId}")]
-        public async Task<IActionResult> GetProductTypesByBrandId(int brandId)
+        [HttpGet("productType/{campaignId}")]
+        public async Task<IActionResult> GetProductTypesByBrandId(int campaignId)
         {
-            return Ok(await this.productTypeService.GetProductTypesByBrandIdAsync(brandId));
+            var campaign = await this.campaignService.GetCampaignsByCampaignIdAsync(campaignId);
+            return Ok(await this.productTypeService.GetProductTypesByBrandIdAsync(campaign.Campaign.BrandId));
         }
 
     }

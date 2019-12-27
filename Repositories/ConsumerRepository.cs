@@ -18,7 +18,7 @@ namespace CSP_Redemption_WebApi.Repositories
         //Task<List<Consumer>> GetConsumersByBrandIdAsync(int branId);
         Task<List<Consumer>> GetConsumersByBrandIdAsync(PaginationModel data, string type);
         Task<int> GetConsumersTotalByBrandIdAsync(PaginationModel data);
-        Task<bool> CreateAsync(Consumer consumer);
+        Task<ResponseModel> CreateAsync(Consumer consumer, List<string> ProductType);
         Task<Consumer> GetConsumerByIdAsync(int consumerId);
         Task<bool> UpdateAsync(Consumer consumer);
         Task<bool> ImportFileAsync(List<Consumer>  consumers);
@@ -240,13 +240,40 @@ namespace CSP_Redemption_WebApi.Repositories
 
             }
         }
-        public async Task<bool> CreateAsync(Consumer consumer)
+        public async Task<ResponseModel> CreateAsync(Consumer consumer, List<string> ProductType)
         {
+            var response = new ResponseModel();
             using (var Context = new CSP_RedemptionContext())
             {
-                Context.Consumer.Add(consumer);
-                return await Context.SaveChangesAsync() > 0;
+                using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        await Context.Consumer.AddAsync(consumer);
+                        await Context.SaveChangesAsync();
+
+                        var productTypes = new List<ConsumerProductType>();
+                        foreach (var item in ProductType)
+                        {
+                            productTypes.Add(new ConsumerProductType()
+                            {
+                                ConsumerId = consumer.Id,
+                                ProductTypeId = Convert.ToInt32(item)
+                            });
+                        }
+                        await Context.ConsumerProductType.AddRangeAsync(productTypes);
+                        response.IsSuccess = await Context.SaveChangesAsync() > 0;
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        response.Message = ex.Message;
+                    }
+
+                }  
             }
+            return response;
         }
 
         public async Task<Consumer> GetConsumerByIdAsync(int consumerId)
