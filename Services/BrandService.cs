@@ -12,22 +12,102 @@ namespace CSP_Redemption_WebApi.Services
 {
     public interface IBrandService
     {
+        Task<BrandsResponseModel> GetBrandsAsync();
+        Task<BrandResponseModel> GetBrandAsync(int id);
         Task<ResponseModel> Register(BrandRegisterRequestModel model);
     }
     public class BrandService : IBrandService
     {
         private readonly IBrandRepository _brandRepository;
+        private readonly IStaffRepository _staffRepository;
 
-        public BrandService(IBrandRepository brandRepository)
+        public BrandService(IBrandRepository brandRepository, IStaffRepository staffRepository)
         {
-            this._brandRepository = brandRepository;
+            _brandRepository = brandRepository;
+            _staffRepository = staffRepository;
         }
+
+        public async Task<BrandsResponseModel> GetBrandsAsync()
+        {
+            var response = new BrandsResponseModel();
+            try
+            {
+                var brands = await _brandRepository.GetBrandsAsync();
+
+                response.Brands = new List<BrandModel>();
+
+                foreach (var brand in brands)
+                {
+                    response.Brands.Add(new BrandModel()
+                    {
+                        Id = brand.Id,
+                        Code = brand.Code,
+                        Name = brand.Name,
+                        IsOwner = brand.IsOwner
+                    });
+                }
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<BrandResponseModel> GetBrandAsync(int id)
+        {
+            var response = new BrandResponseModel();
+            try
+            {
+                var brand = await _brandRepository.GetBrandAsync(id);
+                var staffs = await _staffRepository.GetStaffsByBrandIdAsync(brand.Id);
+                var admin = staffs.Where(x => x.Role.Name == "Administrator").FirstOrDefault();
+                if(admin == null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Brand administrator not  found.";
+                    return response;
+                }
+
+                response.Brand = new BrandModel()
+                {
+                    Id = brand.Id,
+                    Code = brand.Code,
+                    IsOwner = brand.IsOwner,
+                    Name = brand.Name,
+                    Staff = new StaffModel()
+                    {
+                        Id = admin.Id,
+                        CreatedDate = admin.CreatedDate,
+                        BrandId = admin.BrandId,
+                        CreatedBy = admin.CreatedBy,
+                        Email = admin.Email,
+                        FirstName = admin.FirstName,
+                        IsActived = admin.IsActived,
+                        LastName = admin.LastName,
+                        Password = admin.Password,
+                        Phone = admin.Phone,
+                        RoleId = admin.RoleId
+                    }
+                };
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public async Task<ResponseModel> Register(BrandRegisterRequestModel model)
         {
             var response = new ResponseModel();
             try
             {
-                bool isExist = await this._brandRepository.GetBrandByCodeAsync(model.Brand.Code.ToUpper());
+                bool isExist = await _brandRepository.GetBrandByCodeAsync(model.Brand.Code.ToUpper());
                 if (isExist)
                 {
                     response.IsSuccess = false;
@@ -41,7 +121,7 @@ namespace CSP_Redemption_WebApi.Services
                         Name = model.Brand.Name,
                         IsOwner = false
                     };
-                    string newPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, model.Staff.Password) ;
+                    string newPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, model.Staff.Password);
                     var staff = new Staff()
                     {
                         FirstName = model.Staff.FirstName,
@@ -56,12 +136,12 @@ namespace CSP_Redemption_WebApi.Services
                     response.IsSuccess = await this._brandRepository.CreateAsync(brand, staff);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
             }
-            
-            
+
+
             return response;
         }
     }

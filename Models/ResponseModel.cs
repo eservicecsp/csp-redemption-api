@@ -332,12 +332,26 @@ namespace CSP_Redemption_WebApi.Models
     #endregion
 
     #region Brand
+    public class BrandsResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<BrandModel> Brands { get; set; }
+    }
+
+    public class BrandResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public BrandModel Brand { get; set; }
+    }
     public class BrandModel
     {
         public int Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
-        public bool IsActived { get; set; }
+        public bool IsOwner { get; set; }
+        public StaffModel Staff { get; set; }
     }
     #endregion
 

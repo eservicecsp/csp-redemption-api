@@ -15,12 +15,14 @@ namespace CSP_Redemption_WebApi.Models
         public int CampaignId { get; set; }
         public int createBy { get; set; }
     }
+
     #region Brand
     public class BrandRegisterRequestModel
     {
         public BrandModel Brand { get; set; }
         public StaffModel Staff { get; set; }
     }
+
     #endregion
 
     #region Consumer

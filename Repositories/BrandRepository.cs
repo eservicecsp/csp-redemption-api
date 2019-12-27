@@ -10,9 +10,11 @@ namespace CSP_Redemption_WebApi.Repositories
 {
     public interface IBrandRepository
     {
+        Task<List<Brand>> GetBrandsAsync();
+        Task<Brand> GetBrandAsync(int id);
         Task<bool> CreateAsync(Brand brand, Staff staff);
         Task<bool> GetBrandByCodeAsync(string code);
-        Task<Brand> GetBrandAsync(int id);
+        
     }
     public class BrandRepository : IBrandRepository
     {
@@ -20,6 +22,16 @@ namespace CSP_Redemption_WebApi.Repositories
         public BrandRepository(CSP_RedemptionContext context)
         {
             this._context = context;
+        }
+
+        public async Task<List<Brand>> GetBrandsAsync()
+        {
+            return await _context.Brand.ToListAsync();
+        }
+
+        public async Task<Brand> GetBrandAsync(int id)
+        {
+            return await _context.Brand.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<bool> CreateAsync(Brand brand, Staff staff)
@@ -87,11 +99,6 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 return await Context.Brand.AnyAsync(x => x.Code == code.ToUpper());
             }
-        }
-
-        public async Task<Brand> GetBrandAsync(int id)
-        {
-            return await _context.Brand.FirstOrDefaultAsync(x=>x.Id == id);
-        }
+        }       
     }
 }

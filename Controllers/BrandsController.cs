@@ -17,13 +17,25 @@ namespace CSP_Redemption_WebApi.Controllers
 
         public BrandsController(IBrandService brandService)
         {
-            this._brandService = brandService;
+            _brandService = brandService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetBrandsAsync()
+        {
+            return Ok(await _brandService.GetBrandsAsync());
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBrandAsync(int id)
+        {
+            return Ok(await _brandService.GetBrandAsync(id));
         }
 
         [HttpPost("Create")]
         public async Task<IActionResult> Create(BrandRegisterRequestModel request)
         {
-            return Ok(await this._brandService.Register(request));
+            return Ok(await _brandService.Register(request));
         }
     }
 }
