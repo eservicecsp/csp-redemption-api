@@ -143,7 +143,7 @@ namespace CSP_Redemption_WebApi.Models
     public class TransactionModel
     {
         public int Id { get; set; }
-        public int ConsumerId { get; set; }
+        public int? ConsumerId { get; set; }
         public string Token { get; set; }
         public string Code { get; set; }
         public int Point { get; set; }

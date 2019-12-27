@@ -12,7 +12,7 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface ITransactionRepository
     {
         Task<bool> CreateTransactionJigSawAsync(Transaction transaction, QrCode qrCode);
-        Task<bool> CreateTransactionEnrollmentAsync(Transaction transaction, QrCode qrCode);
+        Task<bool> CreateTransactionEnrollmentAsync(Transaction transaction, QrCode qrCode, Enrollment enrollments);
         Task<bool> CreateTransactionPointAsync(Transaction transaction, QrCode qrCode);
         Task<bool> CreateTransactionErrorAsync(Transaction transaction);
         Task<Transaction> GetWinTransactionAsync(Transaction transaction);
@@ -75,7 +75,7 @@ namespace CSP_Redemption_WebApi.Repositories
             }
             return isSuccess;
         }
-        public async Task<bool> CreateTransactionEnrollmentAsync(Transaction transaction, QrCode qrCode)
+        public async Task<bool> CreateTransactionEnrollmentAsync(Transaction transaction, QrCode qrCode, Enrollment enrollments)
         {
             bool isSuccess = false;
             using (var Context = new CSP_RedemptionContext())
@@ -84,28 +84,27 @@ namespace CSP_Redemption_WebApi.Repositories
                 {
                     try
                     {
-                        Context.Transaction.Add(transaction);
-                        if (await Context.SaveChangesAsync() > 0)
+                        var enrollmentsDb = await Context.Enrollment.SingleOrDefaultAsync(x => x.Tel == enrollments.Tel);
+                        if(enrollmentsDb == null)
                         {
-                            var data = new QrCode
-                            {
-                                Id = qrCode.Id,
-                                Token = qrCode.Token,
-                                CampaignId = qrCode.CampaignId,
-                                Code = qrCode.Code,
-                                Peice = qrCode.Peice,
-                                ConsumerId = qrCode.ConsumerId,
-                                TransactionId = transaction.Id,
-                                Point = qrCode.Point,
-                                ScanDate = qrCode.ScanDate
-                            };
-                            // await this.qrCodeRepository.UpdateAsync(qrCode);
-                            var dbQrCode = await Context.QrCode.SingleAsync(x => x.Token == qrCode.Token && x.CampaignId == qrCode.CampaignId && x.Code == qrCode.Code && x.ConsumerId == null);
-                            Context.Entry(dbQrCode).CurrentValues.SetValues(data);
-
-                            isSuccess = await Context.SaveChangesAsync() > 0;
-                            tran.Commit();
+                            await Context.Enrollment.AddAsync(enrollments);
+                            await Context.SaveChangesAsync();
                         }
+                        else
+                        {
+                            enrollments.Id = enrollmentsDb.Id;
+                        }
+                        
+
+                        await Context.Transaction.AddAsync(transaction);
+                        await Context.SaveChangesAsync();
+
+                        var dbQrCode = await Context.QrCode.SingleAsync(x => x.Token == qrCode.Token && x.CampaignId == qrCode.CampaignId && x.Code == qrCode.Code && x.EnrollmentId == null);
+                        dbQrCode.EnrollmentId = enrollments.Id;
+                        Context.Entry(dbQrCode).CurrentValues.SetValues(dbQrCode);
+
+                        isSuccess = await Context.SaveChangesAsync() > 0;
+                        tran.Commit();
 
                     }
                     catch (Exception)
@@ -121,7 +120,6 @@ namespace CSP_Redemption_WebApi.Repositories
             return isSuccess;
         }
         
-
         public async Task<bool> CreateTransactionPointAsync(Transaction transaction, QrCode qrCode)
         {
             bool isSuccess = false;

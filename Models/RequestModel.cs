@@ -29,6 +29,9 @@ namespace CSP_Redemption_WebApi.Models
         public string Phone { get; set; }
         public int CampaignId { get; set; }
         public int ConsumerId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
         public string Token { get; set; }
         public string Code { get; set; }
         public int Point { get; set; }

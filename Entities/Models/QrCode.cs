@@ -11,6 +11,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string Code { get; set; }
         public int? Peice { get; set; }
         public int? ConsumerId { get; set; }
+        public int? EnrollmentId { get; set; }
         public int? TransactionId { get; set; }
         public int? Point { get; set; }
         public DateTime? ScanDate { get; set; }

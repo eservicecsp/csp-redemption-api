@@ -43,5 +43,15 @@ namespace CSP_Redemption_WebApi.Controllers
         {
             return Ok(await this.consumerService.IsExist(dataConsumer));
         }
+        [HttpPost("enrollment")]
+        public async Task<IActionResult> enrollment(CheckExistConsumerRequestModel dataConsumer)
+        {
+            return Ok(await this.consumerService.RegisterEnrollment(dataConsumer));
+        }
+        [HttpPost("consumer")]
+        public async Task<IActionResult> registerConsumerEnrollment(ConsumerRequestModel dataConsumer)
+        {
+            return Ok(await this.consumerService.registerConsumerEnrollment(dataConsumer));
+        }
     }
 }

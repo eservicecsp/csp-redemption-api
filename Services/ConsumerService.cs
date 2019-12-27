@@ -24,6 +24,8 @@ namespace CSP_Redemption_WebApi.Services
         Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(FiltersModel data, int brandId);
         Task<ResponseModel> SendSelected(List<Consumer> enrollments, string channel, int brandId);
         Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId);
+        Task<RedemptionResponseModel> RegisterEnrollment(CheckExistConsumerRequestModel dataConsumer);
+        Task<RedemptionResponseModel> registerConsumerEnrollment(ConsumerRequestModel dataConsumer);
     }
     public class ConsumerService : IConsumerService
     {
@@ -289,6 +291,181 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
+        public async Task<RedemptionResponseModel> RegisterEnrollment(CheckExistConsumerRequestModel dataConsumer)
+        {
+            var response = new RedemptionResponseModel();
+            var tran = new Transaction();
+            var qrCode = new QrCode();
+            bool IsError = false;
+            try
+            {
+                var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
+                tran.CampaignId = campaign.Id;
+               // tran.ConsumerId = consumerRequest.ConsumerId;
+                tran.Token = dataConsumer.Token;
+                tran.Code = dataConsumer.Code;
+                tran.Latitude = dataConsumer.Latitude;
+                tran.Longitude = dataConsumer.Longitude;
+                tran.Location = dataConsumer.Location;
+                tran.CreatedDate = DateTime.Now;
+
+                var enrollment = new Enrollment()
+                {
+                    FirstName = dataConsumer.FirstName,
+                    LastName = dataConsumer.LastName,
+                    Tel = dataConsumer.Phone,
+                    Email = dataConsumer.Email,
+                    CampaignId = dataConsumer.CampaignId,
+                    CreatedDate = DateTime.Now,
+                    CreatedBy = 0,
+                    IsConsumer = false
+                };
+
+
+                if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
+                {
+                    qrCode.Token = dataConsumer.Token;
+                    qrCode.CampaignId = dataConsumer.CampaignId;
+                    qrCode.ConsumerId = dataConsumer.ConsumerId;
+                    qrCode.ScanDate = DateTime.Now;
+                    qrCode.Code = dataConsumer.Code;
+                    var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
+                    if (dbQrCode != null)
+                    {
+                        if (dbQrCode.EnrollmentId == null)
+                        {
+                          
+                            response.Message = campaign.WinMessage;
+                            response.StatusTypeCode = "SUCCESS";
+
+                            tran.TransactionTypeId = 4;
+                            tran.ResponseMessage = campaign.WinMessage;
+                            
+
+                        }
+                        else
+                        {
+                            IsError = true;
+                            response.Message = campaign.DuplicateMessage;
+                            response.StatusTypeCode = "DUPLICATE";
+
+                            tran.TransactionTypeId = 3;
+                            tran.ResponseMessage = campaign.DuplicateMessage;
+                        }
+                    }
+                    else
+                    {
+                        IsError = true;
+                        response.Message = campaign.QrCodeNotExistMessage;
+                        response.StatusTypeCode = "EMPTY";
+
+                        tran.TransactionTypeId = 2;
+                        tran.ResponseMessage = campaign.QrCodeNotExistMessage;
+                    }
+                }
+                else
+                {
+                    IsError = true;
+                    response.Message = campaign.AlertMessage;
+                    response.StatusTypeCode = "FAIL";
+
+                    tran.TransactionTypeId = 1;
+                    tran.ResponseMessage = campaign.AlertMessage;
+                }
+                var statusTran = await this.transactionRepository.CreateTransactionEnrollmentAsync(tran, qrCode, enrollment);
+                if (!statusTran)
+                {
+                    IsError = true;
+                    response.Message = "System error.";
+                    response.StatusTypeCode = "FAIL";
+
+                    tran.TransactionTypeId = 1;
+                    tran.ResponseMessage = "System error.";
+                }
+                if (IsError)
+                {
+                    await this.transactionRepository.CreateTransactionErrorAsync(tran);
+                }
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+        public async Task<RedemptionResponseModel> registerConsumerEnrollment(ConsumerRequestModel dataConsumer)
+        {
+            var response = new RedemptionResponseModel();
+
+            try
+            {
+                var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
+
+
+                if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
+                {
+                    var consumer = new Consumer()
+                    {
+                         FirstName = dataConsumer.FirstName,
+                         LastName = dataConsumer.LastName,
+                         Email = dataConsumer.Email,
+                         Phone = dataConsumer.Phone,
+                         BirthDate = dataConsumer.BirthDate,
+                         Address1 = dataConsumer.Address1,
+                         TumbolCode = dataConsumer.TumbolCode,
+                         AmphurCode = dataConsumer.AmphurCode,
+                         ProvinceCode = dataConsumer.ProvinceCode,
+                         ZipCode = dataConsumer.ZipCode,
+                         ConsumerSourceId = 1,
+                         BrandId = campaign.BrandId,
+                         CampaignId = dataConsumer.CampaignId,
+                         Point = 0 ,
+                         IsBodycare = false,
+                         IsMakeup = false,
+                         IsSkincare = false,
+                         IsSupplements = false,
+                         CreatedBy = 0,
+                         CreatedDate = DateTime.Now
+
+
+                    };
+
+                    Consumer isExist = await this.consumerRepository.IsExist(consumer);
+                    if(isExist == null)
+                    {
+                        var isCreated = await this.consumerRepository.CreateAsync(consumer, dataConsumer.ProductType);
+                        if (isCreated.IsSuccess)
+                        {
+                            response.Message = campaign.WinMessage;
+                            response.StatusTypeCode = "SUCCESS";
+                        }
+                        else
+                        {
+                            response.Message = isCreated.Message;
+                            response.StatusTypeCode = "FAIL";
+                        }
+                    }
+                    else
+                    {
+                        response.Message = campaign.WinMessage;
+                        response.StatusTypeCode = "SUCCESS";
+                    }
+                    
+                }
+                else
+                {
+                    response.Message = campaign.AlertMessage;
+                    response.StatusTypeCode = "FAIL";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public async Task<RedemptionResponseModel> Redemption(CheckExistConsumerRequestModel consumerRequest)
         {
             var response = new RedemptionResponseModel();
@@ -323,50 +500,53 @@ namespace CSP_Redemption_WebApi.Services
                     if (campaign.CampaignTypeId == 3) //Enrollment & Member
                     {
                         
-                        qrCode.Code = consumerRequest.Code;
-                        var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
-                        if(dbQrCode != null)
-                        {
-                            qrCode.Id = dbQrCode.Id;
-                            qrCode.Peice = dbQrCode.Peice;
-                            if (dbQrCode.ConsumerId == null)
-                            {
-                                response.Message = campaign.WinMessage;
-                                response.StatusTypeCode = "SUCCESS";
+                        //qrCode.Code = consumerRequest.Code;
+                        //var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
+                        //if(dbQrCode != null)
+                        //{
+                        //    qrCode.Id = dbQrCode.Id;
+                        //    qrCode.Peice = dbQrCode.Peice;
+                        //    if (dbQrCode.EnrollmentId == null)
+                        //    {
+                        //        response.Message = campaign.WinMessage;
+                        //        response.StatusTypeCode = "SUCCESS";
 
-                                tran.TransactionTypeId = 4;
-                                tran.ResponseMessage = campaign.WinMessage;
+                        //        tran.TransactionTypeId = 4;
+                        //        tran.ResponseMessage = campaign.WinMessage;
 
-                                var statusTran = await this.transactionRepository.CreateTransactionEnrollmentAsync(tran, qrCode);
-                                if (!statusTran)
-                                {
-                                    IsError = true;
-                                    response.Message = "System error.";
-                                    response.StatusTypeCode = "FAIL";
+                        //        var enrollment = new Enrollment()
+                        //        {
+                        //        };
+                        //        var statusTran = await this.transactionRepository.CreateTransactionEnrollmentAsync(tran, qrCode, enrollment);
+                        //        if (!statusTran)
+                        //        {
+                        //            IsError = true;
+                        //            response.Message = "System error.";
+                        //            response.StatusTypeCode = "FAIL";
 
-                                    tran.TransactionTypeId = 1;
-                                    tran.ResponseMessage = "System error.";
-                                }
-                            }
-                            else
-                            {
-                                IsError = true;
-                                response.Message = campaign.DuplicateMessage;
-                                response.StatusTypeCode = "DUPLICATE";
+                        //            tran.TransactionTypeId = 1;
+                        //            tran.ResponseMessage = "System error.";
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        IsError = true;
+                        //        response.Message = campaign.DuplicateMessage;
+                        //        response.StatusTypeCode = "DUPLICATE";
 
-                                tran.TransactionTypeId = 3;
-                                tran.ResponseMessage = campaign.DuplicateMessage;
-                            }
-                        }
-                        else
-                        {
-                            IsError = true;
-                            response.Message = campaign.QrCodeNotExistMessage;
-                            response.StatusTypeCode = "EMPTY";
+                        //        tran.TransactionTypeId = 3;
+                        //        tran.ResponseMessage = campaign.DuplicateMessage;
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    IsError = true;
+                        //    response.Message = campaign.QrCodeNotExistMessage;
+                        //    response.StatusTypeCode = "EMPTY";
 
-                            tran.TransactionTypeId = 2;
-                            tran.ResponseMessage = campaign.QrCodeNotExistMessage;
-                        }
+                        //    tran.TransactionTypeId = 2;
+                        //    tran.ResponseMessage = campaign.QrCodeNotExistMessage;
+                        //}
                         
                     }
                     else

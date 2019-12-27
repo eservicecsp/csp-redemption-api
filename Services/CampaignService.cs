@@ -100,8 +100,8 @@ namespace CSP_Redemption_WebApi.Services
                             LastName = item.Consumer == null ? null : item.Consumer.LastName,
                             Email = item.Consumer == null ? null : item.Consumer.Email,
                             Phone = item.Consumer == null ? null : item.Consumer.Phone,
-                            BirthDate = item.Consumer.BirthDate,
-                            TotalPoint = (item.Consumer.Point != null) ? Convert.ToInt32(item.Consumer.Point) : 0
+                            BirthDate = item.Consumer == null ? null : item.Consumer.BirthDate,
+                            TotalPoint = item.Consumer == null ? 0 : (item.Consumer.Point != null) ? Convert.ToInt32(item.Consumer.Point) : 0
                         });
                     }
                     response.length = await this.transactionRepository.GetTransactionTotalByCampaignsIdAsync(data);

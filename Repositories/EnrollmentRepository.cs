@@ -17,6 +17,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<bool> ImportFileAsync(List<Enrollment> enrollments);
         Task<List<Enrollment>> GetEnrollmentsByBrandIdAsync(PaginationModel data, string type);
         Task<int> GetEnrollmentTotalByBrandIdAsync(PaginationModel data);
+        //Task<bool> CreateAsync(Enrollment enrollments, QrCode qrCode);
     }
     public class EnrollmentRepository: IEnrollmentRepository
     {
@@ -188,5 +189,35 @@ namespace CSP_Redemption_WebApi.Repositories
                 return await enrollments.CountAsync();
             }
         }
+
+        //public async Task<bool> CreateAsync(Enrollment enrollments, QrCode qrCode )
+        //{
+        //    bool isSuccess = false;
+        //    using (var Context = new CSP_RedemptionContext())
+        //    {
+        //        using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+        //        {
+        //            try
+        //            {
+        //                await Context.Enrollment.AddAsync(enrollments);
+        //                await Context.SaveChangesAsync();
+
+        //                QrCode thisRow = await Context.QrCode.SingleAsync(x => x.Id == qrCode.Id);
+        //                Context.Entry(thisRow).CurrentValues.SetValues(qrCode);
+        //                await Context.SaveChangesAsync();
+
+        //                isSuccess = true;
+        //                transaction.Commit();
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                transaction.Rollback();
+        //                throw;
+        //            }
+
+        //        }
+        //    }
+        //    return isSuccess;
+        //}
     }
 }
