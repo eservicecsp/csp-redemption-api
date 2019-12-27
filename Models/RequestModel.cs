@@ -102,6 +102,7 @@ namespace CSP_Redemption_WebApi.Models
         public bool isMakeup { get; set; }
         public bool isBodycare { get; set; }
         public bool isSupplements { get; set; }
+        public List<string> productTypes { get; set; }
 
     }
 

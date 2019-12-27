@@ -436,6 +436,7 @@ namespace CSP_Redemption_WebApi.Services
                         var isCreated = await this.consumerRepository.CreateAsync(consumer, dataConsumer.ProductType);
                         if (isCreated.IsSuccess)
                         {
+                            response.IsSuccess = true;
                             response.Message = campaign.WinMessage;
                             response.StatusTypeCode = "SUCCESS";
                         }
@@ -447,6 +448,7 @@ namespace CSP_Redemption_WebApi.Services
                     }
                     else
                     {
+                        response.IsSuccess = true;
                         response.Message = campaign.WinMessage;
                         response.StatusTypeCode = "SUCCESS";
                     }
