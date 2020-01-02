@@ -22,8 +22,8 @@ namespace CSP_Redemption_WebApi.Services
         Task<RedemptionResponseModel> Redemption(CheckExistConsumerRequestModel consumerRequest);
         Task<ResponseModel> ImportJob(ImportDataBinding data);
         Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(FiltersModel data, int brandId);
-        Task<ResponseModel> SendSelected(List<Consumer> enrollments, string channel, int brandId);
-        Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId);
+        Task<ResponseModel> SendSelected(List<Consumer> enrollments, string channel, int brandId, int promotion);
+        Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId, int promotion);
         Task<RedemptionResponseModel> RegisterEnrollment(CheckExistConsumerRequestModel dataConsumer);
         Task<RedemptionResponseModel> registerConsumerEnrollment(ConsumerRequestModel dataConsumer);
     }
@@ -62,8 +62,32 @@ namespace CSP_Redemption_WebApi.Services
                 var consumers = await this.consumerRepository.GetConsumersByBrandIdAsync(data, "WEB");
                 if (consumers != null)
                 {
-                    response.length = await this.consumerRepository.GetConsumersTotalByBrandIdAsync(data);
-                    response.data = consumers;
+                    response.Length = await this.consumerRepository.GetConsumersTotalByBrandIdAsync(data);
+                    response.Data = new List<ConsumerModel>();
+                    foreach (var consumer in consumers)
+                    {
+                        response.Data.Add(new ConsumerModel()
+                        {
+                            Id = consumer.Id,
+                            BirthDate = consumer.BirthDate.Value,
+                            CreatedDate = consumer.CreatedDate,
+                            Address1 = consumer.Address1,
+                            Address2 = consumer.Address2,
+                            AmphurCode = consumer.AmphurCode,
+                            BrandId = consumer.BrandId,
+                            CampaignId = consumer.CampaignId,
+                            ConsumerSourceId = consumer.ConsumerSourceId,
+                            CreatedBy = consumer.CreatedBy,
+                            Email = consumer.Email,
+                            FirstName = consumer.FirstName,
+                            LastName = consumer.LastName,
+                            Phone = consumer.Phone,
+                            Point = consumer.Point,
+                            ProvinceCode = consumer.ProvinceCode,
+                            TumbolCode = consumer.TumbolCode,
+                            ZipCode = consumer.ZipCode
+                        });
+                    }
                 }
                 response.IsSuccess = true;
             }
@@ -89,12 +113,12 @@ namespace CSP_Redemption_WebApi.Services
                         Phone = dataConsumer.Phone
                     };
                     Consumer isExist = await this.consumerRepository.IsExist(checkConsumer);
-                    if(campaign.CampaignTypeId == 3)  //Enrollment & Member
+                    if (campaign.CampaignTypeId == 3)  //Enrollment & Member
                     {
                         if ((isExist != null && isExist.BirthDate == null) || isExist == null)
                         {
                             ConsumerRequestModel dbConsumer = new ConsumerRequestModel();
-                            if(isExist != null)
+                            if (isExist != null)
                             {
 
                                 dbConsumer.Id = isExist.Id;
@@ -131,7 +155,7 @@ namespace CSP_Redemption_WebApi.Services
                             response.IsExist = true;
                         }
 
-                            
+
                     }
                     else
                     {
@@ -163,7 +187,7 @@ namespace CSP_Redemption_WebApi.Services
                             response.IsSuccess = true;
                             response.IsExist = false;
                         }
-                    }   
+                    }
                 }
                 else
                 {
@@ -212,7 +236,8 @@ namespace CSP_Redemption_WebApi.Services
                     CreatedDate = DateTime.Now,
                 };
                 try
-                {   if(consumerRequest.Id > 0)
+                {
+                    if (consumerRequest.Id > 0)
                     {
                         consumer.Id = consumerRequest.Id;
                         var isCreated = await this.consumerRepository.UpdateAsync(consumer);
@@ -242,7 +267,7 @@ namespace CSP_Redemption_WebApi.Services
                             response.IsSuccess = false;
                             response.Message = "Internal server error.";
                         }
-                        
+
                     }
                     else
                     {
@@ -279,15 +304,15 @@ namespace CSP_Redemption_WebApi.Services
                             response.Message = "Internal server error.";
                         }
                     }
-                    
+
                 }
                 catch (Exception ex)
                 {
                     response.Message = ex.Message;
                 }
             }
-           
-            
+
+
             return response;
         }
 
@@ -301,7 +326,7 @@ namespace CSP_Redemption_WebApi.Services
             {
                 var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
                 tran.CampaignId = campaign.Id;
-               // tran.ConsumerId = consumerRequest.ConsumerId;
+                // tran.ConsumerId = consumerRequest.ConsumerId;
                 tran.Token = dataConsumer.Token;
                 tran.Code = dataConsumer.Code;
                 tran.Latitude = dataConsumer.Latitude;
@@ -334,13 +359,13 @@ namespace CSP_Redemption_WebApi.Services
                     {
                         if (dbQrCode.EnrollmentId == null)
                         {
-                          
+
                             response.Message = campaign.WinMessage;
                             response.StatusTypeCode = "SUCCESS";
 
                             tran.TransactionTypeId = 4;
                             tran.ResponseMessage = campaign.WinMessage;
-                            
+
 
                         }
                         else
@@ -387,7 +412,7 @@ namespace CSP_Redemption_WebApi.Services
                     await this.transactionRepository.CreateTransactionErrorAsync(tran);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
             }
@@ -406,32 +431,32 @@ namespace CSP_Redemption_WebApi.Services
                 {
                     var consumer = new Consumer()
                     {
-                         FirstName = dataConsumer.FirstName,
-                         LastName = dataConsumer.LastName,
-                         Email = dataConsumer.Email,
-                         Phone = dataConsumer.Phone,
-                         BirthDate = dataConsumer.BirthDate,
-                         Address1 = dataConsumer.Address1,
-                         TumbolCode = dataConsumer.TumbolCode,
-                         AmphurCode = dataConsumer.AmphurCode,
-                         ProvinceCode = dataConsumer.ProvinceCode,
-                         ZipCode = dataConsumer.ZipCode,
-                         ConsumerSourceId = 1,
-                         BrandId = campaign.BrandId,
-                         CampaignId = dataConsumer.CampaignId,
-                         Point = 0 ,
-                         IsBodycare = false,
-                         IsMakeup = false,
-                         IsSkincare = false,
-                         IsSupplements = false,
-                         CreatedBy = 0,
-                         CreatedDate = DateTime.Now
+                        FirstName = dataConsumer.FirstName,
+                        LastName = dataConsumer.LastName,
+                        Email = dataConsumer.Email,
+                        Phone = dataConsumer.Phone,
+                        BirthDate = dataConsumer.BirthDate,
+                        Address1 = dataConsumer.Address1,
+                        TumbolCode = dataConsumer.TumbolCode,
+                        AmphurCode = dataConsumer.AmphurCode,
+                        ProvinceCode = dataConsumer.ProvinceCode,
+                        ZipCode = dataConsumer.ZipCode,
+                        ConsumerSourceId = 1,
+                        BrandId = campaign.BrandId,
+                        CampaignId = dataConsumer.CampaignId,
+                        Point = 0,
+                        IsBodycare = false,
+                        IsMakeup = false,
+                        IsSkincare = false,
+                        IsSupplements = false,
+                        CreatedBy = 0,
+                        CreatedDate = DateTime.Now
 
 
                     };
 
                     Consumer isExist = await this.consumerRepository.IsExist(consumer);
-                    if(isExist == null)
+                    if (isExist == null)
                     {
                         var isCreated = await this.consumerRepository.CreateAsync(consumer, dataConsumer.ProductType);
                         if (isCreated.IsSuccess)
@@ -452,7 +477,7 @@ namespace CSP_Redemption_WebApi.Services
                         response.Message = campaign.WinMessage;
                         response.StatusTypeCode = "SUCCESS";
                     }
-                    
+
                 }
                 else
                 {
@@ -501,7 +526,7 @@ namespace CSP_Redemption_WebApi.Services
 
                     if (campaign.CampaignTypeId == 3) //Enrollment & Member
                     {
-                        
+
                         //qrCode.Code = consumerRequest.Code;
                         //var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
                         //if(dbQrCode != null)
@@ -549,7 +574,7 @@ namespace CSP_Redemption_WebApi.Services
                         //    tran.TransactionTypeId = 2;
                         //    tran.ResponseMessage = campaign.QrCodeNotExistMessage;
                         //}
-                        
+
                     }
                     else
                     {
@@ -654,9 +679,9 @@ namespace CSP_Redemption_WebApi.Services
                 {
                     await this.transactionRepository.CreateTransactionErrorAsync(tran);
                 }
-   
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
             }
@@ -719,7 +744,7 @@ namespace CSP_Redemption_WebApi.Services
                         countLine++;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     if (File.Exists(filePath)) File.Delete(filePath);
 
@@ -735,7 +760,7 @@ namespace CSP_Redemption_WebApi.Services
                     response.IsSuccess = await this.consumerRepository.ImportFileAsync(consumers);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
                 if (File.Exists(filePath)) File.Delete(filePath);
@@ -744,7 +769,7 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(FiltersModel data , int brandId)
+        public async Task<FileResponseDataBinding> ExportTextFileConsumerByBrandId(FiltersModel data, int brandId)
         {
             FileResponseDataBinding result = new FileResponseDataBinding();
             try
@@ -752,7 +777,7 @@ namespace CSP_Redemption_WebApi.Services
                 var consumersDb = await this.consumerRepository.ExportTextFileConsumerByBrandIdAsync(data, brandId);
                 if (consumersDb.Count() > 0)
                 {
-                    string fileName = DateTime.Now.ToString("yyyy-MM-dd")+"_"+ brandId+"_"+"Consumers.txt";
+                    string fileName = DateTime.Now.ToString("yyyy-MM-dd") + "_" + brandId + "_" + "Consumers.txt";
                     string filePath = Path.Combine(@"Upload\" + fileName);
                     if (!File.Exists(filePath))
                     {
@@ -766,12 +791,12 @@ namespace CSP_Redemption_WebApi.Services
                                 string Tumbol = item.TumbolCodeNavigation == null ? "" : item.TumbolCodeNavigation.NameTh;
                                 string Amphur = item.AmphurCodeNavigation == null ? "" : item.AmphurCodeNavigation.NameTh;
                                 string Province = item.ProvinceCodeNavigation == null ? "" : item.ProvinceCodeNavigation.NameTh;
-                                writer.WriteLine(item.FirstName + "|" + 
-                                    item.LastName + "|" + 
-                                    item.Email + "|" + 
-                                    item.Phone + "|" + 
-                                    item.BirthDate.Value.ToString("yyyy-MM-dd")+ "|" + 
-                                    item.Address1+ "|" +
+                                writer.WriteLine(item.FirstName + "|" +
+                                    item.LastName + "|" +
+                                    item.Email + "|" +
+                                    item.Phone + "|" +
+                                    item.BirthDate.Value.ToString("yyyy-MM-dd") + "|" +
+                                    item.Address1 + "|" +
                                     Tumbol + "|" +
                                     Amphur + "|" +
                                     Province + "|" +
@@ -799,7 +824,7 @@ namespace CSP_Redemption_WebApi.Services
             return result;
         }
 
-        public async Task<ResponseModel> SendSelected(List<Consumer> enrollments, string channel, int brandId)
+        public async Task<ResponseModel> SendSelected(List<Consumer> enrollments, string channel, int brandId, int promotion)
         {
             var response = new ResponseModel();
             try
@@ -813,6 +838,7 @@ namespace CSP_Redemption_WebApi.Services
                     channel = channel,
                     type = "consumer",
                     id = intArray,
+                    promotion = promotion
 
                 });
                 var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");
@@ -832,7 +858,7 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId)
+        public async Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId, int promotion)
         {
             var response = new ResponseModel();
             try
@@ -849,6 +875,7 @@ namespace CSP_Redemption_WebApi.Services
                         channel = channel,
                         type = "consumer",
                         id = intArray,
+                        promotion = promotion
 
                     });
                     var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");

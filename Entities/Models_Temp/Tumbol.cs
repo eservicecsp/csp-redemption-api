@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSP_Redemption_WebApi.Entities.Models
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
-    public partial class Province
+    public partial class Tumbol
     {
-        public Province()
+        public Tumbol()
         {
-            Amphur = new HashSet<Amphur>();
             Consumer = new HashSet<Consumer>();
             Dealer = new HashSet<Dealer>();
         }
@@ -15,10 +14,10 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string Code { get; set; }
         public string NameTh { get; set; }
         public string NameEn { get; set; }
-        public int ZoneId { get; set; }
+        public string ZipCode { get; set; }
+        public string AmphurCode { get; set; }
 
-        public virtual Zone Zone { get; set; }
-        public virtual ICollection<Amphur> Amphur { get; set; }
+        public virtual Amphur AmphurCodeNavigation { get; set; }
         public virtual ICollection<Consumer> Consumer { get; set; }
         public virtual ICollection<Dealer> Dealer { get; set; }
     }

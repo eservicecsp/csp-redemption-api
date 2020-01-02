@@ -21,7 +21,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<ResponseModel> CreateAsync(Consumer consumer, List<string> ProductType);
         Task<Consumer> GetConsumerByIdAsync(int consumerId);
         Task<bool> UpdateAsync(Consumer consumer);
-        Task<bool> ImportFileAsync(List<Consumer>  consumers);
+        Task<bool> ImportFileAsync(List<Consumer> consumers);
         Task<List<Consumer>> ExportTextFileConsumerByBrandIdAsync(FiltersModel data, int brandId);
     }
     public class ConsumerRepository : IConsumerRepository
@@ -58,7 +58,7 @@ namespace CSP_Redemption_WebApi.Repositories
                 //var consumers = Context.Consumer.AsQueryable();
                 //List<Consumer> consumers = new List<Consumer>();
                 //var consumers = Context.Consumer.Where(x => x.BrandId == data.BrandId);
-                var query = Context.Consumer.Where(x => x.BrandId == data.BrandId);
+                var query = Context.Consumer.Include(x => x.ConsumerProductType).Where(x => x.BrandId == data.BrandId);
                 //if (data.filter != null)
                 //{
                 //    consumers = consumers.Where(x => x.FirstName.Contains(data.filter) ||
@@ -67,34 +67,38 @@ namespace CSP_Redemption_WebApi.Repositories
                 //                                 x.Email.Contains(data.filter)
                 //                         );
                 //}
-                if(data.filters != null)
-                {
-                    if (data.filters.isBodycare == true || data.filters.isMakeup == true || data.filters.isSkincare == true || data.filters.isSupplements == true)
-                    {
-                        query = query.Where(x => (x.IsBodycare == true && (data.filters.isBodycare == true)) ||
-                                      (x.IsMakeup == true && (data.filters.isMakeup == true)) ||
-                                      (x.IsSkincare == true && (data.filters.isSkincare == true)) ||
-                                      (x.IsSupplements == true && (data.filters.isSupplements == true)));
-                    }
-                }
+                //if(data.filters != null)
+                //{
+                //    if (data.filters.isBodycare == true || data.filters.isMakeup == true || data.filters.isSkincare == true || data.filters.isSupplements == true)
+                //    {
+                //        query = query.Where(x => (x.IsBodycare == true && (data.filters.isBodycare == true)) ||
+                //                      (x.IsMakeup == true && (data.filters.isMakeup == true)) ||
+                //                      (x.IsSkincare == true && (data.filters.isSkincare == true)) ||
+                //                      (x.IsSupplements == true && (data.filters.isSupplements == true)));
+                //    }
+                //}
                 
 
-                if (data.filters == null)
+                if (data.filters != null)
                 {
-                    query = query;
-                }
-                else
-                {
+                    if (data.filters.productTypes.Count() > 0)
+                    {
+
+                        query = query.Where(y => y.ConsumerProductType.Any(x => data.filters.productTypes.Contains(x.ProductTypeId)));
+
+
+                    }
+
                     if (data.filters.birthOfMonth > 0)
                     {
                         query = query.Where(x => x.BirthDate.Value.Month == data.filters.birthOfMonth);
                     }
 
-                    if (data.filters.phone != null )
+                    if (data.filters.phone != null)
                     {
                         query = query.Where(x => x.Phone.Contains(data.filters.phone));
                     }
-                    if (data.filters.email != null )
+                    if (data.filters.email != null)
                     {
                         query = query.Where(x => x.Email.Contains(data.filters.email));
                     }
@@ -106,7 +110,7 @@ namespace CSP_Redemption_WebApi.Repositories
                     query = query.Where(x => x.BirthDate.Value.Year >= startYear.Year && x.BirthDate.Value.Year <= endYear.Year);
                 }
 
-                if(type == "WEB")
+                if (type == "WEB")
                 {
                     if (data.sortActive != null)
                     {
@@ -178,7 +182,7 @@ namespace CSP_Redemption_WebApi.Repositories
                     }
                 }
 
-                
+
                 return await query.ToListAsync();
             }
         }
@@ -199,33 +203,35 @@ namespace CSP_Redemption_WebApi.Repositories
 
                 //return await consumers.CountAsync();
                 var query = Context.Consumer.Where(x => x.BrandId == data.BrandId);
+                //if (data.filters != null)
+                //{
+                //    if (data.filters.isBodycare == true || data.filters.isMakeup == true || data.filters.isSkincare == true || data.filters.isSupplements == true)
+                //    {
+                //        query = query.Where(x => (x.IsBodycare == true && (data.filters.isBodycare == true)) ||
+                //                      (x.IsMakeup == true && (data.filters.isMakeup == true)) ||
+                //                      (x.IsSkincare == true && (data.filters.isSkincare == true)) ||
+                //                      (x.IsSupplements == true && (data.filters.isSupplements == true)));
+                //    }
+                //}
+               
+
                 if (data.filters != null)
                 {
-                    if (data.filters.isBodycare == true || data.filters.isMakeup == true || data.filters.isSkincare == true || data.filters.isSupplements == true)
+                    if (data.filters.productTypes.Count() > 0)
                     {
-                        query = query.Where(x => (x.IsBodycare == true && (data.filters.isBodycare == true)) ||
-                                      (x.IsMakeup == true && (data.filters.isMakeup == true)) ||
-                                      (x.IsSkincare == true && (data.filters.isSkincare == true)) ||
-                                      (x.IsSupplements == true && (data.filters.isSupplements == true)));
+                        query = query.Where(y => y.ConsumerProductType.Any(x => data.filters.productTypes.Contains(x.ProductTypeId)));
                     }
-                }
 
-                if (data.filters == null)
-                {
-                    query = query;
-                }
-                else
-                {
                     if (data.filters.birthOfMonth > 0)
                     {
                         query = query.Where(x => x.BirthDate.Value.Month == data.filters.birthOfMonth);
                     }
 
-                    if (data.filters.phone != null )
+                    if (data.filters.phone != null)
                     {
                         query = query.Where(x => x.Phone.Contains(data.filters.phone));
                     }
-                    if (data.filters.email != null )
+                    if (data.filters.email != null)
                     {
                         query = query.Where(x => x.Email.Contains(data.filters.email));
                     }
@@ -271,7 +277,7 @@ namespace CSP_Redemption_WebApi.Repositories
                         response.Message = ex.Message;
                     }
 
-                }  
+                }
             }
             return response;
         }
@@ -288,7 +294,7 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-              
+
                 var dbConsumer = await Context.Consumer.SingleAsync(x => x.Id == consumer.Id);
                 var data = new Consumer
                 {
@@ -367,15 +373,15 @@ namespace CSP_Redemption_WebApi.Repositories
                         isSuccess = true;
                         transaction.Commit();
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         transaction.Rollback();
                         throw;
                     }
-                    
+
                 }
             }
-                return isSuccess;
+            return isSuccess;
         }
 
         public async Task<List<Consumer>> ExportTextFileConsumerByBrandIdAsync(FiltersModel data, int brandId)
@@ -398,12 +404,9 @@ namespace CSP_Redemption_WebApi.Repositories
                     query = query.Where(x => x.Email.Contains(data.email));
                 }
 
-                if (data.isBodycare == true || data.isMakeup == true || data.isSkincare == true || data.isSupplements == true)
+                if (data.productTypes != null)
                 {
-                    query = query.Where(x => (x.IsBodycare == true && (data.isBodycare == true)) ||
-                                  (x.IsMakeup == true && (data.isMakeup == true)) ||
-                                  (x.IsSkincare == true && (data.isSkincare == true)) ||
-                                  (x.IsSupplements == true && (data.isSupplements == true)));
+                    query = query.Where(y => y.ConsumerProductType.Any(x => data.productTypes.Contains(x.ProductTypeId)));
                 }
                 var today = DateTime.Today;
 

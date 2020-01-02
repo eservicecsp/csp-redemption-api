@@ -59,6 +59,7 @@ namespace CSP_Redemption_WebApi.Services
                         QrCodeNotExistMessage = campaign.QrCodeNotExistMessage,
                         Quantity = campaign.Quantity,
                         WinMessage = campaign.WinMessage,
+                        GrandTotal = campaign.GrandTotal == null? 0: campaign.GrandTotal.Value
                     });
                 }
 
@@ -125,7 +126,14 @@ namespace CSP_Redemption_WebApi.Services
                  if(requestModel.Campaign.CampaignTypeId == 3)  //Enrollment & Member
                 {
                     var qrToken = this.GenerateTokens(1);
-                    var qrCodes = this.GenerateCode(qrToken[0].Token, requestModel.Campaign.Quantity);
+
+                    int percentWaste = requestModel.Campaign.Waste == null ? 0 : requestModel.Campaign.Waste.Value;
+                    double waste = ((double)requestModel.Campaign.Quantity * (double)percentWaste) / 100;
+                    int Ceiling = (int)Math.Ceiling(waste);
+                    int grandTotal = requestModel.Campaign.Quantity + Ceiling;
+
+                    requestModel.Campaign.GrandTotal = grandTotal;
+                    var qrCodes = this.GenerateCode(qrToken[0].Token, grandTotal);
                     var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
                     if (hasSaved.IsSuccess)
                     {
@@ -139,7 +147,20 @@ namespace CSP_Redemption_WebApi.Services
                 }
                 else if(requestModel.Campaign.CampaignTypeId == 1)//Collecting
                 {
-                    var qrCodes = this.GenerateTokens(requestModel.Campaign.Quantity);
+                    int[] n = new int[requestModel.Peices.Count];
+                    int grandTotal = 0;
+                    for (int i = 0; i < requestModel.Peices.Count; i++)
+                    {
+                        int percentWaste = requestModel.Campaign.Waste == null ? 0 : requestModel.Campaign.Waste.Value;
+                        double waste = ((double)requestModel.Campaign.Quantity * (double)percentWaste) / 100;
+                        int Ceiling = (int)Math.Ceiling(waste);
+                        n[i] = Ceiling;
+                        grandTotal += Ceiling;
+                    }
+                    //int Ceiling = (int)Math.Ceiling((requestModel.Campaign.Quantity * requestModel.Campaign.Waste) / 100);
+                    requestModel.Campaign.GrandTotal = grandTotal;
+                    var qrCodes = this.GenerateTokens(grandTotal);
+                    requestModel.Peices = n.ToList();
                     var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
                     if (hasSaved.IsSuccess)
                     {
@@ -152,7 +173,13 @@ namespace CSP_Redemption_WebApi.Services
                 }
                 else //Point & Reward
                 {
-                    var qrCodes = this.GenerateTokensPoint(requestModel.Campaign.Quantity, requestModel.Point);
+                    int percentWaste = requestModel.Campaign.Waste == null ? 0 : requestModel.Campaign.Waste.Value;
+                    double waste = ((double)requestModel.Campaign.Quantity * (double)percentWaste) / 100;
+                    int Ceiling = (int)Math.Ceiling(waste);
+                    int grandTotal = requestModel.Campaign.Quantity + Ceiling;
+
+                    requestModel.Campaign.GrandTotal = grandTotal;
+                    var qrCodes = this.GenerateTokensPoint(grandTotal, requestModel.Point);
                     var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
                     if (hasSaved.IsSuccess)
                     {
@@ -289,7 +316,10 @@ namespace CSP_Redemption_WebApi.Services
                        DuplicateMessage = campaignDb.DuplicateMessage,
                        QrCodeNotExistMessage = campaignDb.QrCodeNotExistMessage,
                        WinMessage = campaignDb.WinMessage,
-                       BrandId = campaignDb.BrandId
+                       BrandId = campaignDb.BrandId,
+                       GrandTotal = campaignDb.GrandTotal == null ? 0 : campaignDb.GrandTotal.Value,
+                       Waste = campaignDb.Waste == null ? 0 : campaignDb.Waste.Value
+
                     };
                     response.Campaign = campaign;
                     response.IsSuccess = true;

@@ -72,11 +72,17 @@ namespace CSP_Redemption_WebApi.Services
                 if (dealers != null)
                 {
                     dealer.Id = dealers.Id;
+                    dealer.BranchNo = dealers.BranchNo;
                     dealer.Name = dealers.Name;
                     dealer.Email = dealers.Email;
                     dealer.TaxNo = dealers.TaxNo;
                     dealer.Phone = dealers.Phone;
                     dealer.Tel = dealers.Tel;
+                    dealer.Address1 = dealers.Address1;
+                    dealer.ProvinceCode = dealers.ProvinceCode;
+                    dealer.AmphurCode = dealers.AmphurCode;
+                    dealer.TumbolCode = dealers.TumbolCode;
+                    dealer.ZipCode = dealers.ZipCode;
                 }
 
                 response.Dealer = dealer;

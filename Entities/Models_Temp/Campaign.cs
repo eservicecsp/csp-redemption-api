@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSP_Redemption_WebApi.Entities.Models
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
     public partial class Campaign
     {
@@ -20,8 +20,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string Url { get; set; }
         public int Quantity { get; set; }
         public int? TotalPeice { get; set; }
-        public int? Waste { get; set; }
-        public int? GrandTotal { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string AlertMessage { get; set; }
