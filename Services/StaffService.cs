@@ -68,6 +68,7 @@ namespace CSP_Redemption_WebApi.Services
 
                     response.IsSuccess = true;
                     response.Token = staffToken;
+                    response.ResetPasswordToken = dbStaff.ResetPasswordToken;
                 }
                 response.IsSuccess = true;
             }
