@@ -17,6 +17,8 @@ namespace CSP_Redemption_WebApi.Services
         Task<ResponseModel> CreateAsync(Staff staff);
         Task<StaffResponseModel> GetStaffsById(int id);
         Task<ResponseModel> UpdateAsync(Staff staff);
+        Task<ResetPasswordTokenResponseModel> GetResetPasswordTokenAsync(string email);
+        Task<ResponseModel> ResetPasswordAsync(Staff staff);
     }
 
     public class StaffService : IStaffService
@@ -66,6 +68,7 @@ namespace CSP_Redemption_WebApi.Services
 
                     response.IsSuccess = true;
                     response.Token = staffToken;
+                    response.ResetPasswordToken = dbStaff.ResetPasswordToken;
                 }
                 response.IsSuccess = true;
             }
@@ -367,5 +370,64 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
+        public async Task<ResetPasswordTokenResponseModel> GetResetPasswordTokenAsync(string email)
+        {
+            var response = new ResetPasswordTokenResponseModel();
+            try
+            {
+                var staff = await this.staffRepository.GetStaffByEmailAsync(email);
+                if(staff == null)
+                {
+                    response.Message = "Staff not found.";
+                    return response;
+                }
+
+                staff.ResetPasswordToken = Guid.NewGuid().ToString();
+                if (await this.staffRepository.UpdateAsync(staff))
+                {
+                    response.IsSuccess = true;
+                    response.Token = staff.ResetPasswordToken;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ResponseModel> ResetPasswordAsync(Staff staff)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var dbStaff = await this.staffRepository.GetStaffByEmailAsync(staff.Email);
+                if(dbStaff == null)
+                {
+                    response.Message = "Staff not found.";
+                    return response;
+                }
+
+                if(dbStaff.ResetPasswordToken != staff.ResetPasswordToken)
+                {
+                    response.Message = "Invalid token.";
+                    return response;
+                }
+
+                dbStaff.Password = Helpers.Argon2Helper.HashPassword(staff.Email, staff.Password);
+                dbStaff.ResetPasswordToken = null;
+                if (await this.staffRepository.UpdateAsync(dbStaff))
+                {
+                    response.IsSuccess = true;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return response;
+        }
     }
 }

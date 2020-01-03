@@ -32,8 +32,9 @@ namespace CSP_Redemption_WebApi.Repositories
                 var menuRole = await Context.RoleFunction.Where(x => x.RoleId == roleId).ToListAsync();
                 foreach (var item in menuRole)
                 {
-                    var menu = await Context.Function.Where(x=>x.Id == item.FunctionId).FirstOrDefaultAsync();
-                    menus.Add(menu);
+                    var menu = await Context.Function.Where(x => x.Id == item.FunctionId && x.IsActived == true).FirstOrDefaultAsync();
+                    if (menu != null)
+                        menus.Add(menu);
                 }
                 return menus;
             }

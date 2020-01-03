@@ -22,6 +22,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int BrandId { get; set; }
         public int RoleId { get; set; }
         public bool IsActived { get; set; }
+        public string ResetPasswordToken { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public int? ModifiedBy { get; set; }

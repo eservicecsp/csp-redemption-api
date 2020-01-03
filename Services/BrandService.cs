@@ -140,6 +140,7 @@ namespace CSP_Redemption_WebApi.Services
                         Phone = model.Staff.Phone,
                         IsActived = true,
                         CreatedDate = DateTime.Now,
+                        ResetPasswordToken = Guid.NewGuid().ToString()
                     };
 
                     response.IsSuccess = await this._brandRepository.CreateAsync(brand, staff);
