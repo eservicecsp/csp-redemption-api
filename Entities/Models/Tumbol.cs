@@ -8,6 +8,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public Tumbol()
         {
             Consumer = new HashSet<Consumer>();
+            Dealer = new HashSet<Dealer>();
         }
 
         public string Code { get; set; }
@@ -18,5 +19,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
 
         public virtual Amphur AmphurCodeNavigation { get; set; }
         public virtual ICollection<Consumer> Consumer { get; set; }
+        public virtual ICollection<Dealer> Dealer { get; set; }
     }
 }

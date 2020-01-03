@@ -159,6 +159,9 @@ namespace CSP_Redemption_WebApi.Services
                     {
                         string url = campaign.Url.Replace("[#campaignId#]", campaignId.ToString());
                         url = url.Replace("[#token#]", token.Token);
+                        string[] str1 = url.Split("?".ToCharArray());
+                        string fullUrl = $"{ str1[0]}/register?{str1[1]}";
+                        //
                         var intArray = enrollments.Select(x => x.Id).ToArray();
                         var mainUri = this.configuration["GMCServices:Uri"];
                         var apiPath = this.configuration["GMCServices:AutomationApiPath"];
@@ -168,7 +171,7 @@ namespace CSP_Redemption_WebApi.Services
                             channel = channel,
                             type = "enrollment",
                             id = intArray,
-                            url = url.ToString()
+                            url = fullUrl.ToString()
 
                         });
                         var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");
@@ -215,6 +218,9 @@ namespace CSP_Redemption_WebApi.Services
                         var enrollments = await this.enrollmentRepository.GetEnrollmentsByBrandIdAsync(data, "API");
                         string url = campaign.Url.Replace("[#campaignId#]", campaignId.ToString());
                         url = url.Replace("[#token#]", token.Token);
+                        string[] str1 = url.Split("?".ToCharArray());
+                        string fullUrl = $"{ str1[0]}/register?{str1[1]}";
+
                         var intArray = enrollments.Select(x => x.Id).ToArray();
                         var mainUri = this.configuration["GMCServices:Uri"];
                         var apiPath = this.configuration["GMCServices:AutomationApiPath"];
@@ -223,7 +229,7 @@ namespace CSP_Redemption_WebApi.Services
                             channel = channel,
                             type = "enrollment",
                             id = intArray,
-                            url = url.ToString()
+                            url = fullUrl.ToString()
 
                         });
                         var content = new StringContent(stringPayload, Encoding.UTF8, "application/json");

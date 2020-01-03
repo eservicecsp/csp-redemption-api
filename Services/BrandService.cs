@@ -15,6 +15,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<BrandsResponseModel> GetBrandsAsync();
         Task<BrandResponseModel> GetBrandAsync(int id);
         Task<ResponseModel> Register(BrandRegisterRequestModel model);
+        Task<ResponseModel> UpdateAsync(BrandRegisterRequestModel model);
     }
     public class BrandService : IBrandService
     {
@@ -108,10 +109,16 @@ namespace CSP_Redemption_WebApi.Services
             try
             {
                 bool isExist = await _brandRepository.GetBrandByCodeAsync(model.Brand.Code.ToUpper());
+                Staff isExistStaff = await this._staffRepository.GetStaffByEmailAsync(model.Staff.Email);
                 if (isExist)
                 {
                     response.IsSuccess = false;
                     response.Message = "Code is duplicated.";
+                }
+                else if(isExistStaff != null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Email is duplicated.";
                 }
                 else
                 {
@@ -121,7 +128,9 @@ namespace CSP_Redemption_WebApi.Services
                         Name = model.Brand.Name,
                         IsOwner = false
                     };
-                    string newPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, model.Staff.Password);
+                    string getPassword =  DateTime.Now.ToString("yyyyMMddHHmmss");
+                    //string newPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, model.Staff.Password); 
+                    string newPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, getPassword);
                     var staff = new Staff()
                     {
                         FirstName = model.Staff.FirstName,
@@ -134,7 +143,40 @@ namespace CSP_Redemption_WebApi.Services
                     };
 
                     response.IsSuccess = await this._brandRepository.CreateAsync(brand, staff);
+                    response.Message = getPassword;
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+
+
+            return response;
+        }
+
+        public async Task<ResponseModel> UpdateAsync(BrandRegisterRequestModel model)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var brand = new Brand()
+                {
+                    Id = model.Brand.Id,
+                    Name = model.Brand.Name,
+                };
+                var staff = new Staff()
+                {
+                    Id = model.Staff.Id,
+                    FirstName = model.Staff.FirstName,
+                    LastName = model.Staff.LastName,
+                    Phone = model.Staff.Phone,
+                    ModifiedBy = model.Staff.CreatedBy,
+                    ModifiedDate = DateTime.Now,
+                    IsActived = model.Staff.IsActived
+                };
+
+                response.IsSuccess = await this._brandRepository.UpdateAsync(brand, staff);
             }
             catch (Exception ex)
             {

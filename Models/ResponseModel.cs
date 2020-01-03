@@ -90,8 +90,8 @@ namespace CSP_Redemption_WebApi.Models
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
-        public int length { get; set; }
-        public List<Consumer> data { get; set; }
+        public int Length { get; set; }
+        public List<ConsumerModel> Data { get; set; }
     }
 
     public class EnrollmentsByPaginationResponseModel
@@ -143,7 +143,7 @@ namespace CSP_Redemption_WebApi.Models
     public class TransactionModel
     {
         public int Id { get; set; }
-        public int ConsumerId { get; set; }
+        public int? ConsumerId { get; set; }
         public string Token { get; set; }
         public string Code { get; set; }
         public int Point { get; set; }
@@ -184,6 +184,8 @@ namespace CSP_Redemption_WebApi.Models
         public int BrandId { get; set; }
         public string Url { get; set; }
         public int Quantity { get; set; }
+        public int? Waste { get; set; }
+        public int? GrandTotal { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string AlertMessage { get; set; }
@@ -232,6 +234,7 @@ namespace CSP_Redemption_WebApi.Models
     public class DealerModel
     {
         public int Id { get; set; }
+        public string BranchNo { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string TaxNo { get; set; }
@@ -239,6 +242,11 @@ namespace CSP_Redemption_WebApi.Models
         public string Tel { get; set; }
         public int BrandId { get; set; }
         public int CreatedBy { get; set; }
+        public string Address1 { get; set; }
+        public string TumbolCode { get; set; }
+        public string AmphurCode { get; set; }
+        public string ProvinceCode { get; set; }
+        public string ZipCode { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 

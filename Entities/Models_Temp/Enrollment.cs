@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSP_Redemption_WebApi.Entities.Models
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
     public partial class Enrollment
     {
@@ -14,7 +14,5 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public DateTime CreatedDate { get; set; }
         public int? CreatedBy { get; set; }
         public bool IsConsumer { get; set; }
-
-        public virtual Campaign Campaign { get; set; }
     }
 }

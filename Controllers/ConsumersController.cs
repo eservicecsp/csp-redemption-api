@@ -55,9 +55,14 @@ namespace CSP_Redemption_WebApi.Controllers
             bool isSkincare = false,
             bool isMakeup = false,
             bool isBodycare = false,
-            bool isSupplement = false
+            bool isSupplement = false,
+            string productTypes = ""
             )
         {
+
+            var token = Request.Headers["Authorization"].ToString();
+            int brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            List<int> xxx ;
             var data = new FiltersModel()
             {
                 startAge = startAge,
@@ -68,11 +73,14 @@ namespace CSP_Redemption_WebApi.Controllers
                 isSkincare = isSkincare,
                 isMakeup = isMakeup,
                 isBodycare = isBodycare,
-                isSupplements = isSupplement
+                isSupplements = isSupplement ,
 
             };
-            var token = Request.Headers["Authorization"].ToString();
-            int brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            if (productTypes!= null){
+                data.productTypes = productTypes.Split(',').Select(Int32.Parse).ToList();
+            }
+
+           
             var response = await this.consumerService.ExportTextFileConsumerByBrandId(data, brandId);
 
             // Create file text index
@@ -90,21 +98,21 @@ namespace CSP_Redemption_WebApi.Controllers
 
         // public async Task<IActionResult> ImportJob(ImportDataBinding data) => Ok(await this.enrollmentService.ImportFile(data));
         [HttpPost("SendSelected")]
-        public async Task<IActionResult> SendSelected(List<Consumer> consumers, string channel)
+        public async Task<IActionResult> SendSelected(List<Consumer> consumers, string channel, int promotion)
         {
             var token = Request.Headers["Authorization"].ToString();
-            return Ok(await this.consumerService.SendSelected(consumers, channel, Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"))));
+            return Ok(await this.consumerService.SendSelected(consumers, channel, Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId")), promotion));
         }
 
         [HttpPost("SendAll")]
-        public async Task<IActionResult> SendAll(FiltersModel data, string channel)
+        public async Task<IActionResult> SendAll(FiltersModel data, string channel, int promotion)
         {
             var dataModel = new PaginationModel()
             {
                 filters = data
             };
             var token = Request.Headers["Authorization"].ToString();
-            return Ok(await this.consumerService.SendAll(dataModel, channel, Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"))));
+            return Ok(await this.consumerService.SendAll(dataModel, channel, Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId")), promotion));
         }
     }
 }

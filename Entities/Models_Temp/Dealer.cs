@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSP_Redemption_WebApi.Entities.Models
+namespace CSP_Redemption_WebApi.Entities.Models_Temp
 {
     public partial class Dealer
     {
+        public Dealer()
+        {
+            Campaign = new HashSet<Campaign>();
+        }
+
         public int Id { get; set; }
         public string BranchNo { get; set; }
         public string Name { get; set; }

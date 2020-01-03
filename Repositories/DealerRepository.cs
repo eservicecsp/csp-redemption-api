@@ -36,15 +36,18 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 Dealer thisRow = await Context.Dealer.SingleAsync(x => x.Id == dealer.Id);
-                //thisRow.Id = thisRow.Id;
+                thisRow.BranchNo = dealer.BranchNo;
                 thisRow.Name = dealer.Name;
                 thisRow.Email = dealer.Email;
                 thisRow.TaxNo = dealer.TaxNo;
                 //thisRow.BrandId = thisRow.BrandId;
                 thisRow.Phone = dealer.Phone;
                 thisRow.Tel = dealer.Tel;
-                //thisRow.CreatedBy = thisRow.CreatedBy;
-                //thisRow.CreatedDate = thisRow.CreatedDate;
+                thisRow.Address1 = dealer.Address1;
+                thisRow.ProvinceCode = dealer.ProvinceCode;
+                thisRow.AmphurCode = dealer.AmphurCode;
+                thisRow.TumbolCode = dealer.TumbolCode;
+                thisRow.ZipCode = dealer.ZipCode;
                 Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
                 return await Context.SaveChangesAsync() > 0;
 
