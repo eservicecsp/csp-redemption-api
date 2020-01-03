@@ -265,6 +265,13 @@ namespace CSP_Redemption_WebApi.Models
         public StaffModel Staff { get; set; }
     }
 
+    public class ResetPasswordTokenResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public string Token { get; set; }
+    }
+
     public class StaffModel
     {
         public int Id { get; set; }

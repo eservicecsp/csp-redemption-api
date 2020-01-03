@@ -74,7 +74,8 @@ namespace CSP_Redemption_WebApi.Repositories
                 thisRow.FirstName = staff.FirstName;
                 thisRow.LastName = staff.LastName;
                 thisRow.Email = thisRow.Email;
-                thisRow.Phone = thisRow.Password;
+                if(!string.IsNullOrEmpty(staff.Password))
+                    thisRow.Password = staff.Password;
                 thisRow.Phone = staff.Phone;
                 thisRow.BrandId = thisRow.BrandId;
                 thisRow.RoleId = staff.RoleId;
@@ -83,6 +84,7 @@ namespace CSP_Redemption_WebApi.Repositories
                 thisRow.CreatedDate = thisRow.CreatedDate;
                 thisRow.ModifiedBy = staff.ModifiedBy;
                 thisRow.ModifiedDate = staff.ModifiedDate;
+                thisRow.ResetPasswordToken = staff.ResetPasswordToken;
                 Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
                 return await Context.SaveChangesAsync() > 0;
 

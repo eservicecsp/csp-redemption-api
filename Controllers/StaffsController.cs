@@ -89,5 +89,17 @@ namespace CSP_Redemption_WebApi.Controllers
             staff.ModifiedDate = DateTime.Now;
             return Ok(await this.staffService.UpdateAsync(staff));
         }
+
+        [HttpGet("ResetPasswordToken")]
+        public async Task<IActionResult> GetResetPasswordToken(string email)
+        {
+            return Ok(await this.staffService.GetResetPasswordTokenAsync(email));
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(Staff staff)
+        {
+            return Ok(await this.staffService.ResetPasswordAsync(staff));
+        }
     }
 }
