@@ -14,7 +14,9 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<Brand> GetBrandAsync(int id);
         Task<bool> CreateAsync(Brand brand, Staff staff);
         Task<bool> GetBrandByCodeAsync(string code);
-        
+        Task<bool> UpdateAsync(Brand brand, Staff staff);
+
+
     }
     public class BrandRepository : IBrandRepository
     {
@@ -99,6 +101,44 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 return await Context.Brand.AnyAsync(x => x.Code == code.ToUpper());
             }
-        }       
+        }
+
+        public async Task<bool> UpdateAsync(Brand brand, Staff staff)
+        {
+            bool isSuccess = false;
+
+            using (var Context = new CSP_RedemptionContext())
+            {
+                using (var transaction = Context.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+
+                        Brand thisRow = await Context.Brand.SingleAsync(x => x.Id == brand.Id);
+                        thisRow.Name = brand.Name;
+                        Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
+                        Context.SaveChangesAsync();
+
+                        Staff thisStaff = await Context.Staff.SingleAsync(x => x.Id == staff.Id);
+                        thisStaff.FirstName = staff.FirstName;
+                        thisStaff.LastName = staff.LastName;
+                        thisStaff.Phone = staff.Phone;
+                        thisStaff.IsActived = staff.IsActived;
+                        thisStaff.ModifiedBy = staff.ModifiedBy;
+                        thisStaff.ModifiedDate = staff.ModifiedDate;
+
+                        isSuccess = await Context.SaveChangesAsync() > 0;
+                        transaction.Commit();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+
+                    }
+                }
+            }
+            return isSuccess;
+        }
     }
 }

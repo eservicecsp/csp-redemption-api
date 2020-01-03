@@ -37,5 +37,12 @@ namespace CSP_Redemption_WebApi.Controllers
         {
             return Ok(await _brandService.Register(request));
         }
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update(BrandRegisterRequestModel request)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            request.Staff.CreatedBy = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
+            return Ok(await _brandService.UpdateAsync(request));
+        }
     }
 }
