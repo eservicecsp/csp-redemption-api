@@ -108,13 +108,55 @@ namespace CSP_Redemption_WebApi.Models
 
     public class CreateCampaignRequestModel
     {
-        public Campaign Campaign { get; set; }
+        public CampaignModel Campaign { get; set; }
         public List<int> Peices { get; set; }
         public int Point { get; set; }
         public int Product { get; set; }
     }
 
+    //public class CampaignModel
+    //{
+    //    public int Id { get; set; }
+    //    public string Name { get; set; }
+    //    public string Description { get; set; }
+    //    public int CampaignTypeId { get; set; }
+    //    public int BrandId { get; set; }
+    //    public int? DealerId { get; set; }
+    //    public string Url { get; set; }
+    //    public int Quantity { get; set; }
+    //    public int? TotalPeice { get; set; }
+    //    public int? Waste { get; set; }
+    //    public int? GrandTotal { get; set; }
+    //    public DateTime? StartDate { get; set; }
+    //    public DateTime? EndDate { get; set; }
+    //    public string AlertMessage { get; set; }
+    //    public string DuplicateMessage { get; set; }
+    //    public string QrCodeNotExistMessage { get; set; }
+    //    public string WinMessage { get; set; }
+    //    public int? Rows { get; set; }
+    //    public int? Columns { get; set; }
+    //    public string CollectingType { get; set; }
+    //    public int CreatedBy { get; set; }
+    //    public DateTime CreatedDate { get; set; }
+    //    public List<Dealer> dealers { get; set; }
+
+    //    public List<Collection> CollectingData { get; set; }
+    //}
+
+
     #endregion
 
-   
+    public class CollectionModel
+    {
+        public int Id { get; set; }
+  
+        public int Quantity { get; set; }
+        public int Row { get; set; }
+        public int Column { get; set; }
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public string File { get; set; }
+        public string Extension { get; set; }
+
+    }
 }

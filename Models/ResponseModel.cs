@@ -176,14 +176,16 @@ namespace CSP_Redemption_WebApi.Models
     }
     public class CampaignModel
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int CampaignTypeId { get; set; }
-        public int ProductId { get; set; }
         public int BrandId { get; set; }
+        public int Product { get; set; }
+        public int? DealerId { get; set; }
         public string Url { get; set; }
         public int Quantity { get; set; }
+        public int? TotalPeice { get; set; }
         public int? Waste { get; set; }
         public int? GrandTotal { get; set; }
         public DateTime? StartDate { get; set; }
@@ -192,8 +194,14 @@ namespace CSP_Redemption_WebApi.Models
         public string DuplicateMessage { get; set; }
         public string QrCodeNotExistMessage { get; set; }
         public string WinMessage { get; set; }
+        public int? Rows { get; set; }
+        public int? Columns { get; set; }
+        public string CollectingType { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
+        public List<Dealer> Dealers { get; set; }
+
+        public List<CollectionModel> CollectingData { get; set; }
     }
 
     #endregion

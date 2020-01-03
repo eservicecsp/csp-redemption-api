@@ -8,6 +8,7 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
         public Dealer()
         {
             Campaign = new HashSet<Campaign>();
+            CampaignDealer = new HashSet<CampaignDealer>();
         }
 
         public int Id { get; set; }
@@ -32,5 +33,6 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
         public virtual Province ProvinceCodeNavigation { get; set; }
         public virtual Tumbol TumbolCodeNavigation { get; set; }
         public virtual ICollection<Campaign> Campaign { get; set; }
+        public virtual ICollection<CampaignDealer> CampaignDealer { get; set; }
     }
 }

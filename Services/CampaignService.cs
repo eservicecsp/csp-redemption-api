@@ -147,15 +147,15 @@ namespace CSP_Redemption_WebApi.Services
                 }
                 else if(requestModel.Campaign.CampaignTypeId == 1)//Collecting
                 {
-                    int[] n = new int[requestModel.Peices.Count];
+                    int[] n = new int[requestModel.Campaign.CollectingData.Count];
                     int grandTotal = 0;
-                    for (int i = 0; i < requestModel.Peices.Count; i++)
+                    for (int i = 0; i < requestModel.Campaign.CollectingData.Count; i++)
                     {
                         int percentWaste = requestModel.Campaign.Waste == null ? 0 : requestModel.Campaign.Waste.Value;
-                        double waste = ((double)requestModel.Campaign.Quantity * (double)percentWaste) / 100;
+                        double waste = ((double)requestModel.Campaign.CollectingData[i].Quantity * (double)percentWaste) / 100;
                         int Ceiling = (int)Math.Ceiling(waste);
-                        n[i] = Ceiling;
-                        grandTotal += Ceiling;
+                        n[i] = (Ceiling + requestModel.Campaign.CollectingData[i].Quantity);
+                        grandTotal += (Ceiling + requestModel.Campaign.CollectingData[i].Quantity);
                     }
                     //int Ceiling = (int)Math.Ceiling((requestModel.Campaign.Quantity * requestModel.Campaign.Waste) / 100);
                     requestModel.Campaign.GrandTotal = grandTotal;
@@ -309,7 +309,7 @@ namespace CSP_Redemption_WebApi.Services
                        Id = campaignDb.Id,
                        Name = campaignDb.Name,
                        Description = campaignDb.Description,
-                       ProductId = ProductId,
+                       Product = ProductId,
                        StartDate = campaignDb.StartDate,
                        EndDate = campaignDb.EndDate,
                        AlertMessage = campaignDb.AlertMessage,

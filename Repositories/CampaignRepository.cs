@@ -57,9 +57,9 @@ namespace CSP_Redemption_WebApi.Repositories
                     {
                         string connectionString = this.configuration["ConnectionStrings:ApiDatabase"];
 
-                        // Campaign
-                        await Context.Campaign.AddAsync(requestModel.Campaign);
-                        await Context.SaveChangesAsync();
+                        //// Campaign
+                        //await Context.Campaign.AddAsync(requestModel.Campaign);
+                        //await Context.SaveChangesAsync();
 
                         var copyParameters = new[]
                         {
@@ -85,7 +85,7 @@ namespace CSP_Redemption_WebApi.Repositories
                                         if (index <= requestModel.Peices[peiceIndex])
                                         {
                                             item.Peice = peiceIndex + 1;
-                                            item.CampaignId = requestModel.Campaign.Id;
+                                            item.CampaignId = requestModel.Campaign.Id.Value;
                                             index++;
                                         }
                                         else
@@ -101,7 +101,7 @@ namespace CSP_Redemption_WebApi.Repositories
                                         foreach (var item in qrCodes.Where(x => x.Peice == null))
                                         {
                                             item.Peice = peiceIndex + 1;
-                                            item.CampaignId = requestModel.Campaign.Id;
+                                            item.CampaignId = requestModel.Campaign.Id.Value;
                                         }
                                     }
 
@@ -135,7 +135,7 @@ namespace CSP_Redemption_WebApi.Repositories
                             case 2: // Point & Reward
                                 {
                                     // QrCodes
-                                    qrCodes.Select(q => { q.CampaignId = requestModel.Campaign.Id; q.Point = requestModel.Point; return q; }).ToList();
+                                    qrCodes.Select(q => { q.CampaignId = requestModel.Campaign.Id.Value; q.Point = requestModel.Point; return q; }).ToList();
                                     //qrCodes.ToList().ForEach(c => c.CampaignId = campaign.Id);
 
                                     using (var bcp = new SqlBulkCopy(connectionString))
@@ -168,7 +168,7 @@ namespace CSP_Redemption_WebApi.Repositories
                             case 3: // Enrollment & Member
                                 {
                                     // QrCodes
-                                    qrCodes.Select(q => { q.CampaignId = requestModel.Campaign.Id; return q; }).ToList();
+                                    qrCodes.Select(q => { q.CampaignId = requestModel.Campaign.Id.Value; return q; }).ToList();
                                     //qrCodes.ToList().ForEach(c => c.CampaignId = campaign.Id);
 
                                     using (var bcp = new SqlBulkCopy(connectionString))
@@ -208,7 +208,7 @@ namespace CSP_Redemption_WebApi.Repositories
 
                         var campProduct = new CampaignProduct()
                         {
-                            CampaignId = requestModel.Campaign.Id,
+                            CampaignId = requestModel.Campaign.Id.Value,
                             ProductId = requestModel.Product
                         };
                         await Context.CampaignProduct.AddAsync(campProduct);

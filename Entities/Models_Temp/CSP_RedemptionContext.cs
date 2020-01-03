@@ -18,8 +18,10 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
         public virtual DbSet<Amphur> Amphur { get; set; }
         public virtual DbSet<Brand> Brand { get; set; }
         public virtual DbSet<Campaign> Campaign { get; set; }
+        public virtual DbSet<CampaignDealer> CampaignDealer { get; set; }
         public virtual DbSet<CampaignProduct> CampaignProduct { get; set; }
         public virtual DbSet<CampaignType> CampaignType { get; set; }
+        public virtual DbSet<Collection> Collection { get; set; }
         public virtual DbSet<Consumer> Consumer { get; set; }
         public virtual DbSet<ConsumerProductType> ConsumerProductType { get; set; }
         public virtual DbSet<ConsumerSource> ConsumerSource { get; set; }
@@ -133,6 +135,23 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
                     .HasConstraintName("FK_Campaign_Dealer");
             });
 
+            modelBuilder.Entity<CampaignDealer>(entity =>
+            {
+                entity.HasKey(e => new { e.CampaignId, e.DealerId });
+
+                entity.HasOne(d => d.Campaign)
+                    .WithMany(p => p.CampaignDealer)
+                    .HasForeignKey(d => d.CampaignId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_CampaignDealer_Campaign");
+
+                entity.HasOne(d => d.Dealer)
+                    .WithMany(p => p.CampaignDealer)
+                    .HasForeignKey(d => d.DealerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_CampaignDealer_Dealer");
+            });
+
             modelBuilder.Entity<CampaignProduct>(entity =>
             {
                 entity.HasKey(e => new { e.CampaignId, e.ProductId });
@@ -165,6 +184,21 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
                 entity.Property(e => e.SubTitle).HasMaxLength(100);
 
                 entity.Property(e => e.Title).HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Collection>(entity =>
+            {
+                entity.Property(e => e.CollectionName).HasMaxLength(255);
+
+                entity.Property(e => e.CollectionPath).HasMaxLength(255);
+
+                entity.Property(e => e.Extension).HasMaxLength(255);
+
+                entity.HasOne(d => d.Campaign)
+                    .WithMany(p => p.Collection)
+                    .HasForeignKey(d => d.CampaignId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Collection_Campaign");
             });
 
             modelBuilder.Entity<Consumer>(entity =>
