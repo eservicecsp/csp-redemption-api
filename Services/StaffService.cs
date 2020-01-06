@@ -27,18 +27,21 @@ namespace CSP_Redemption_WebApi.Services
         private readonly IStaffRepository staffRepository;
         private readonly IFunctionRepository functionRepository;
         private readonly IRoleFunctionRepository roleFunctionRepository;
+        private readonly IEmailService _emailService;
 
         public StaffService(
             IConfiguration configuration,
             IStaffRepository staffRepository,
             IFunctionRepository functionRepository,
-            IRoleFunctionRepository roleFunctionRepository
+            IRoleFunctionRepository roleFunctionRepository,
+            IEmailService emailService
             )
         {
             this.configuration = configuration;
             this.staffRepository = staffRepository;
             this.functionRepository = functionRepository;
             this.roleFunctionRepository = roleFunctionRepository;
+            _emailService = emailService;
         }
 
         public async Task<AuthenticationResponseModel> Authenticate(Staff staff)
@@ -421,6 +424,35 @@ namespace CSP_Redemption_WebApi.Services
                 {
                     response.IsSuccess = true;
                 }
+
+                // send email to brand administrator
+                var toEmails = new List<string>();
+                toEmails.Add(staff.Email);
+
+                var parameters = new Dictionary<string, string>();
+                parameters.Add("name", $"{staff.FirstName} {staff.LastName}");
+                parameters.Add("password", $"{staff.Password}");
+
+                var email = new EmailModel()
+                {
+                    To = toEmails,
+                    Template = @"
+Dear [#name#],
+
+Your password has been changed.
+
+Your new password: [#password#]
+
+If this is not you, please consider to contact system administrator.
+
+Kind Regards,
+Karmart Redemption
+",
+                    Subject = "Register - Karmart Redemption",
+                    Parameters = parameters
+                };
+
+                var emailResponse = _emailService.SendEmail(email);
             }
             catch (Exception)
             {

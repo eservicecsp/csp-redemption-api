@@ -146,10 +146,21 @@ namespace CSP_Redemption_WebApi.Models
 
     #endregion
 
+    #region Email
+    public class EmailModel
+    {
+        public List<string> To { get; set; }
+        public string Subject { get; set; }
+        public string Template { get; set; }
+        public Dictionary<string, string> Parameters { get; set; }
+        public List<string> AttachmentPaths { get; set; }
+    }
+    #endregion
+
     public class CollectionModel
     {
         public int Id { get; set; }
-  
+
         public int Quantity { get; set; }
         public int WasteQuantity { get; set; }
         public int TotalQuantity { get; set; }
