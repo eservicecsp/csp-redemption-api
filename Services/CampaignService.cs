@@ -371,7 +371,7 @@ namespace CSP_Redemption_WebApi.Services
                     List<Dealer> dealers = new List<Dealer>(); 
                     if (campaignDb.CampaignDealer.Count() > 0)
                     {
-                       //Int
+                       //int
                     }
                     var campaign = new CampaignModel()
                     {
