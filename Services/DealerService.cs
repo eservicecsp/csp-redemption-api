@@ -45,9 +45,8 @@ namespace CSP_Redemption_WebApi.Services
                         Email = dealer.Email,
                         TaxNo = dealer.TaxNo,
                         Phone = dealer.Phone,
-                        Tel = dealer.Tel
-                        
-                        
+                        Tel = dealer.Tel,
+                        BranchNo = dealer.BranchNo,
                     });
                 }
 
