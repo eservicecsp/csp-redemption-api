@@ -22,7 +22,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string Url { get; set; }
         public int Quantity { get; set; }
         public int? TotalPeice { get; set; }
-        public int? Waste { get; set; }
+        public int? WastePercentage { get; set; }
         public int? GrandTotal { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

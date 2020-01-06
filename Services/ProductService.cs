@@ -60,15 +60,15 @@ namespace CSP_Redemption_WebApi.Services
                     {
                         foreach (var attachment in product.ProductAttachment)
                         {
-                            var filePath = Path.Combine(productAttachmentPath, attachment.Name);
+                            //var filePath = Path.Combine(productAttachmentPath, attachment.Name);
 
-                            byte[] imageBytes = System.IO.File.ReadAllBytes(filePath);
-                            string base64String = Convert.ToBase64String(imageBytes);
+                            //byte[] imageBytes = System.IO.File.ReadAllBytes(filePath);
+                            //string base64String = Convert.ToBase64String(imageBytes);
 
                             attachments.Add(new ProductAttachmentModel()
                             {
                                 Id = attachment.Id,
-                                File = base64String,
+                               // File = base64String,
                                 Name = attachment.Name,
                                 Path = null,
                                 Extension = attachment.Extension

@@ -1,9 +1,11 @@
 ﻿using CSP_Redemption_WebApi.Entities.Models;
 using CSP_Redemption_WebApi.Models;
 using CSP_Redemption_WebApi.Repositories;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,14 +25,17 @@ namespace CSP_Redemption_WebApi.Services
     {
         private readonly ICampaignRepository campaignRepository;
         private readonly ITransactionRepository transactionRepository;
+        private readonly IConfiguration _configuration;
         public CampaignService
             (
             ICampaignRepository campaignRepository,
-            ITransactionRepository transactionRepository
+            ITransactionRepository transactionRepository,
+            IConfiguration configuration
             )
         {
             this.campaignRepository = campaignRepository;
             this.transactionRepository = transactionRepository;
+            _configuration = configuration;
         }
 
         public async Task<CampaignsResponseModel> GetCampaignsByBrandIdAsync(int brandId)
@@ -59,7 +64,7 @@ namespace CSP_Redemption_WebApi.Services
                         QrCodeNotExistMessage = campaign.QrCodeNotExistMessage,
                         Quantity = campaign.Quantity,
                         WinMessage = campaign.WinMessage,
-                        GrandTotal = campaign.GrandTotal == null? 0: campaign.GrandTotal.Value
+                        GrandTotal = campaign.GrandTotal == null ? 0 : campaign.GrandTotal.Value
                     });
                 }
 
@@ -119,12 +124,33 @@ namespace CSP_Redemption_WebApi.Services
 
         public async Task<ResponseModel> CreateCampaignAsync(CreateCampaignRequestModel requestModel)
         {
-            
+
             var reponse = new ResponseModel();
             try
             {
-                 if(requestModel.Campaign.CampaignTypeId == 3)  //Enrollment & Member
+                Campaign campaign = new Campaign()
                 {
+                    Name = requestModel.Campaign.Name,
+                    Description = requestModel.Campaign.Description,
+                    CampaignTypeId = requestModel.Campaign.CampaignTypeId,
+                    BrandId = requestModel.Campaign.BrandId,
+                    Url = requestModel.Campaign.Url,
+                    Quantity = requestModel.Campaign.Quantity,
+                    TotalPeice = requestModel.Campaign.TotalPeice,
+                    WastePercentage = requestModel.Campaign.Waste,
+                    StartDate = requestModel.Campaign.StartDate,
+                    EndDate = requestModel.Campaign.EndDate,
+                    AlertMessage = requestModel.Campaign.AlertMessage,
+                    DuplicateMessage = requestModel.Campaign.DuplicateMessage,
+                    QrCodeNotExistMessage = requestModel.Campaign.QrCodeNotExistMessage,
+                    WinMessage = requestModel.Campaign.WinMessage,
+                    CreatedBy = requestModel.Campaign.CreatedBy,
+                    CreatedDate = DateTime.Now
+                };
+
+                if (requestModel.Campaign.CampaignTypeId == 3)  //Enrollment & Member
+                {
+                   
                     var qrToken = this.GenerateTokens(1);
 
                     int percentWaste = requestModel.Campaign.Waste == null ? 0 : requestModel.Campaign.Waste.Value;
@@ -133,8 +159,11 @@ namespace CSP_Redemption_WebApi.Services
                     int grandTotal = requestModel.Campaign.Quantity + Ceiling;
 
                     requestModel.Campaign.GrandTotal = grandTotal;
+                    campaign.GrandTotal = grandTotal;
                     var qrCodes = this.GenerateCode(qrToken[0].Token, grandTotal);
-                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
+
+
+                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes, campaign);
                     if (hasSaved.IsSuccess)
                     {
                         reponse.IsSuccess = true;
@@ -145,23 +174,57 @@ namespace CSP_Redemption_WebApi.Services
                     }
 
                 }
-                else if(requestModel.Campaign.CampaignTypeId == 1)//Collecting
+                else if (requestModel.Campaign.CampaignTypeId == 1)//Collecting
                 {
                     int[] n = new int[requestModel.Campaign.CollectingData.Count];
                     int grandTotal = 0;
-                    for (int i = 0; i < requestModel.Campaign.CollectingData.Count; i++)
+
+                    string campaginAttachmentPath = _configuration["Attachments:Campaigns"];
+                    campaginAttachmentPath = campaginAttachmentPath.Replace("[#campaignId#]", $"{requestModel.Campaign.BrandId.ToString()}-{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}");
+  
+                    int i = 0;
+                    List<CollectionModel> collections = new List<CollectionModel>();
+                    foreach (var item in requestModel.Campaign.CollectingData)
                     {
                         int percentWaste = requestModel.Campaign.Waste == null ? 0 : requestModel.Campaign.Waste.Value;
-                        double waste = ((double)requestModel.Campaign.CollectingData[i].Quantity * (double)percentWaste) / 100;
+                        double waste = ((double)item.Quantity * (double)percentWaste) / 100;
                         int Ceiling = (int)Math.Ceiling(waste);
-                        n[i] = (Ceiling + requestModel.Campaign.CollectingData[i].Quantity);
-                        grandTotal += (Ceiling + requestModel.Campaign.CollectingData[i].Quantity);
+                        n[i] = (Ceiling + item.Quantity);
+                        grandTotal += (Ceiling + item.Quantity);
+
+                        var filePath = Path.Combine(campaginAttachmentPath, item.name);
+                        File.WriteAllBytes(filePath, Convert.FromBase64String(item.file));
+                        string[] Extensions = item.file.Split(',');
+                        collections.Add(new CollectionModel()
+                        {
+                            Quantity = item.Quantity,
+                            WasteQuantity = Ceiling,
+                            TotalQuantity = (Ceiling + item.Quantity),
+                            row = item.row,
+                            column = item.column,
+                            name = item.name,
+                            path = filePath,
+                            extension = Extensions[0]
+
+                        });
+                        i++;
                     }
+                    campaign.CollectingType = Convert.ToInt32(requestModel.Campaign.CollectingType);
+                    campaign.Rows = requestModel.Campaign.Rows;
+                    campaign.Columns = requestModel.Campaign.Columns;
+
+
+                    campaign.Quantity  = requestModel.Campaign.CollectingData.Sum(x=>x.Quantity);
+                    requestModel.Campaign.CollectingData = collections;
                     //int Ceiling = (int)Math.Ceiling((requestModel.Campaign.Quantity * requestModel.Campaign.Waste) / 100);
                     requestModel.Campaign.GrandTotal = grandTotal;
+                    campaign.GrandTotal = grandTotal;
                     var qrCodes = this.GenerateTokens(grandTotal);
                     requestModel.Peices = n.ToList();
-                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
+
+
+
+                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes, campaign);
                     if (hasSaved.IsSuccess)
                     {
                         reponse.IsSuccess = true;
@@ -179,8 +242,9 @@ namespace CSP_Redemption_WebApi.Services
                     int grandTotal = requestModel.Campaign.Quantity + Ceiling;
 
                     requestModel.Campaign.GrandTotal = grandTotal;
+                    campaign.GrandTotal = grandTotal;
                     var qrCodes = this.GenerateTokensPoint(grandTotal, requestModel.Point);
-                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes);
+                    var hasSaved = await this.campaignRepository.CreateAsync(requestModel, qrCodes, campaign);
                     if (hasSaved.IsSuccess)
                     {
                         reponse.IsSuccess = true;
@@ -190,9 +254,9 @@ namespace CSP_Redemption_WebApi.Services
                         reponse.Message = hasSaved.Message;
                     }
                 }
-  
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 reponse.Message = ex.Message;
             }
@@ -210,7 +274,7 @@ namespace CSP_Redemption_WebApi.Services
                     string token = Helpers.ShortenerHelper.GenerateToken(10);
                     qrCodes.Add(new QrCode()
                     {
-                        Token = $"{token}{Guid.NewGuid().ToString("N")}" ,
+                        Token = $"{token}{Guid.NewGuid().ToString("N")}",
                         Code = null
                     });
                     i++;
@@ -222,7 +286,7 @@ namespace CSP_Redemption_WebApi.Services
                     .Select(group => group.Key);
                 if (dupplicateTokens.Count() > 0)
                 {
-                    
+
                 }
             }
             catch (Exception ex)
@@ -231,7 +295,7 @@ namespace CSP_Redemption_WebApi.Services
             }
             return qrCodes;
         }
-        public List<QrCode> GenerateTokensPoint(int quantity,int point)
+        public List<QrCode> GenerateTokensPoint(int quantity, int point)
         {
             List<QrCode> qrCodes = new List<QrCode>();
             try
@@ -263,7 +327,7 @@ namespace CSP_Redemption_WebApi.Services
             }
             return qrCodes;
         }
-        public List<QrCode> GenerateCode(string token ,int quantity)
+        public List<QrCode> GenerateCode(string token, int quantity)
         {
             List<QrCode> qrCodes = new List<QrCode>();
             try
@@ -273,7 +337,7 @@ namespace CSP_Redemption_WebApi.Services
                 while (i <= quantity)
                 {
 
-                    string value = String.Format("{0:D"+ length + "}", i);
+                    string value = String.Format("{0:D" + length + "}", i);
 
                     qrCodes.Add(new QrCode()
                     {
@@ -297,34 +361,42 @@ namespace CSP_Redemption_WebApi.Services
             try
             {
                 var campaignDb = await this.campaignRepository.GetCampaignByIdAsync(campaignId);
-                if(campaignDb != null)
+                if (campaignDb != null)
                 {
                     int ProductId = 0;
                     if (campaignDb.CampaignProduct.Count() > 0)
                     {
-                        ProductId = campaignDb.CampaignProduct.FirstOrDefault(x=>x.CampaignId == campaignId).ProductId;
+                        ProductId = campaignDb.CampaignProduct.FirstOrDefault(x => x.CampaignId == campaignId).ProductId;
+                    }
+                    List<Dealer> dealers = new List<Dealer>(); 
+                    if (campaignDb.CampaignDealer.Count() > 0)
+                    {
+                       //Int
                     }
                     var campaign = new CampaignModel()
                     {
-                       Id = campaignDb.Id,
-                       Name = campaignDb.Name,
-                       Description = campaignDb.Description,
-                       Product = ProductId,
-                       StartDate = campaignDb.StartDate,
-                       EndDate = campaignDb.EndDate,
-                       AlertMessage = campaignDb.AlertMessage,
-                       DuplicateMessage = campaignDb.DuplicateMessage,
-                       QrCodeNotExistMessage = campaignDb.QrCodeNotExistMessage,
-                       WinMessage = campaignDb.WinMessage,
-                       BrandId = campaignDb.BrandId,
-                       GrandTotal = campaignDb.GrandTotal == null ? 0 : campaignDb.GrandTotal.Value,
-                       Waste = campaignDb.Waste == null ? 0 : campaignDb.Waste.Value
+                        Id = campaignDb.Id,
+                        Name = campaignDb.Name,
+                        Description = campaignDb.Description,
+                        Product = ProductId,
+                        StartDate = campaignDb.StartDate,
+                        EndDate = campaignDb.EndDate,
+                        AlertMessage = campaignDb.AlertMessage,
+                        DuplicateMessage = campaignDb.DuplicateMessage,
+                        QrCodeNotExistMessage = campaignDb.QrCodeNotExistMessage,
+                        WinMessage = campaignDb.WinMessage,
+                        BrandId = campaignDb.BrandId,
+                        GrandTotal = campaignDb.GrandTotal == null ? 0 : campaignDb.GrandTotal.Value,
+                        Waste = campaignDb.WastePercentage == null ? 0 : campaignDb.WastePercentage.Value,
+                        Dealers = dealers,
+                        //CollectingData = campaignDb.Collection
 
                     };
                     response.Campaign = campaign;
                     response.IsSuccess = true;
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
             }

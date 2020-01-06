@@ -62,5 +62,14 @@ namespace CSP_Redemption_WebApi.Repositories
                 return await Context.SaveChangesAsync() > 0;
             }
         }
+
+        //public async Task<List<Dealer>> GetDealerByCampaignIdAsync(int campaignId)
+        //{
+        //    //List<Dealer> dealers = new
+        //    using (var Context = new CSP_RedemptionContext())
+        //    {
+        //        return await Context.Dealer.Where(x => x.Id == id).FirstOrDefaultAsync();
+        //    }
+        //}
     }
 }

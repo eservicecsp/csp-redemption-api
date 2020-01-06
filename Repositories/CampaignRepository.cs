@@ -16,7 +16,7 @@ namespace CSP_Redemption_WebApi.Repositories
     {
         Task<Campaign> GetCampaignByIdAsync(int campaignId);
         Task<List<Campaign>> GetCampaignsByBrandIdAsync(int brandId);
-        Task<ResponseModel> CreateAsync(CreateCampaignRequestModel requestModel, List<QrCode> qrCodes);
+        Task<ResponseModel> CreateAsync(CreateCampaignRequestModel requestModel, List<QrCode> qrCodes, Campaign campaign);
         Task<bool> UpdateAsync(Campaign campaign);
     }
     public class CampaignRepository : ICampaignRepository
@@ -33,6 +33,8 @@ namespace CSP_Redemption_WebApi.Repositories
             {
                 return await Context.Campaign
                                     .Include(x=>x.CampaignProduct)
+                                    .Include(x=>x.CampaignDealer)
+                                    .Include(x=>x.Collection)
                                     .Where(x => x.Id.Equals(campaignId))
                                     .FirstOrDefaultAsync();
             }
@@ -46,7 +48,7 @@ namespace CSP_Redemption_WebApi.Repositories
             }
         }
 
-        public async Task<ResponseModel> CreateAsync(CreateCampaignRequestModel requestModel, List<QrCode> qrCodes)
+        public async Task<ResponseModel> CreateAsync(CreateCampaignRequestModel requestModel, List<QrCode> qrCodes, Campaign campaign)
         {
             var response = new ResponseModel();
             using (var Context = new CSP_RedemptionContext())
@@ -57,9 +59,27 @@ namespace CSP_Redemption_WebApi.Repositories
                     {
                         string connectionString = this.configuration["ConnectionStrings:ApiDatabase"];
 
-                        //// Campaign
-                        //await Context.Campaign.AddAsync(requestModel.Campaign);
-                        //await Context.SaveChangesAsync();
+                        // Campaign
+                        await Context.Campaign.AddAsync(campaign);
+                        await Context.SaveChangesAsync();
+                        int campaignId = campaign.Id;
+
+                        if(requestModel.Campaign.Dealers != null)
+                        {
+                            List<CampaignDealer> campaignDealer = new List<CampaignDealer>();
+                            foreach (var item in requestModel.Campaign.Dealers)
+                            {
+                                campaignDealer.Add(new CampaignDealer()
+                                {
+                                    CampaignId = campaignId,
+                                    DealerId = item.Id
+                                });
+                            }
+                            // CampaignDealer
+                            await Context.CampaignDealer.AddRangeAsync(campaignDealer);
+                            await Context.SaveChangesAsync();
+                        }
+                        
 
                         var copyParameters = new[]
                         {
@@ -77,6 +97,26 @@ namespace CSP_Redemption_WebApi.Repositories
                         {
                             case 1: // Collecting
                                 {
+                                    List<Collection> collections = new List<Collection>();
+                                    foreach(var item in requestModel.Campaign.CollectingData)
+                                    {
+                                        collections.Add(new Collection() { 
+                                            CampaignId = campaignId,
+                                            Quantity = item.Quantity,
+                                            WasteQuantity = item.WasteQuantity,
+                                            TotalQuantity = item.TotalQuantity,
+                                            CollectionRow = item.row,
+                                            CollectionColumn = item.column,
+                                            CollectionName = item.name,
+                                            CollectionPath = item.path,
+                                            CollectionFile = item.file,
+                                            Extension = item.extension
+                                        });
+                                    }
+                                    // Collection
+                                    await Context.Collection.AddRangeAsync(collections);
+                                    await Context.SaveChangesAsync();
+
                                     int index = 1;
                                     int peiceIndex = 0;
 
@@ -85,7 +125,7 @@ namespace CSP_Redemption_WebApi.Repositories
                                         if (index <= requestModel.Peices[peiceIndex])
                                         {
                                             item.Peice = peiceIndex + 1;
-                                            item.CampaignId = requestModel.Campaign.Id.Value;
+                                            item.CampaignId = campaignId;
                                             index++;
                                         }
                                         else
@@ -101,7 +141,7 @@ namespace CSP_Redemption_WebApi.Repositories
                                         foreach (var item in qrCodes.Where(x => x.Peice == null))
                                         {
                                             item.Peice = peiceIndex + 1;
-                                            item.CampaignId = requestModel.Campaign.Id.Value;
+                                            item.CampaignId = campaignId;
                                         }
                                     }
 
@@ -135,7 +175,7 @@ namespace CSP_Redemption_WebApi.Repositories
                             case 2: // Point & Reward
                                 {
                                     // QrCodes
-                                    qrCodes.Select(q => { q.CampaignId = requestModel.Campaign.Id.Value; q.Point = requestModel.Point; return q; }).ToList();
+                                    qrCodes.Select(q => { q.CampaignId = campaignId; q.Point = requestModel.Point; return q; }).ToList();
                                     //qrCodes.ToList().ForEach(c => c.CampaignId = campaign.Id);
 
                                     using (var bcp = new SqlBulkCopy(connectionString))
@@ -168,7 +208,7 @@ namespace CSP_Redemption_WebApi.Repositories
                             case 3: // Enrollment & Member
                                 {
                                     // QrCodes
-                                    qrCodes.Select(q => { q.CampaignId = requestModel.Campaign.Id.Value; return q; }).ToList();
+                                    qrCodes.Select(q => { q.CampaignId = campaignId; return q; }).ToList();
                                     //qrCodes.ToList().ForEach(c => c.CampaignId = campaign.Id);
 
                                     using (var bcp = new SqlBulkCopy(connectionString))
@@ -208,12 +248,25 @@ namespace CSP_Redemption_WebApi.Repositories
 
                         var campProduct = new CampaignProduct()
                         {
-                            CampaignId = requestModel.Campaign.Id.Value,
+                            CampaignId = campaignId,
                             ProductId = requestModel.Product
                         };
                         await Context.CampaignProduct.AddAsync(campProduct);
                         await Context.SaveChangesAsync();
-                        
+
+                        //List<CampaignDealer> campaignDealers = new List<CampaignDealer>();
+                        //foreach (var dealer in requestModel.Campaign.Dealers)
+                        //{
+                        //    campaignDealers.Add(new CampaignDealer()
+                        //    {
+                        //           CampaignId = campaignId,
+                        //           DealerId = dealer.Id,
+                        //    });
+                        //}
+                        //await Context.CampaignDealer.AddRangeAsync(campaignDealers);
+                        //await Context.SaveChangesAsync();
+
+
 
                         transaction.Commit();
                         response.IsSuccess = true;

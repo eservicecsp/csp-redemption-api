@@ -51,7 +51,7 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=172.1.240.60;Database=CSP_Redemption;User ID=sa;Password=P@ssw0rd");
+                optionsBuilder.UseSqlServer("Server=localhost;Database=CSP_Redemption;User ID=sa;Password=P@ssw0rd");
             }
         }
 
@@ -189,8 +189,6 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
             modelBuilder.Entity<Collection>(entity =>
             {
                 entity.Property(e => e.CollectionName).HasMaxLength(255);
-
-                entity.Property(e => e.CollectionPath).HasMaxLength(255);
 
                 entity.Property(e => e.Extension).HasMaxLength(255);
 
@@ -564,6 +562,8 @@ namespace CSP_Redemption_WebApi.Entities.Models_Temp
                 entity.Property(e => e.Phone)
                     .IsRequired()
                     .HasMaxLength(10);
+
+                entity.Property(e => e.ResetPasswordToken).HasMaxLength(50);
 
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Staff)

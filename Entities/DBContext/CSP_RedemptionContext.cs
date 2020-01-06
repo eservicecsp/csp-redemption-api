@@ -195,8 +195,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
             {
                 entity.Property(e => e.CollectionName).HasMaxLength(255);
 
-                entity.Property(e => e.CollectionPath).HasMaxLength(255);
-
                 entity.Property(e => e.Extension).HasMaxLength(255);
 
                 entity.HasOne(d => d.Campaign)
@@ -560,9 +558,6 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.Property(e => e.ResetPasswordToken)
-                    .HasMaxLength(50);
-
                 entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Password)
@@ -572,6 +567,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.Phone)
                     .IsRequired()
                     .HasMaxLength(10);
+
+                entity.Property(e => e.ResetPasswordToken).HasMaxLength(50);
 
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Staff)
