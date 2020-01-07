@@ -19,9 +19,13 @@ namespace CSP_Redemption_WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetFunction(string type)
+        public async Task<IActionResult> GetFunctions(string type)
         {
-            return Ok(await this.functionService.GetFunctionsAsync(type.ToLower()));
+            var token = Request.Headers["Authorization"].ToString();
+            var brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            var userId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
+
+            return Ok(await this.functionService.GetFunctionsAsync(type.ToLower(), brandId, true));
         }
     }
 }
