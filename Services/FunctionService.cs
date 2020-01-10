@@ -9,19 +9,23 @@ namespace CSP_Redemption_WebApi.Services
 {
     public interface IFunctionService
     {
-        Task<FunctionsResponseModel> GetFunctionsAsync(string type);
+        Task<FunctionsResponseModel> GetFunctionsAsync(string type, int brandId, bool isActive = false);
     }
 
     public class FunctionService : IFunctionService
     {
         private readonly IFunctionRepository functionRepository;
+        private readonly IBrandRepository brandRepository;
 
-        public FunctionService(IFunctionRepository functionRepository)
+        public FunctionService(
+            IFunctionRepository functionRepository,
+            IBrandRepository brandRepository)
         {
             this.functionRepository = functionRepository;
+            this.brandRepository = brandRepository;
         }
 
-        public async Task<FunctionsResponseModel> GetFunctionsAsync(string type)
+        public async Task<FunctionsResponseModel> GetFunctionsAsync(string type, int brandId, bool isActive = false)
         {
             var response = new FunctionsResponseModel();
             try
@@ -39,6 +43,17 @@ namespace CSP_Redemption_WebApi.Services
                             break;
                         }
                 }
+
+                var brand = await this.brandRepository.GetBrandAsync(brandId);
+                if (!brand.IsOwner)
+                    functions = functions.Where(x => x.IsExternal == true && x.IsActived == true).ToList();
+
+                if (isActive)
+                {
+                    functions = functions.Where(x => x.IsActived == true).ToList();
+                }
+
+
                 response.Functions = new List<FunctionModel>();
                 foreach (var function in functions)
                 {

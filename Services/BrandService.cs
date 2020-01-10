@@ -21,11 +21,13 @@ namespace CSP_Redemption_WebApi.Services
     {
         private readonly IBrandRepository _brandRepository;
         private readonly IStaffRepository _staffRepository;
+        private readonly IEmailService _emailService;
 
-        public BrandService(IBrandRepository brandRepository, IStaffRepository staffRepository)
+        public BrandService(IBrandRepository brandRepository, IStaffRepository staffRepository, IEmailService emailService)
         {
             _brandRepository = brandRepository;
             _staffRepository = staffRepository;
+            _emailService = emailService;
         }
 
         public async Task<BrandsResponseModel> GetBrandsAsync()
@@ -128,15 +130,15 @@ namespace CSP_Redemption_WebApi.Services
                         Name = model.Brand.Name,
                         IsOwner = false
                     };
-                    string getPassword =  DateTime.Now.ToString("yyyyMMddHHmmss");
+                    string password =  DateTime.Now.ToString("yyyyMMddHHmmss");
                     //string newPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, model.Staff.Password); 
-                    string newPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, getPassword);
+                    string hashedPassword = Helpers.Argon2Helper.HashPassword(model.Staff.Email, password);
                     var staff = new Staff()
                     {
                         FirstName = model.Staff.FirstName,
                         LastName = model.Staff.LastName,
                         Email = model.Staff.Email,
-                        Password = newPassword,
+                        Password = hashedPassword,
                         Phone = model.Staff.Phone,
                         IsActived = true,
                         CreatedDate = DateTime.Now,
@@ -144,7 +146,41 @@ namespace CSP_Redemption_WebApi.Services
                     };
 
                     response.IsSuccess = await this._brandRepository.CreateAsync(brand, staff);
-                    response.Message = getPassword;
+
+                    // send email to brand administrator
+                    var toEmails = new List<string>();
+                    toEmails.Add(staff.Email);
+
+                    var parameters = new Dictionary<string, string>();
+                    parameters.Add("name", $"{staff.FirstName} {staff.LastName}");
+                    parameters.Add("email", $"{staff.Email}");
+                    parameters.Add("password", $"{password}");
+                    parameters.Add("url", $"http://localhost:4200/pages/auth/reset-password?email={model.Staff.Email}&token={staff.ResetPasswordToken}");
+
+                    var email = new EmailModel()
+                    {
+                        To = toEmails,
+                        Template = @"
+Dear [#name#],
+
+Your registration has been completed.
+
+You registered with this email: [#email#]
+
+You registered with this password: [#password#]
+
+Please consider to change passsword at this [#url#]
+
+Kind Regards,
+Karmart Redemption
+",
+                        Subject = "Register - Karmart Redemption",
+                        Parameters = parameters
+                    };
+                    
+                    var emailResponse = _emailService.SendEmail(email);
+
+                    response.Message = password;
                 }
             }
             catch (Exception ex)

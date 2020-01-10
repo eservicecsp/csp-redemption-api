@@ -395,6 +395,7 @@ namespace CSP_Redemption_WebApi.Models
         public int BrandId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public List<FunctionModel> Functions { get; set; }
     }
 
     #endregion
@@ -588,11 +589,18 @@ namespace CSP_Redemption_WebApi.Models
     #endregion
 
     #region Role
+    public class RolesResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<RoleModel> roles { get; set; }
+    }
+
     public class RoleResponseModel
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
-        public List<Role> roles { get; set; }
+        public RoleModel Role { get; set; }
     }
 
     #endregion

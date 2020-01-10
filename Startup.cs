@@ -52,6 +52,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IProductTypeService, ProductTypeService>();
             services.AddScoped<IPromotionService, PromotionService>();
             services.AddScoped<IPromotionTypeService, PromotionTypeService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
