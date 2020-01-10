@@ -11,6 +11,7 @@ namespace CSP_Redemption_WebApi.Repositories
     public interface IAmphurRepository
     {
         Task<List<Amphur>> GetAmphursByProvinceCodeAsync(string provinceCode);
+        //Task<List<Amphur>> GetAmphursByProvinceCodeByArrayAsync(string provinceCode);
     }
     public class AmphurRepository: IAmphurRepository
     {
@@ -21,5 +22,13 @@ namespace CSP_Redemption_WebApi.Repositories
                 return await Context.Amphur.Where(x => x.ProvinceCode == provinceCode).ToListAsync();
             }
         }
+
+        //public async Task<List<Amphur>> GetAmphursByProvinceCodeByArrayAsync(string provinceCode)
+        //{
+        //    using (var Context = new CSP_RedemptionContext())
+        //    {
+        //        return await Context.Amphur.Include(x => x.Tumbol).Where(x => x.ProvinceCode == provinceCode).ToListAsync();
+        //    }
+        //}
     }
 }

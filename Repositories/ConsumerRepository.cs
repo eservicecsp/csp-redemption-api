@@ -23,6 +23,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<bool> UpdateAsync(Consumer consumer);
         Task<bool> ImportFileAsync(List<Consumer> consumers);
         Task<List<Consumer>> ExportTextFileConsumerByBrandIdAsync(FiltersModel data, int brandId);
+        Task<Consumer> GetConsumerByPhoneAndBrandIdAsync(string phone, int brandId);
     }
     public class ConsumerRepository : IConsumerRepository
     {
@@ -414,6 +415,19 @@ namespace CSP_Redemption_WebApi.Repositories
                 var startYear = today.AddYears(-(data.endAge));
                 query = query.Where(x => x.BirthDate.Value.Year >= startYear.Year && x.BirthDate.Value.Year <= endYear.Year);
                 return await query.ToListAsync();
+            }
+        }
+
+        public async Task<Consumer> GetConsumerByPhoneAndBrandIdAsync(string phone, int brandId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Consumer
+                            .Include(x=>x.ProvinceCodeNavigation)
+                            .Include(x=>x.AmphurCodeNavigation)
+                            .Include(x=>x.TumbolCodeNavigation)
+                            .Where(x => x.Phone == phone && x.BrandId == brandId)
+                            .FirstOrDefaultAsync();
             }
         }
     }

@@ -20,6 +20,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<int> GetTransactionTotalByCampaignsIdAsync(PaginationModel data);
         Task<int> GetCountTransactionByTypeId(int campaignId, int typeId);
         Task<int> GetCountAllTransaction(int campaignId);
+        Task<int> GetCountTransactionByProvince(string[] zipCode, int campaignId);
     }
     public class TransactionRepository : ITransactionRepository
     {
@@ -84,26 +85,33 @@ namespace CSP_Redemption_WebApi.Repositories
                 {
                     try
                     {
-                        var enrollmentsDb = await Context.Enrollment.SingleOrDefaultAsync(x => x.Tel == enrollments.Tel);
+                        var enrollmentsDb = await Context.Enrollment.Where(x => x.Tel == enrollments.Tel && x.CampaignId == enrollments.CampaignId).FirstOrDefaultAsync();
                         if(enrollmentsDb == null)
                         {
                             await Context.Enrollment.AddAsync(enrollments);
                             await Context.SaveChangesAsync();
+                            transaction.EnrollmentId = enrollments.Id;
                         }
                         else
                         {
                             enrollments.Id = enrollmentsDb.Id;
+                            transaction.EnrollmentId = enrollmentsDb.Id;
                         }
                         
 
                         await Context.Transaction.AddAsync(transaction);
-                        await Context.SaveChangesAsync();
-
-                        var dbQrCode = await Context.QrCode.SingleAsync(x => x.Token == qrCode.Token && x.CampaignId == qrCode.CampaignId && x.Code == qrCode.Code && x.EnrollmentId == null);
-                        dbQrCode.EnrollmentId = enrollments.Id;
-                        Context.Entry(dbQrCode).CurrentValues.SetValues(dbQrCode);
-
                         isSuccess = await Context.SaveChangesAsync() > 0;
+
+                        var dbQrCode = await Context.QrCode.Where(x => x.Token == qrCode.Token && x.CampaignId == qrCode.CampaignId && x.Code == qrCode.Code && x.EnrollmentId == null).FirstOrDefaultAsync();
+                        if(dbQrCode != null)
+                        {
+                            dbQrCode.EnrollmentId = enrollments.Id;
+                            dbQrCode.ScanDate = DateTime.Now;
+                            Context.Entry(dbQrCode).CurrentValues.SetValues(dbQrCode);
+
+                            isSuccess = await Context.SaveChangesAsync() > 0;
+                        }
+                        
                         tran.Commit();
 
                     }
@@ -346,6 +354,14 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.Transaction.Where(x => x.CampaignId == campaignId).CountAsync();
+            }
+        }
+
+        public async Task<int> GetCountTransactionByProvince(string[] zipCode, int campaignId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Transaction.Where(x => x.CampaignId == campaignId && zipCode.Contains(x.ZipCode)).CountAsync();
             }
         }
     }

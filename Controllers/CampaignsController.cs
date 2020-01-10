@@ -83,5 +83,23 @@ namespace CSP_Redemption_WebApi.Controllers
             return Ok(await this.productTypeService.GetProductTypesByBrandIdAsync(campaign.Campaign.BrandId));
         }
 
+        [HttpGet("Download")]
+        public async Task<IActionResult> ExportTextQrCodeByCampaignId(int campaignId, int campaignTypeId)
+        {
+
+            var response = await this.qrCodeService.ExportTextQrCodeByCampaignId(campaignId, campaignTypeId);
+            // Create file text index
+            if (response.IsSuccess)
+            {
+                byte[] bytes = System.Convert.FromBase64String(response.Message.Split(',').Last());
+                //byte[] bytes = response.File;
+                return File(bytes, "text/plain", response.Message.Split(',').First());
+            }
+            else
+            {
+                return Ok(response);
+            }
+        }
+
     }
 }

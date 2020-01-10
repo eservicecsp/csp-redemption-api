@@ -40,6 +40,7 @@ namespace CSP_Redemption_WebApi.Models
         public string Latitude { get; set; }
         public string Longitude { get; set; }
         public string Location { get; set; }
+        public string ZipCode { get; set; }
         public int TransactionTypeId { get; set; }
         public string ResponseMessage { get; set; }
         public DateTime CreatedDate { get; set; }
@@ -159,6 +160,7 @@ namespace CSP_Redemption_WebApi.Models
         public string path { get; set; }
         public string file { get; set; }
         public string extension { get; set; }
+        public string IsCollected { get; set; }
 
     }
 }

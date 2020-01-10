@@ -26,16 +26,28 @@ namespace CSP_Redemption_WebApi.Services
         private readonly ICampaignRepository campaignRepository;
         private readonly ITransactionRepository transactionRepository;
         private readonly IConfiguration _configuration;
+        private readonly IDealerRepository dealerRepository;
+        private readonly ICollectionRepository collectionRepository;
+        private readonly IEnrollmentRepository enrollmentRepository;
+        private readonly IQrCodeRepository qrCodeRepository;
         public CampaignService
             (
             ICampaignRepository campaignRepository,
             ITransactionRepository transactionRepository,
-            IConfiguration configuration
+            IConfiguration configuration ,
+            IDealerRepository dealerRepository,
+            ICollectionRepository collectionRepository,
+            IEnrollmentRepository enrollmentRepository,
+            IQrCodeRepository qrCodeRepository
             )
         {
             this.campaignRepository = campaignRepository;
             this.transactionRepository = transactionRepository;
             _configuration = configuration;
+            this.dealerRepository = dealerRepository;
+            this.collectionRepository = collectionRepository;
+            this.enrollmentRepository = enrollmentRepository;
+            this.qrCodeRepository = qrCodeRepository;
         }
 
         public async Task<CampaignsResponseModel> GetCampaignsByBrandIdAsync(int brandId)
@@ -89,6 +101,46 @@ namespace CSP_Redemption_WebApi.Services
                 {
                     foreach (var item in transactions)
                     {
+                        string FirstName = item.Consumer == null ? null : item.Consumer.FirstName;
+                        string LastName = item.Consumer == null ? null : item.Consumer.LastName;
+                        string Email = item.Consumer == null ? null : item.Consumer.Email;
+                        string Phone = item.Consumer == null ? null : item.Consumer.Phone;
+                        if (item.ConsumerId == null)
+                        {
+                            var qrCode = new QrCode()
+                            {
+                                CampaignId = item.CampaignId,
+                                Token = item.Token,
+                                Code = item.Code
+                            };
+                            var qrCodeDb = await this.qrCodeRepository.GetQCodeByCode(qrCode);
+                            if (qrCodeDb != null && qrCodeDb.EnrollmentId != null)
+                            {
+                                var enrollment = await this.enrollmentRepository.GetEnrollmentByIdAsync(qrCodeDb.EnrollmentId.Value);
+                                if (enrollment != null)
+                                {
+                                    FirstName = enrollment.FirstName;
+                                    LastName = enrollment.LastName;
+                                    Email = enrollment.Email;
+                                    Phone = enrollment.Tel;
+                                }
+
+                            }
+
+                        }
+                        if(item.ConsumerId == null && item.EnrollmentId != null)
+                        {
+                            var enrollment = await this.enrollmentRepository.GetEnrollmentByIdAsync(item.EnrollmentId.Value);
+                            if (enrollment != null)
+                            {
+                                FirstName = enrollment.FirstName;
+                                LastName = enrollment.LastName;
+                                Email = enrollment.Email;
+                                Phone = enrollment.Tel;
+                            }
+                        }
+
+
                         dbTran.Add(new TransactionModel()
                         {
                             Id = item.Id,
@@ -102,10 +154,10 @@ namespace CSP_Redemption_WebApi.Services
                             TransactionType = item.TransactionType.Name,
                             ResponseMessage = item.ResponseMessage,
                             CreatedDate = item.CreatedDate,
-                            FirstName = item.Consumer == null ? null : item.Consumer.FirstName,
-                            LastName = item.Consumer == null ? null : item.Consumer.LastName,
-                            Email = item.Consumer == null ? null : item.Consumer.Email,
-                            Phone = item.Consumer == null ? null : item.Consumer.Phone,
+                            FirstName = FirstName,
+                            LastName = LastName,
+                            Email = Email,
+                            Phone = Phone,
                             BirthDate = item.Consumer == null ? null : item.Consumer.BirthDate,
                             TotalPoint = item.Consumer == null ? 0 : (item.Consumer.Point != null) ? Convert.ToInt32(item.Consumer.Point) : 0
                         });
@@ -191,10 +243,16 @@ namespace CSP_Redemption_WebApi.Services
                         int Ceiling = (int)Math.Ceiling(waste);
                         n[i] = (Ceiling + item.Quantity);
                         grandTotal += (Ceiling + item.Quantity);
-
-                        var filePath = Path.Combine(campaginAttachmentPath, item.name);
-                        File.WriteAllBytes(filePath, Convert.FromBase64String(item.file));
                         string[] Extensions = item.file.Split(',');
+                        var filePath = Path.Combine(campaginAttachmentPath, item.name);
+                        if(!Directory.Exists(campaginAttachmentPath))
+                        {
+                            Directory.CreateDirectory(campaginAttachmentPath);
+                        }
+
+                        File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
+                        //File.WriteAllBytes(filePath, Convert.FromBase64String(item.file));
+
                         collections.Add(new CollectionModel()
                         {
                             Quantity = item.Quantity,
@@ -231,6 +289,7 @@ namespace CSP_Redemption_WebApi.Services
                     }
                     else
                     {
+                        Directory.Delete(campaginAttachmentPath);
                         reponse.Message = hasSaved.Message;
                     }
                 }
@@ -337,7 +396,7 @@ namespace CSP_Redemption_WebApi.Services
                 while (i <= quantity)
                 {
 
-                    string value = String.Format("{0:D" + length + "}", i);
+                    string value = Helpers.ShortenerHelper.GenerateToken(10);
 
                     qrCodes.Add(new QrCode()
                     {
@@ -371,8 +430,35 @@ namespace CSP_Redemption_WebApi.Services
                     List<Dealer> dealers = new List<Dealer>(); 
                     if (campaignDb.CampaignDealer.Count() > 0)
                     {
-                       //int
+                        int[] DealerId = campaignDb.CampaignDealer.Select(x => x.DealerId).ToArray();
+                        dealers = await this.dealerRepository.GetDealerByDealersIdAsync(DealerId);
+                        //int dealdersId = new int { campaignDb.CampaignDealer.Select(x=>x.DealerId).ToArray() };
                     }
+                    List<CollectionModel> collections = new List<CollectionModel>();
+                    var collection = await this.collectionRepository.GetCollecttionsByCampaignIdAsync(campaignId);
+                    if(collection!= null)
+                    {
+                       foreach(var item in collection)
+                        {
+                            byte[] imageArray = System.IO.File.ReadAllBytes(item.CollectionPath);
+                            string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+                            collections.Add(new CollectionModel()
+                            {
+                                Id = item.Id,
+                                Quantity = item.Quantity,
+                                TotalQuantity = item.TotalQuantity.Value,
+                                row = item.CollectionRow,
+                                column = item.CollectionColumn,
+                                name = item.CollectionName,
+                                //path = item.CollectionPath,
+                                file = base64ImageRepresentation,
+                                extension = item.Extension
+
+                            });
+                        }
+                    }
+
                     var campaign = new CampaignModel()
                     {
                         Id = campaignDb.Id,
@@ -389,7 +475,11 @@ namespace CSP_Redemption_WebApi.Services
                         GrandTotal = campaignDb.GrandTotal == null ? 0 : campaignDb.GrandTotal.Value,
                         Waste = campaignDb.WastePercentage == null ? 0 : campaignDb.WastePercentage.Value,
                         Dealers = dealers,
-                        //CollectingData = campaignDb.Collection
+                        Rows = campaignDb.Rows,
+                        Columns = campaignDb.Columns,
+                        CollectingType = campaignDb.CollectingType.ToString(),
+                        CollectingData = collections,
+                        CampaignTypeId = campaignDb.CampaignTypeId
 
                     };
                     response.Campaign = campaign;

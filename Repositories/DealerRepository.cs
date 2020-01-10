@@ -14,6 +14,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<Dealer> GetDealersByIdAsync(int id);
         Task<bool> UpdateAsync(Dealer dealer);
         Task<bool> CreateAsync(Dealer dealer);
+        Task<List<Dealer>> GetDealerByDealersIdAsync(int[] dealersId);
     }
     public class DealerRepository : IDealerRepository
     {
@@ -63,13 +64,13 @@ namespace CSP_Redemption_WebApi.Repositories
             }
         }
 
-        //public async Task<List<Dealer>> GetDealerByCampaignIdAsync(int campaignId)
-        //{
-        //    //List<Dealer> dealers = new
-        //    using (var Context = new CSP_RedemptionContext())
-        //    {
-        //        return await Context.Dealer.Where(x => x.Id == id).FirstOrDefaultAsync();
-        //    }
-        //}
+        public async Task<List<Dealer>> GetDealerByDealersIdAsync(int[] dealersId)
+        {
+            //List<Dealer> dealers = new
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Dealer.Where(x => dealersId.Contains(x.Id)).ToListAsync();
+            }
+        }
     }
 }

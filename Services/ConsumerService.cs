@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace CSP_Redemption_WebApi.Services
 {
@@ -26,6 +27,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<ResponseModel> SendAll(PaginationModel data, string channel, int brandId, int promotion);
         Task<RedemptionResponseModel> RegisterEnrollment(CheckExistConsumerRequestModel dataConsumer);
         Task<RedemptionResponseModel> registerConsumerEnrollment(ConsumerRequestModel dataConsumer);
+        Task<ConsumersResponseModel> GetConsumerByPhoneAndBrandIdAsync(string phone, int brandId);
     }
     public class ConsumerService : IConsumerService
     {
@@ -35,6 +37,7 @@ namespace CSP_Redemption_WebApi.Services
         private readonly IQrCodeRepository qrCodeRepository;
         private readonly IHostingEnvironment hostingEnvironment;
         private readonly IConfiguration configuration;
+        private readonly ICollectionRepository collectionRepository;
 
         public ConsumerService
             (
@@ -43,7 +46,8 @@ namespace CSP_Redemption_WebApi.Services
               ITransactionRepository transactionRepository,
               IQrCodeRepository qrCodeRepository,
               IHostingEnvironment hostingEnvironment,
-              IConfiguration configuration
+              IConfiguration configuration,
+              ICollectionRepository collectionRepository
             )
         {
             this.campaignRepository = campaignRepository;
@@ -51,6 +55,7 @@ namespace CSP_Redemption_WebApi.Services
             this.transactionRepository = transactionRepository;
             this.qrCodeRepository = qrCodeRepository;
             this.hostingEnvironment = hostingEnvironment;
+            this.collectionRepository = collectionRepository;
             this.configuration = configuration;
         }
 
@@ -103,9 +108,38 @@ namespace CSP_Redemption_WebApi.Services
             var response = new IsExistResponseModel();
             try
             {
+                string location = null;
+                string ZipCode = null;
+                var mainUri = this.configuration["GoogleMapsPlatform:Uri"];
+                var apiPath = this.configuration["GoogleMapsPlatform:ApiPath"];
+                var key = this.configuration["GoogleMapsPlatform:Key"];
+                var type = this.configuration["GoogleMapsPlatform:Type"];
+                if (dataConsumer.Latitude != null && dataConsumer.Longitude != null)
+                {
+                    var builder = new UriBuilder(mainUri + apiPath);
+                    builder.Port = -1;
+                    var query = HttpUtility.ParseQueryString(builder.Query);
+                    query["latlng"] = $"{dataConsumer.Latitude},{dataConsumer.Longitude}";
+                    query["key"] = key;
+                    builder.Query = query.ToString();
+                    string url = builder.ToString();
+
+                    using (var client = new HttpClient())
+                    {
+                        var responseFromApi = await client.GetAsync(url);
+                        var result = await responseFromApi.Content.ReadAsStringAsync();
+                        var jObject = JsonConvert.DeserializeObject<GeoCoderResponse>(result);
+                        location = jObject.results.Where(x => x.types.Contains(type)).Select(x => x.formatted_address).First();
+                        var locationData = jObject.results.Where(x => x.types.Contains(type)).First();
+                        ZipCode = locationData.address_components[0].short_name;
+
+
+                    }
+                }
                 var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
                 if (campaign != null)
                 {
+                    
 
                     var checkConsumer = new Consumer()
                     {
@@ -142,7 +176,8 @@ namespace CSP_Redemption_WebApi.Services
                             tran.Point = dataConsumer.Point;
                             tran.Latitude = dataConsumer.Latitude;
                             tran.Longitude = dataConsumer.Longitude;
-                            tran.Location = dataConsumer.Location;
+                            tran.Location = location;
+                            tran.ZipCode = ZipCode;
                             //await this.Redemption(tran);
                             var redemption = await this.Redemption(tran);
                             response.IsSuccess = true;
@@ -169,7 +204,8 @@ namespace CSP_Redemption_WebApi.Services
                             tran.Point = dataConsumer.Point;
                             tran.Latitude = dataConsumer.Latitude;
                             tran.Longitude = dataConsumer.Longitude;
-                            tran.Location = dataConsumer.Location;
+                            tran.Location = location;
+                            tran.ZipCode = ZipCode;
                             //await this.Redemption(tran);
                             var redemption = await this.Redemption(tran);
                             response.IsSuccess = true;
@@ -186,6 +222,48 @@ namespace CSP_Redemption_WebApi.Services
                         {
                             response.IsSuccess = true;
                             response.IsExist = false;
+                        }
+                    }
+
+                    if(isExist != null)
+                    {
+                        if (campaign.CampaignTypeId == 1)
+                        {
+                            response.CollectingType = campaign.CollectingType.Value;
+                            response.Rows = campaign.Rows.Value;
+                            response.Columns = campaign.Columns.Value;
+                            List<CollectionModel> collections = new List<CollectionModel>();
+                            var collection = await this.collectionRepository.GetCollecttionsByCampaignIdAsync(campaign.Id);
+                            if (collection != null)
+                            {
+                                int Peice = 1;
+                                foreach (var item in collection)
+                                {
+                                    byte[] imageArray = System.IO.File.ReadAllBytes(item.CollectionPath);
+                                    string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+                                    string img_grayscale = null;
+                                    var grayscale = await qrCodeRepository.GetPeiceByCampaignIdConsumerIdAsync(campaign.Id, Peice, isExist.Id);
+                                    if (!grayscale)
+                                    {
+                                        img_grayscale = "img_grayscale";
+                                    }
+                                    collections.Add(new CollectionModel()
+                                    {
+                                        Id = item.Id,
+                                        Quantity = item.Quantity,
+                                        TotalQuantity = item.TotalQuantity.Value,
+                                        row = item.CollectionRow,
+                                        column = item.CollectionColumn,
+                                        name = item.CollectionName,
+                                        //path = item.CollectionPath,
+                                        file = base64ImageRepresentation,
+                                        extension = item.Extension,
+                                        IsCollected = img_grayscale
+                                    });
+                                    Peice++;
+                                }
+                                response.CollectingData = collections;
+                            }
                         }
                     }
                 }
@@ -207,6 +285,34 @@ namespace CSP_Redemption_WebApi.Services
         public async Task<RedemptionResponseModel> Register(ConsumerRequestModel consumerRequest)
         {
             var response = new RedemptionResponseModel();
+ 
+            string location = null;
+            string ZipCode = null;
+            var mainUri = this.configuration["GoogleMapsPlatform:Uri"];
+            var apiPath = this.configuration["GoogleMapsPlatform:ApiPath"];
+            var key = this.configuration["GoogleMapsPlatform:Key"];
+            var type = this.configuration["GoogleMapsPlatform:Type"];
+            if (consumerRequest.Latitude != null && consumerRequest.Longitude != null)
+            {
+                var builder = new UriBuilder(mainUri + apiPath);
+                builder.Port = -1;
+                var query = HttpUtility.ParseQueryString(builder.Query);
+                query["latlng"] = $"{consumerRequest.Latitude},{consumerRequest.Longitude}";
+                query["key"] = key;
+                builder.Query = query.ToString();
+                string url = builder.ToString();
+
+                using (var client = new HttpClient())
+                {
+                    var responseFromApi = await client.GetAsync(url);
+                    var result = await responseFromApi.Content.ReadAsStringAsync();
+                    var jObject = JsonConvert.DeserializeObject<GeoCoderResponse>(result);
+                    location = jObject.results.Where(x => x.types.Contains(type)).Select(x => x.formatted_address).First();
+                    var locationData = jObject.results.Where(x => x.types.Contains(type)).First();
+                    ZipCode = locationData.address_components[0].short_name;
+
+                }
+            }
             var campaign = await this.campaignRepository.GetCampaignByIdAsync(consumerRequest.CampaignId);
             if (campaign == null)
             {
@@ -253,7 +359,8 @@ namespace CSP_Redemption_WebApi.Services
                             tran.Point = consumerRequest.Point == null ? 0 : Convert.ToInt32(consumerRequest.Point);
                             tran.Latitude = consumerRequest.Latitude;
                             tran.Longitude = consumerRequest.Longitude;
-                            tran.Location = consumerRequest.Location;
+                            tran.Location = location;
+                            tran.ZipCode = ZipCode;
                             var redemption = await this.Redemption(tran);
                             response.IsSuccess = true;
                             response.StatusTypeCode = redemption.StatusTypeCode;
@@ -289,7 +396,8 @@ namespace CSP_Redemption_WebApi.Services
                             tran.Point = consumerRequest.Point == null ? 0 : Convert.ToInt32(consumerRequest.Point);
                             tran.Latitude = consumerRequest.Latitude;
                             tran.Longitude = consumerRequest.Longitude;
-                            tran.Location = consumerRequest.Location;
+                            tran.Location = location;
+                            tran.ZipCode = ZipCode;
                             var redemption = await this.Redemption(tran);
                             response.IsSuccess = true;
                             response.StatusTypeCode = redemption.StatusTypeCode;
@@ -324,6 +432,33 @@ namespace CSP_Redemption_WebApi.Services
             bool IsError = false;
             try
             {
+                string location = null;
+                string ZipCode = null;
+                var mainUri = this.configuration["GoogleMapsPlatform:Uri"];
+                var apiPath = this.configuration["GoogleMapsPlatform:ApiPath"];
+                var key = this.configuration["GoogleMapsPlatform:Key"];
+                var type = this.configuration["GoogleMapsPlatform:Type"];
+                if (dataConsumer.Latitude != null && dataConsumer.Longitude != null)
+                {
+                    var builder = new UriBuilder(mainUri + apiPath);
+                    builder.Port = -1;
+                    var query = HttpUtility.ParseQueryString(builder.Query);
+                    query["latlng"] = $"{dataConsumer.Latitude},{dataConsumer.Longitude}";
+                    query["key"] = key;
+                    builder.Query = query.ToString();
+                    string url = builder.ToString();
+
+                    using (var client = new HttpClient())
+                    {
+                        var responseFromApi = await client.GetAsync(url);
+                        var result = await responseFromApi.Content.ReadAsStringAsync();
+                        var jObject = JsonConvert.DeserializeObject<GeoCoderResponse>(result);
+                        location = jObject.results.Where(x => x.types.Contains(type)).Select(x => x.formatted_address).First();
+                        var locationData = jObject.results.Where(x => x.types.Contains(type)).First();
+                        ZipCode = locationData.address_components[0].short_name;
+                    }
+                }
+
                 var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
                 tran.CampaignId = campaign.Id;
                 // tran.ConsumerId = consumerRequest.ConsumerId;
@@ -331,8 +466,9 @@ namespace CSP_Redemption_WebApi.Services
                 tran.Code = dataConsumer.Code;
                 tran.Latitude = dataConsumer.Latitude;
                 tran.Longitude = dataConsumer.Longitude;
-                tran.Location = dataConsumer.Location;
+                tran.Location = location;
                 tran.CreatedDate = DateTime.Now;
+                tran.ZipCode = ZipCode;
 
                 var enrollment = new Enrollment()
                 {
@@ -370,7 +506,7 @@ namespace CSP_Redemption_WebApi.Services
                         }
                         else
                         {
-                            IsError = true;
+                            //IsError = true;
                             response.Message = campaign.DuplicateMessage;
                             response.StatusTypeCode = "DUPLICATE";
 
@@ -380,7 +516,7 @@ namespace CSP_Redemption_WebApi.Services
                     }
                     else
                     {
-                        IsError = true;
+                        //IsError = true;
                         response.Message = campaign.QrCodeNotExistMessage;
                         response.StatusTypeCode = "EMPTY";
 
@@ -390,7 +526,7 @@ namespace CSP_Redemption_WebApi.Services
                 }
                 else
                 {
-                    IsError = true;
+                    //IsError = true;
                     response.Message = campaign.AlertMessage;
                     response.StatusTypeCode = "FAIL";
 
@@ -511,6 +647,7 @@ namespace CSP_Redemption_WebApi.Services
                 tran.Latitude = consumerRequest.Latitude;
                 tran.Longitude = consumerRequest.Longitude;
                 tran.Location = consumerRequest.Location;
+                tran.ZipCode = consumerRequest.ZipCode;
                 tran.CreatedDate = DateTime.Now;
 
                 response.ConsumerId = consumerRequest.ConsumerId;
@@ -651,6 +788,44 @@ namespace CSP_Redemption_WebApi.Services
                             if (campaign.CampaignTypeId == 1) //JigSaw
                             {
                                 response.Pieces = await this.qrCodeRepository.GetPiece(qrCode);
+                                if (campaign.CampaignTypeId == 1)
+                                {
+                                    response.CollectingType = campaign.CollectingType.Value;
+                                    response.Rows = campaign.Rows.Value;
+                                    response.Columns = campaign.Columns.Value;
+                                    List<CollectionModel> collections = new List<CollectionModel>();
+                                    var collection = await this.collectionRepository.GetCollecttionsByCampaignIdAsync(campaign.Id);
+                                    if (collection != null)
+                                    {
+                                        int Peice = 1;
+                                        foreach (var item in collection)
+                                        {
+                                            byte[] imageArray = System.IO.File.ReadAllBytes(item.CollectionPath);
+                                            string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+                                            string img_grayscale = null;
+                                            var grayscale = await qrCodeRepository.GetPeiceByCampaignIdConsumerIdAsync(campaign.Id, Peice, consumerRequest.ConsumerId);
+                                            if (!grayscale)
+                                            {
+                                                img_grayscale = "img_grayscale";
+                                            }
+                                            collections.Add(new CollectionModel()
+                                            {
+                                                Id = item.Id,
+                                                Quantity = item.Quantity,
+                                                TotalQuantity = item.TotalQuantity.Value,
+                                                row = item.CollectionRow,
+                                                column = item.CollectionColumn,
+                                                name = item.CollectionName,
+                                                //path = item.CollectionPath,
+                                                file = base64ImageRepresentation,
+                                                extension = item.Extension,
+                                                IsCollected = img_grayscale
+                                            });
+                                            Peice++;
+                                        }
+                                        response.CollectingData = collections;
+                                    }
+                                }
                             }
                         }
                         else
@@ -902,5 +1077,127 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
+        public async Task<ConsumersResponseModel> GetConsumerByPhoneAndBrandIdAsync(string phone, int brandId)
+        {
+            var response = new ConsumersResponseModel();
+            try
+            {
+                var consumerDb = await this.consumerRepository.GetConsumerByPhoneAndBrandIdAsync(phone, brandId);
+                if(consumerDb != null)
+                {
+                    var consumer = new ConsumerModel();
+                    consumer.Id = consumerDb.Id;
+                    consumer.FirstName = consumerDb.FirstName;
+                    consumer.LastName = consumerDb.LastName;
+                    consumer.Email = consumerDb.Email;
+                    consumer.Phone = consumerDb.Phone;
+                    consumer.BirthDate = consumerDb.BirthDate.Value;
+                    consumer.Address1 = consumerDb.Address1;
+                    consumer.Address2 = consumerDb.Address2;
+                    consumer.ProvinceCode = consumerDb.ProvinceCode;
+                    consumer.AmphurCode = consumerDb.AmphurCode;
+                    consumer.TumbolCode = consumerDb.TumbolCode;
+                    consumer.ZipCode = consumerDb.ZipCode;
+                    consumer.Point = consumerDb.Point;
+
+                    response.Consumer = consumer;
+                    response.IsSuccess = true;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = "User invalid.";
+                }
+            }catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+    }
+    public class GeoCoderResponse
+    {
+        public Plus_Code plus_code { get; set; }
+        public Result[] results { get; set; }
+        public string status { get; set; }
+    }
+    public class Plus_Code
+    {
+        public string compound_code { get; set; }
+        public string global_code { get; set; }
+    }
+
+    public class Result
+    {
+        public Address_Components[] address_components { get; set; }
+        public string formatted_address { get; set; }
+        public Geometry geometry { get; set; }
+        public string place_id { get; set; }
+        public Plus_Code1 plus_code { get; set; }
+        public string[] types { get; set; }
+    }
+
+    public class Geometry
+    {
+        public Location location { get; set; }
+        public string location_type { get; set; }
+        public Viewport viewport { get; set; }
+        public Bounds bounds { get; set; }
+    }
+
+    public class Location
+    {
+        public float lat { get; set; }
+        public float lng { get; set; }
+    }
+
+    public class Viewport
+    {
+        public Northeast northeast { get; set; }
+        public Southwest southwest { get; set; }
+    }
+
+    public class Northeast
+    {
+        public float lat { get; set; }
+        public float lng { get; set; }
+    }
+
+    public class Southwest
+    {
+        public float lat { get; set; }
+        public float lng { get; set; }
+    }
+
+    public class Bounds
+    {
+        public Northeast1 northeast { get; set; }
+        public Southwest1 southwest { get; set; }
+    }
+
+    public class Northeast1
+    {
+        public float lat { get; set; }
+        public float lng { get; set; }
+    }
+
+    public class Southwest1
+    {
+        public float lat { get; set; }
+        public float lng { get; set; }
+    }
+
+    public class Plus_Code1
+    {
+        public string compound_code { get; set; }
+        public string global_code { get; set; }
+    }
+
+    public class Address_Components
+    {
+        public string long_name { get; set; }
+        public string short_name { get; set; }
+        public string[] types { get; set; }
     }
 }

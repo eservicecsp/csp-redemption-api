@@ -32,5 +32,10 @@ namespace CSP_Redemption_WebApi.Controllers
         {
             return Ok(await this.chartService.GetChartQrCode(campaignId));
         }
+        [HttpGet("province/{campaignId}")]
+        public async Task<IActionResult> GetCharProvince(int campaignId)
+        {
+            return Ok(await this.chartService.GetChartProvince(campaignId)); 
+        }
     }
 }

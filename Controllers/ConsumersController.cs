@@ -76,7 +76,8 @@ namespace CSP_Redemption_WebApi.Controllers
                 isSupplements = isSupplement ,
 
             };
-            if (productTypes!= null){
+            if (productTypes!= null && productTypes != "undefined")
+            {
                 data.productTypes = productTypes.Split(',').Select(Int32.Parse).ToList();
             }
 
@@ -113,6 +114,12 @@ namespace CSP_Redemption_WebApi.Controllers
             };
             var token = Request.Headers["Authorization"].ToString();
             return Ok(await this.consumerService.SendAll(dataModel, channel, Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId")), promotion));
+        }
+
+        [HttpGet("Member")]
+        public async Task<IActionResult> GetMember(string phone, int brandId)
+        {
+            return Ok(await this.consumerService.GetConsumerByPhoneAndBrandIdAsync(phone, brandId));
         }
     }
 }

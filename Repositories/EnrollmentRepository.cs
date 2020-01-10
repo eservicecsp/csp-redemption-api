@@ -17,6 +17,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<bool> ImportFileAsync(List<Enrollment> enrollments);
         Task<List<Enrollment>> GetEnrollmentsByBrandIdAsync(PaginationModel data, string type);
         Task<int> GetEnrollmentTotalByBrandIdAsync(PaginationModel data);
+        Task<Enrollment> GetEnrollmentByIdAsync(int enrollmentId);
         //Task<bool> CreateAsync(Enrollment enrollments, QrCode qrCode);
     }
     public class EnrollmentRepository: IEnrollmentRepository
@@ -187,6 +188,14 @@ namespace CSP_Redemption_WebApi.Repositories
                 }
 
                 return await enrollments.CountAsync();
+            }
+        }
+
+        public async Task<Enrollment> GetEnrollmentByIdAsync(int enrollmentId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.Enrollment.FirstOrDefaultAsync(x => x.Id == enrollmentId);
             }
         }
 

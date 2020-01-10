@@ -20,6 +20,8 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<int> GetCountQrCode(int campaignId);
         Task<int> GetCountQrCodeUsed(int campaignId);
         Task<QrCode> GetTokenByCompanyIdAsync(int campaignId);
+        Task<List<QrCode>> ExportQrCodeByCompanyIdAsync(int campaignId);
+        Task<bool> GetPeiceByCampaignIdConsumerIdAsync(int campaignId, int peice, int consumerId);
     }
     public class QrCodeRepository : IQrCodeRepository
     {
@@ -203,7 +205,7 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.QrCode.Where(x => x.CampaignId == campaignId && x.ConsumerId != null ).CountAsync();
+                return await Context.QrCode.Where(x => x.CampaignId == campaignId && (x.ConsumerId != null || x.EnrollmentId != null) ).CountAsync();
             }
         }
         public async Task<QrCode> GetTokenByCompanyIdAsync(int campaignId)
@@ -211,6 +213,20 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.QrCode.FirstOrDefaultAsync(x => x.CampaignId == campaignId);
+            }
+        }
+        public async Task<List<QrCode>> ExportQrCodeByCompanyIdAsync(int campaignId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.QrCode.Include(x => x.Consumer).Where(x => x.CampaignId == campaignId).ToListAsync();
+            }
+        }
+        public async Task<bool> GetPeiceByCampaignIdConsumerIdAsync(int campaignId, int peice, int consumerId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                return await Context.QrCode.AnyAsync(x => x.CampaignId == campaignId && x.Peice == peice && x.ConsumerId == consumerId);
             }
         }
     }

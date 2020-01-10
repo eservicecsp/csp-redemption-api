@@ -26,6 +26,10 @@ namespace CSP_Redemption_WebApi.Models
         public int ConsumerId { get; set; }
         public string StatusTypeCode { get; set; }
         public int CampaignType { get; set; }
+        public int CollectingType { get; set; }
+        public List<CollectionModel> CollectingData { get; set; }
+        public int Rows { get; set; }
+        public int Columns { get; set; }
         public int[] Pieces { get; set; }
         public int? TotalPieces { get; set; }
         public ConsumerRequestModel consumer { get; set; }
@@ -38,6 +42,10 @@ namespace CSP_Redemption_WebApi.Models
         public int ConsumerId { get; set; }
         public string StatusTypeCode { get; set; }
         public int CampaignType { get; set; }
+        public int CollectingType { get; set; }
+        public List<CollectionModel> CollectingData { get; set; }
+        public int Rows { get; set; }
+        public int Columns { get; set; }
         public int[] Pieces { get; set; }
         public int? TotalPieces { get; set; }
     }
@@ -48,6 +56,7 @@ namespace CSP_Redemption_WebApi.Models
         public bool IsSuccess { get; set; }
         public string Message { get; set; }
         public List<ConsumerModel> Consumers { get; set; }
+        public ConsumerModel Consumer { get; set; }
     }
 
     public class ConsumerModel
