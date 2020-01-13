@@ -35,6 +35,7 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
         public virtual DbSet<ProductAttachment> ProductAttachment { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
         public virtual DbSet<Promotion> Promotion { get; set; }
+        public virtual DbSet<PromotionSubType> PromotionSubType { get; set; }
         public virtual DbSet<PromotionType> PromotionType { get; set; }
         public virtual DbSet<Province> Province { get; set; }
         public virtual DbSet<QrCode> QrCode { get; set; }
@@ -194,6 +195,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
             modelBuilder.Entity<Collection>(entity =>
             {
                 entity.Property(e => e.CollectionName).HasMaxLength(255);
+
+                entity.Property(e => e.CollectionPath).HasMaxLength(255);
 
                 entity.Property(e => e.Extension).HasMaxLength(255);
 
@@ -416,9 +419,7 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasMaxLength(100);
+                entity.Property(e => e.Description).IsRequired();
 
                 entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
 
@@ -445,11 +446,17 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.Description).HasMaxLength(255);
 
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ImageBackground).HasMaxLength(10);
+
                 entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Promotion)
@@ -463,11 +470,25 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Promotion_Staff");
 
+                entity.HasOne(d => d.PromotionSubType)
+                    .WithMany(p => p.Promotion)
+                    .HasForeignKey(d => d.PromotionSubTypeId)
+                    .HasConstraintName("FK_Promotion_PromotionSubType");
+
                 entity.HasOne(d => d.PromotionType)
                     .WithMany(p => p.Promotion)
                     .HasForeignKey(d => d.PromotionTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Promotion_PromotionType");
+                    .HasConstraintName("FK_Promotion_PromotionType1");
+            });
+
+            modelBuilder.Entity<PromotionSubType>(entity =>
+            {
+                entity.Property(e => e.Description).IsRequired();
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
 
             modelBuilder.Entity<PromotionType>(entity =>
@@ -523,6 +544,12 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.Role)
+                    .HasForeignKey(d => d.BrandId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Role_Brand");
             });
 
             modelBuilder.Entity<RoleFunction>(entity =>
@@ -670,6 +697,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.Token)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.Property(e => e.ZipCode).HasMaxLength(10);
 
                 entity.HasOne(d => d.Campaign)
                     .WithMany(p => p.Transaction)

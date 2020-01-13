@@ -12,6 +12,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
             Product = new HashSet<Product>();
             ProductType = new HashSet<ProductType>();
             Promotion = new HashSet<Promotion>();
+            Role = new HashSet<Role>();
             Staff = new HashSet<Staff>();
         }
 
@@ -25,6 +26,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public virtual ICollection<Product> Product { get; set; }
         public virtual ICollection<ProductType> ProductType { get; set; }
         public virtual ICollection<Promotion> Promotion { get; set; }
+        public virtual ICollection<Role> Role { get; set; }
         public virtual ICollection<Staff> Staff { get; set; }
     }
 }

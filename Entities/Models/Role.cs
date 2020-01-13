@@ -16,6 +16,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string Description { get; set; }
         public int BrandId { get; set; }
 
+        public virtual Brand Brand { get; set; }
         public virtual ICollection<RoleFunction> RoleFunction { get; set; }
         public virtual ICollection<Staff> Staff { get; set; }
     }

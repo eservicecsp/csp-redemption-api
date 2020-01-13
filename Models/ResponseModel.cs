@@ -558,6 +558,16 @@ namespace CSP_Redemption_WebApi.Models
         public int BrandId { get; set; }
         public int PromotionTypeId { get; set; }
         public PromotionTypeModel PromotionType { get; set; }
+        public int? PromotionSubTypeId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public int? MemberDiscount { get; set; }
+        public int? BirthDateDiscount { get; set; }
+        public int? ProductGroupDiscount { get; set; }
+        public string ImagePath1 { get; set; }
+        public string ImagePath2 { get; set; }
+        public string ImagePath3 { get; set; }
+        public string ImageBackground { get; set; }
         public bool IsActived { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedByName { get; set; }
