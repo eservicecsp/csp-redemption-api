@@ -22,9 +22,13 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int? BirthDateDiscount { get; set; }
         public int? ProductGroupDiscount { get; set; }
         public string ImagePath1 { get; set; }
+        public string ImageExtension1 { get; set; }
         public string ImagePath2 { get; set; }
+        public string ImageExtension2 { get; set; }
         public string ImagePath3 { get; set; }
+        public string ImageExtension3 { get; set; }
         public string ImageBackground { get; set; }
+        public string ImageBackgroundExtention { get; set; }
         public bool IsActived { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }

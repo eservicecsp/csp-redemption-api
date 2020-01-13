@@ -14,9 +14,14 @@ namespace CSP_Redemption_WebApi.Controllers
     public class PromotionsController : ControllerBase
     {
         private readonly IPromotionService _promotionService;
-        public PromotionsController(IPromotionService promotionService)
+        private readonly IPromotionSubTypeService _promotionSubTypeService;
+        public PromotionsController(
+            IPromotionService promotionService,
+            IPromotionSubTypeService promotionSubTypeService
+        )
         {
             _promotionService = promotionService;
+            _promotionSubTypeService = promotionSubTypeService;
         }
 
         [HttpGet]
@@ -55,6 +60,12 @@ namespace CSP_Redemption_WebApi.Controllers
             promotion.ModifiedBy = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "userId"));
 
             return Ok(await _promotionService.UpdateAsync(promotion));
+        }
+
+        [HttpGet("promotionsubtypes")]
+        public async Task<IActionResult> GetPromotionSubTypesAsync()
+        {
+            return Ok(await _promotionSubTypeService.GetPromotionSubTypeAsync());
         }
     }
 }

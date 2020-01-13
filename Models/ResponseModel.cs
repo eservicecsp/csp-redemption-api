@@ -596,6 +596,19 @@ namespace CSP_Redemption_WebApi.Models
         public string Name { get; set; }
         public string Description { get; set; }
     }
+    public class PromotionSubTypeResponseModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public List<PromotionSubTypeModel> promotionSubTypes { get; set; }
+    }
+
+    public class PromotionSubTypeModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
     #endregion
 
     #region Role

@@ -448,7 +448,13 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
-                entity.Property(e => e.ImageBackground).HasMaxLength(10);
+                entity.Property(e => e.ImageBackgroundExtention).HasMaxLength(50);
+
+                entity.Property(e => e.ImageExtension1).HasMaxLength(50);
+
+                entity.Property(e => e.ImageExtension2).HasMaxLength(50);
+
+                entity.Property(e => e.ImageExtension3).HasMaxLength(50);
 
                 entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
 
