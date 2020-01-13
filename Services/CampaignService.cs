@@ -277,6 +277,7 @@ namespace CSP_Redemption_WebApi.Services
                     //int Ceiling = (int)Math.Ceiling((requestModel.Campaign.Quantity * requestModel.Campaign.Waste) / 100);
                     requestModel.Campaign.GrandTotal = grandTotal;
                     campaign.GrandTotal = grandTotal;
+                    campaign.TotalPeice = requestModel.Campaign.CollectingData.Count();
                     var qrCodes = this.GenerateTokens(grandTotal);
                     requestModel.Peices = n.ToList();
 
