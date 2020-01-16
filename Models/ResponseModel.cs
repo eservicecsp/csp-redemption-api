@@ -182,6 +182,26 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
         public List<CampaignModel> Campaigns { get; set; }
         public CampaignModel Campaign { get; set; }
+        public List<CampaignPaginationModel> CampaignPagination { get; set; }
+        public int Length { get; set; }
+    }
+
+    public class CampaignPaginationModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string CampaignType { get; set; }
+        public string CampaignStatusType { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public int TotalQrCode { get; set; }
+        public int TotalFail { get; set; }
+        public int TotalEmpty { get; set; }
+        public int TotalDuplicate { get; set; }
+        public int TotalSuccess { get; set; }
+        public int TotalTran { get; set; }
+
     }
     public class CampaignModel
     {
@@ -207,6 +227,10 @@ namespace CSP_Redemption_WebApi.Models
         public int? Columns { get; set; }
         public string CollectingType { get; set; }
         public int CreatedBy { get; set; }
+        public string Tel { get; set; }
+        public string Facebook { get; set; }
+        public string Line { get; set; }
+        public string Web { get; set; }
         public DateTime CreatedDate { get; set; }
         public List<Dealer> Dealers { get; set; }
 
@@ -559,21 +583,35 @@ namespace CSP_Redemption_WebApi.Models
         public int PromotionTypeId { get; set; }
         public PromotionTypeModel PromotionType { get; set; }
         public int? PromotionSubTypeId { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public int? MemberDiscount { get; set; }
         public int? BirthDateDiscount { get; set; }
         public int? ProductGroupDiscount { get; set; }
-        public string ImagePath1 { get; set; }
-        public string ImagePath2 { get; set; }
-        public string ImagePath3 { get; set; }
-        public string ImageBackground { get; set; }
+        public ImageModel image1 { get; set; }
+        public ImageModel image2 { get; set; }
+        public ImageModel image3 { get; set; }
+        public ImageModel backgroundImage { get; set; }
         public bool IsActived { get; set; }
         public int CreatedBy { get; set; }
         public string CreatedByName { get; set; }
         public DateTime CreatedDate { get; set; }
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
+        public int? ProductId { get; set; }
+        public string Tel { get; set; }
+        public string Facebook { get; set; }
+        public string Line { get; set; }
+        public string Web { get; set; }
+    }
+
+    public class ImageModel
+    {
+        public string name { get; set; }
+        public string path { get; set; }
+        public string file { get; set; }
+        public string extension { get; set; }
+        public string imageUrl { get; set; }
     }
 
     public class PromotionTypesResponseModel
@@ -667,6 +705,16 @@ namespace CSP_Redemption_WebApi.Models
         public int? ModifiedBy { get; set; }
         public string ModifiedByName { get; set; }
         public DateTime? ModifiedDate { get; set; }
+    }
+    #endregion
+
+    #region ContactUs
+
+    public class ContactUsModel
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+        public ContactUs contactUs { get; set; }
     }
     #endregion
 }

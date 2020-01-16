@@ -23,12 +23,20 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int? ProductGroupDiscount { get; set; }
         public string ImagePath1 { get; set; }
         public string ImageExtension1 { get; set; }
+        public string ImageUrl1 { get; set; }
         public string ImagePath2 { get; set; }
         public string ImageExtension2 { get; set; }
+        public string ImageUrl2 { get; set; }
         public string ImagePath3 { get; set; }
         public string ImageExtension3 { get; set; }
+        public string ImageUrl3 { get; set; }
         public string ImageBackground { get; set; }
         public string ImageBackgroundExtention { get; set; }
+        public int? ProductId { get; set; }
+        public string Tel { get; set; }
+        public string Facebook { get; set; }
+        public string Line { get; set; }
+        public string Web { get; set; }
         public bool IsActived { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
@@ -37,6 +45,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
 
         public virtual Brand Brand { get; set; }
         public virtual Staff CreatedByNavigation { get; set; }
+        public virtual Product Product { get; set; }
         public virtual PromotionSubType PromotionSubType { get; set; }
         public virtual PromotionType PromotionType { get; set; }
         public virtual ICollection<Tracking> Tracking { get; set; }

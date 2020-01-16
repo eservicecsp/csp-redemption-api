@@ -14,6 +14,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<Promotion> GetPromotionAsync(int brandId, int promotionId);
         Task<bool> CreateAsync(Promotion promotion);
         Task<bool> UpdateAsync(Promotion promotion);
+        Task<List<Promotion>> GetPromotionsValidAsync(int brandId);
     }
 
     public class PromotionRepository : IPromotionRepository
@@ -30,6 +31,20 @@ namespace CSP_Redemption_WebApi.Repositories
                     .Include(x => x.CreatedByNavigation)
                     .Include(x => x.PromotionType)
                     .Where(x => x.BrandId == brandId).ToListAsync();
+        }
+
+        public async Task<List<Promotion>> GetPromotionsValidAsync(int brandId)
+        {
+            DateTime currentDate = DateTime.Now;
+            return await _context.Promotion
+                    .Include(x => x.CreatedByNavigation)
+                    .Include(x => x.PromotionType)
+                    .Where(x => x.BrandId == brandId)
+                    //.Where(x=>x.StartDate.Value.Date >= currentDate.Date && currentDate.Date <= x.EndDate.Value.Date)
+                    .Where(x => x.StartDate.Value.Date <= currentDate.Date && x.EndDate.Value.Date >= currentDate.Date)
+                    .Where(x=>x.PromotionTypeId != 6)
+                    .Where(x=>x.IsActived == true)
+                    .ToListAsync();
         }
         public async Task<Promotion> GetPromotionAsync(int brandId, int promotionId)
         {

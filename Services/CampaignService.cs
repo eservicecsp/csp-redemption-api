@@ -18,6 +18,8 @@ namespace CSP_Redemption_WebApi.Services
         Task<ResponseModel> CreateCampaignAsync(CreateCampaignRequestModel requestModel);
         Task<CampaignsResponseModel> GetCampaignsByCampaignIdAsync(int campaignId);
         Task<ResponseModel> UpdateAsync(Campaign campaign);
+        Task<CampaignsResponseModel> GetCampaignsPaginationByBrandIdAsync(PaginationModel paginationModel);
+        Task<ResponseModel> updatestatusCampaignAsync(UpdateCampaignStatus updateCampaignStatus);
 
     }
 
@@ -34,7 +36,7 @@ namespace CSP_Redemption_WebApi.Services
             (
             ICampaignRepository campaignRepository,
             ITransactionRepository transactionRepository,
-            IConfiguration configuration ,
+            IConfiguration configuration,
             IDealerRepository dealerRepository,
             ICollectionRepository collectionRepository,
             IEnrollmentRepository enrollmentRepository,
@@ -128,7 +130,7 @@ namespace CSP_Redemption_WebApi.Services
                             }
 
                         }
-                        if(item.ConsumerId == null && item.EnrollmentId != null)
+                        if (item.ConsumerId == null && item.EnrollmentId != null)
                         {
                             var enrollment = await this.enrollmentRepository.GetEnrollmentByIdAsync(item.EnrollmentId.Value);
                             if (enrollment != null)
@@ -202,7 +204,7 @@ namespace CSP_Redemption_WebApi.Services
 
                 if (requestModel.Campaign.CampaignTypeId == 3)  //Enrollment & Member
                 {
-                   
+
                     var qrToken = this.GenerateTokens(1);
 
                     int percentWaste = requestModel.Campaign.Waste == null ? 0 : requestModel.Campaign.Waste.Value;
@@ -233,7 +235,7 @@ namespace CSP_Redemption_WebApi.Services
 
                     string campaginAttachmentPath = _configuration["Attachments:Campaigns"];
                     campaginAttachmentPath = campaginAttachmentPath.Replace("[#campaignId#]", $"{requestModel.Campaign.BrandId.ToString()}-{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}");
-  
+
                     int i = 0;
                     List<CollectionModel> collections = new List<CollectionModel>();
                     foreach (var item in requestModel.Campaign.CollectingData)
@@ -245,7 +247,7 @@ namespace CSP_Redemption_WebApi.Services
                         grandTotal += (Ceiling + item.Quantity);
                         string[] Extensions = item.file.Split(',');
                         var filePath = Path.Combine(campaginAttachmentPath, item.name);
-                        if(!Directory.Exists(campaginAttachmentPath))
+                        if (!Directory.Exists(campaginAttachmentPath))
                         {
                             Directory.CreateDirectory(campaginAttachmentPath);
                         }
@@ -272,7 +274,7 @@ namespace CSP_Redemption_WebApi.Services
                     campaign.Columns = requestModel.Campaign.Columns;
 
 
-                    campaign.Quantity  = requestModel.Campaign.CollectingData.Sum(x=>x.Quantity);
+                    campaign.Quantity = requestModel.Campaign.CollectingData.Sum(x => x.Quantity);
                     requestModel.Campaign.CollectingData = collections;
                     //int Ceiling = (int)Math.Ceiling((requestModel.Campaign.Quantity * requestModel.Campaign.Waste) / 100);
                     requestModel.Campaign.GrandTotal = grandTotal;
@@ -428,7 +430,7 @@ namespace CSP_Redemption_WebApi.Services
                     {
                         ProductId = campaignDb.CampaignProduct.FirstOrDefault(x => x.CampaignId == campaignId).ProductId;
                     }
-                    List<Dealer> dealers = new List<Dealer>(); 
+                    List<Dealer> dealers = new List<Dealer>();
                     if (campaignDb.CampaignDealer.Count() > 0)
                     {
                         int[] DealerId = campaignDb.CampaignDealer.Select(x => x.DealerId).ToArray();
@@ -437,9 +439,9 @@ namespace CSP_Redemption_WebApi.Services
                     }
                     List<CollectionModel> collections = new List<CollectionModel>();
                     var collection = await this.collectionRepository.GetCollecttionsByCampaignIdAsync(campaignId);
-                    if(collection!= null)
+                    if (collection != null)
                     {
-                       foreach(var item in collection)
+                        foreach (var item in collection)
                         {
                             byte[] imageArray = System.IO.File.ReadAllBytes(item.CollectionPath);
                             string base64ImageRepresentation = Convert.ToBase64String(imageArray);
@@ -499,6 +501,98 @@ namespace CSP_Redemption_WebApi.Services
             try
             {
                 response.IsSuccess = await this.campaignRepository.UpdateAsync(campaign);
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<CampaignsResponseModel> GetCampaignsPaginationByBrandIdAsync(PaginationModel paginationModel)
+        {
+            var response = new CampaignsResponseModel();
+            try
+            {
+                var campaigns = await this.campaignRepository.GetCampaignsPaginationByBrandIdAsync(paginationModel, paginationModel.BrandId);
+                var CampaignPagination = new List<CampaignPaginationModel>();
+                if (campaigns != null)
+                {
+                    foreach (var campaign in campaigns)
+                    {
+
+                        int TotalQrCode = 0;
+                        int TotalFail = 0;
+                        int TotalEmpty = 0;
+                        int TotalDuplicate = 0;
+                        int TotalSuccess = 0;
+                        int TotalTran = 0;
+                        string CampaignStatusType = string.Empty;
+                        if (paginationModel.filtersCampaign.campaignStatusId == 1)//New
+                        {
+                            PaginationModel data = new PaginationModel();
+                            data.campaignId = campaign.Id;
+                            TotalQrCode = await this.qrCodeRepository.GetQrCodeTotalByCompanyIdAsync(data);
+                        }
+                        else
+                        {
+                            TotalFail = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 1);
+                            TotalEmpty = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 2);
+                            TotalDuplicate = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 3);
+                            TotalSuccess = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 4);
+                            TotalTran = await this.transactionRepository.GetCountAllTransaction(campaign.Id);
+                            CampaignStatusType = campaign.CampaignStatusId == 3 ? "Delete" : "Expire";
+                        }
+                        CampaignPagination.Add(new CampaignPaginationModel()
+                        {
+                            Id = campaign.Id,
+                            Name = campaign.Name,
+                            Description = campaign.Description,
+                            StartDate = campaign.StartDate,
+                            EndDate = campaign.EndDate,
+                            CampaignType = campaign.CampaignType.Name,
+                            TotalQrCode = TotalQrCode,
+                            TotalFail = TotalFail,
+                            TotalEmpty = TotalEmpty,
+                            TotalDuplicate = TotalDuplicate,
+                            TotalSuccess = TotalSuccess,
+                            TotalTran = TotalTran,
+                            CampaignStatusType = CampaignStatusType
+                        });
+                        
+                    }
+                    response.Length = await this.campaignRepository.GetCampaignsTotalPaginationByBrandIdAsync(paginationModel, paginationModel.BrandId);
+
+
+                }
+                
+                response.CampaignPagination = CampaignPagination;
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<ResponseModel> updatestatusCampaignAsync(UpdateCampaignStatus updateCampaignStatus)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                Campaign campaign = await this.campaignRepository.GetCampaignByIdAsync(updateCampaignStatus.CampaignId);
+                if(campaign != null)
+                {
+                    campaign.CampaignStatusId = updateCampaignStatus.CampaignStatusId;
+                    response.IsSuccess = await this.campaignRepository.updatestatusCampaignAsync(campaign);
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = "Campaign not fount.";
+                }
+                
             }
             catch (Exception ex)
             {

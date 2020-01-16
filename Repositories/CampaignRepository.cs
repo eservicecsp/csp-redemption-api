@@ -18,6 +18,9 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<List<Campaign>> GetCampaignsByBrandIdAsync(int brandId);
         Task<ResponseModel> CreateAsync(CreateCampaignRequestModel requestModel, List<QrCode> qrCodes, Campaign campaign);
         Task<bool> UpdateAsync(Campaign campaign);
+        Task<List<Campaign>> GetCampaignsPaginationByBrandIdAsync(PaginationModel data, int brandId);
+        Task<int> GetCampaignsTotalPaginationByBrandIdAsync(PaginationModel data, int brandId);
+        Task<bool> updatestatusCampaignAsync(Campaign campaign);
     }
     public class CampaignRepository : ICampaignRepository
     {
@@ -45,6 +48,95 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 return await Context.Campaign.Where(x => x.BrandId == brandId).OrderByDescending(x=>x.Id).ToListAsync();
+            }
+        }
+
+        public async Task<List<Campaign>> GetCampaignsPaginationByBrandIdAsync(PaginationModel data, int brandId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                //var consumers = Context.Consumer.AsQueryable();
+                var campaigns = Context.Campaign.Include(x=>x.CampaignType).Where(x => x.BrandId == brandId);
+                if (data.filtersCampaign.campaignName != null)
+                {
+                    campaigns = campaigns.Where(x => x.Name.Contains(data.filtersCampaign.campaignName) ||
+                                                 x.Description.Contains(data.filtersCampaign.campaignName)
+                                         );
+                }
+                if(data.filtersCampaign.campaignStatusId == 1 || data.filtersCampaign.campaignStatusId == 2)
+                {
+                    campaigns = campaigns.Where(x => x.CampaignStatusId == data.filtersCampaign.campaignStatusId);
+                }
+                else
+                {
+                    DateTime currentDate = DateTime.Now;
+                    campaigns = campaigns.Where(x => x.CampaignStatusId == 3 || x.EndDate.Value.Date < currentDate.Date);
+                }
+
+                if (data.filtersCampaign.startDate != null)
+                {
+                    campaigns = campaigns.Where(x => x.StartDate.Value.Date >= data.filtersCampaign.startDate.Value.Date);
+                }
+
+                if (data.filtersCampaign.endDate != null)
+                {
+                    campaigns = campaigns.Where(x => x.EndDate.Value.Date <= data.filtersCampaign.endDate.Value.Date);
+                }
+
+
+                int length = await this.GetCampaignsTotalPaginationByBrandIdAsync(data, brandId);
+                int index = 0;
+                if (data.pageIndex > 0)
+                {
+                    index = (data.pageIndex * data.pageSize);
+                }
+
+
+                if (index >= length)
+                {
+                    campaigns = campaigns.Skip(0).Take(data.pageSize);
+                }
+                else
+                {
+                    campaigns = campaigns.Skip(index).Take(data.pageSize);
+                }
+                return await campaigns.ToListAsync();
+            }
+        }
+        public async Task<int> GetCampaignsTotalPaginationByBrandIdAsync(PaginationModel data, int brandId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                //var consumers = Context.Consumer.AsQueryable();
+                var campaigns = Context.Campaign.Where(x => x.BrandId == brandId);
+                if (data.filtersCampaign.campaignName != null)
+                {
+                    campaigns = campaigns.Where(x => x.Name.Contains(data.filtersCampaign.campaignName) ||
+                                                 x.Description.Contains(data.filtersCampaign.campaignName)
+                                         );
+                }
+                if (data.filtersCampaign.campaignStatusId == 1 || data.filtersCampaign.campaignStatusId == 2)
+                {
+                    campaigns = campaigns.Where(x => x.CampaignStatusId == data.filtersCampaign.campaignStatusId);
+                }
+                else
+                {
+                    DateTime currentDate = DateTime.Now;
+                    campaigns = campaigns.Where(x => x.CampaignStatusId == 3 || x.EndDate.Value.Date < currentDate.Date);
+                }
+
+                if (data.filtersCampaign.startDate != null)
+                {
+                    campaigns = campaigns.Where(x => x.StartDate.Value.Date <= data.filtersCampaign.startDate.Value);
+                }
+
+                if (data.filtersCampaign.endDate != null)
+                {
+                    campaigns = campaigns.Where(x => x.EndDate.Value.Date >= data.filtersCampaign.endDate.Value);
+                }
+
+
+                return await campaigns.CountAsync();
             }
         }
 
@@ -298,6 +390,16 @@ namespace CSP_Redemption_WebApi.Repositories
                 Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
                 return await Context.SaveChangesAsync() > 0;
 
+            }
+        }
+
+        public async Task<bool> updatestatusCampaignAsync(Campaign campaign)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                Campaign dbCampaign = await Context.Campaign.FirstOrDefaultAsync(x => x.Id == campaign.Id);
+                Context.Entry(dbCampaign).CurrentValues.SetValues(campaign);
+                return await Context.SaveChangesAsync() > 0;
             }
         }
     }

@@ -54,6 +54,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped<IPromotionTypeService, PromotionTypeService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IPromotionSubTypeService, PromotionSubTypeService>();
+            services.AddScoped<IContactUsService, ContactUsService>();
 
             // Repositories
             services.AddScoped(typeof(IStaffRepository), typeof(StaffRepository));
@@ -79,6 +80,7 @@ namespace CSP_Redemption_WebApi
             services.AddScoped(typeof(IPromotionTypeRepository), typeof(PromotionTypeRepository));
             services.AddScoped(typeof(ICollectionRepository), typeof(CollectionRepository));
             services.AddScoped(typeof(IPromotionSubTypeRepository), typeof(PromotionSubTypeRepository));
+            services.AddScoped(typeof(IContactUsRepository), typeof(ContactUsRepository));
 
             // JWT Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

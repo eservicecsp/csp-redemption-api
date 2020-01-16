@@ -76,6 +76,13 @@ namespace CSP_Redemption_WebApi.Controllers
             return Ok(await this.campaignService.UpdateAsync(campaign));
         }
 
+        [HttpPost("updatestatus")]
+        public async Task<IActionResult> updatestatusCampaign(UpdateCampaignStatus updateCampaignStatus)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            return Ok(await this.campaignService.updatestatusCampaignAsync(updateCampaignStatus));
+        }
+
         [HttpGet("productType/{campaignId}")]
         public async Task<IActionResult> GetProductTypesByBrandId(int campaignId)
         {
@@ -99,6 +106,14 @@ namespace CSP_Redemption_WebApi.Controllers
             {
                 return Ok(response);
             }
+        }
+
+        [HttpPost("campaignList")]
+        public async Task<IActionResult> GetCampaignsPaginationByBrandIdAsync(PaginationModel paginationModel)
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            paginationModel.BrandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            return Ok(await this.campaignService.GetCampaignsPaginationByBrandIdAsync(paginationModel));
         }
 
     }

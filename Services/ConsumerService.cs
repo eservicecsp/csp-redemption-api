@@ -753,11 +753,11 @@ namespace CSP_Redemption_WebApi.Services
                                     totalPoint = (dbConsumer.Point != null ? Convert.ToInt32(dbConsumer.Point) : 0) + (dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0);
                                     // qrCode.Point = dbQrCode.Point;
 
-                                    response.Message = campaign.WinMessage + " และมีคะแนนรวม ( " + totalPoint + " ) คะแนน";
+                                    response.Message = campaign.WinMessage;
                                     response.StatusTypeCode = "SUCCESS";
 
                                     tran.TransactionTypeId = 4;
-                                    tran.ResponseMessage = campaign.WinMessage + " และมีคะแนนรวม ( " + totalPoint + " ) คะแนน";
+                                    tran.ResponseMessage = campaign.WinMessage;
 
                                     var statusTran = await this.transactionRepository.CreateTransactionPointAsync(tran, qrCode);
                                     if (!statusTran)

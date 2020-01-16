@@ -8,6 +8,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public Brand()
         {
             Campaign = new HashSet<Campaign>();
+            ContactUs = new HashSet<ContactUs>();
             Dealer = new HashSet<Dealer>();
             Product = new HashSet<Product>();
             ProductType = new HashSet<ProductType>();
@@ -22,6 +23,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public bool IsOwner { get; set; }
 
         public virtual ICollection<Campaign> Campaign { get; set; }
+        public virtual ICollection<ContactUs> ContactUs { get; set; }
         public virtual ICollection<Dealer> Dealer { get; set; }
         public virtual ICollection<Product> Product { get; set; }
         public virtual ICollection<ProductType> ProductType { get; set; }

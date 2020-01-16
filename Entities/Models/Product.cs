@@ -9,6 +9,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         {
             CampaignProduct = new HashSet<CampaignProduct>();
             ProductAttachment = new HashSet<ProductAttachment>();
+            Promotion = new HashSet<Promotion>();
         }
 
         public int Id { get; set; }
@@ -24,5 +25,6 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public virtual ProductType ProductType { get; set; }
         public virtual ICollection<CampaignProduct> CampaignProduct { get; set; }
         public virtual ICollection<ProductAttachment> ProductAttachment { get; set; }
+        public virtual ICollection<Promotion> Promotion { get; set; }
     }
 }

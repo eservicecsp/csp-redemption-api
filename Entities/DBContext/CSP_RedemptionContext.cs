@@ -23,11 +23,13 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
         public virtual DbSet<Campaign> Campaign { get; set; }
         public virtual DbSet<CampaignDealer> CampaignDealer { get; set; }
         public virtual DbSet<CampaignProduct> CampaignProduct { get; set; }
+        public virtual DbSet<CampaignStatus> CampaignStatus { get; set; }
         public virtual DbSet<CampaignType> CampaignType { get; set; }
         public virtual DbSet<Collection> Collection { get; set; }
         public virtual DbSet<Consumer> Consumer { get; set; }
         public virtual DbSet<ConsumerProductType> ConsumerProductType { get; set; }
         public virtual DbSet<ConsumerSource> ConsumerSource { get; set; }
+        public virtual DbSet<ContactUs> ContactUs { get; set; }
         public virtual DbSet<Dealer> Dealer { get; set; }
         public virtual DbSet<Enrollment> Enrollment { get; set; }
         public virtual DbSet<Function> Function { get; set; }
@@ -111,6 +113,10 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
+                entity.Property(e => e.Facebook).HasMaxLength(255);
+
+                entity.Property(e => e.Line).HasMaxLength(255);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
@@ -119,7 +125,11 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
+                entity.Property(e => e.Tel).HasMaxLength(50);
+
                 entity.Property(e => e.Url).HasMaxLength(255);
+
+                entity.Property(e => e.Web).HasMaxLength(255);
 
                 entity.Property(e => e.WinMessage).HasMaxLength(255);
 
@@ -128,6 +138,11 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.BrandId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Campaign_Brand");
+
+                entity.HasOne(d => d.CampaignStatus)
+                    .WithMany(p => p.Campaign)
+                    .HasForeignKey(d => d.CampaignStatusId)
+                    .HasConstraintName("FK_Campaign_CampaignStatus");
 
                 entity.HasOne(d => d.CampaignType)
                     .WithMany(p => p.Campaign)
@@ -173,6 +188,11 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_CampaignProduct_Product");
+            });
+
+            modelBuilder.Entity<CampaignStatus>(entity =>
+            {
+                entity.Property(e => e.Status).HasMaxLength(50);
             });
 
             modelBuilder.Entity<CampaignType>(entity =>
@@ -279,6 +299,25 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<ContactUs>(entity =>
+            {
+                entity.Property(e => e.Facebook).HasMaxLength(255);
+
+                entity.Property(e => e.Line).HasMaxLength(255);
+
+                entity.Property(e => e.ShopOnline).HasMaxLength(255);
+
+                entity.Property(e => e.Tel).HasMaxLength(50);
+
+                entity.Property(e => e.Web).HasMaxLength(255);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.ContactUs)
+                    .HasForeignKey(d => d.BrandId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ContactUs_Brand");
             });
 
             modelBuilder.Entity<Dealer>(entity =>
@@ -448,6 +487,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
+                entity.Property(e => e.Facebook).HasMaxLength(255);
+
                 entity.Property(e => e.ImageBackgroundExtention).HasMaxLength(50);
 
                 entity.Property(e => e.ImageExtension1).HasMaxLength(50);
@@ -456,6 +497,8 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
 
                 entity.Property(e => e.ImageExtension3).HasMaxLength(50);
 
+                entity.Property(e => e.Line).HasMaxLength(255);
+
                 entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Name)
@@ -463,6 +506,10 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .HasMaxLength(100);
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Tel).HasMaxLength(50);
+
+                entity.Property(e => e.Web).HasMaxLength(255);
 
                 entity.HasOne(d => d.Brand)
                     .WithMany(p => p.Promotion)
@@ -476,6 +523,11 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Promotion_Staff");
 
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.Promotion)
+                    .HasForeignKey(d => d.ProductId)
+                    .HasConstraintName("FK_Promotion_Product");
+
                 entity.HasOne(d => d.PromotionSubType)
                     .WithMany(p => p.Promotion)
                     .HasForeignKey(d => d.PromotionSubTypeId)
@@ -485,7 +537,7 @@ namespace CSP_Redemption_WebApi.Entities.DBContext
                     .WithMany(p => p.Promotion)
                     .HasForeignKey(d => d.PromotionTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Promotion_PromotionType1");
+                    .HasConstraintName("FK_Promotion_PromotionType");
             });
 
             modelBuilder.Entity<PromotionSubType>(entity =>

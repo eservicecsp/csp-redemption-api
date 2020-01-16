@@ -16,6 +16,12 @@ namespace CSP_Redemption_WebApi.Models
         public int createBy { get; set; }
     }
 
+    public class UpdateCampaignStatus
+    {
+        public int CampaignId { get; set; }
+        public int CampaignStatusId { get; set; }
+    }
+
     #region Brand
     public class BrandRegisterRequestModel
     {
@@ -86,10 +92,19 @@ namespace CSP_Redemption_WebApi.Models
         //public int previousPageIndex { get; set; }
         public string filter { get; set; }
         public FiltersModel filters { get; set; }
+        public FiltersCampaignModel filtersCampaign { get; set; }
         public string sortActive { get; set; }
         public string sortDirection { get; set; }
         public int BrandId { get; set; }
         public int campaignId { get; set; }
+    }
+
+    public class FiltersCampaignModel 
+    {
+        public DateTime? startDate { get; set; }
+        public DateTime? endDate { get; set; }
+        public string campaignName { get; set; }
+        public int campaignStatusId { get; set; }
     }
 
     public class FiltersModel

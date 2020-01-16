@@ -19,6 +19,7 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int CampaignTypeId { get; set; }
         public int BrandId { get; set; }
         public int? DealerId { get; set; }
+        public int? CampaignStatusId { get; set; }
         public string Url { get; set; }
         public int Quantity { get; set; }
         public int? TotalPeice { get; set; }
@@ -33,10 +34,15 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public int? Rows { get; set; }
         public int? Columns { get; set; }
         public int? CollectingType { get; set; }
+        public string Tel { get; set; }
+        public string Facebook { get; set; }
+        public string Line { get; set; }
+        public string Web { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
 
         public virtual Brand Brand { get; set; }
+        public virtual CampaignStatus CampaignStatus { get; set; }
         public virtual CampaignType CampaignType { get; set; }
         public virtual Dealer Dealer { get; set; }
         public virtual ICollection<CampaignDealer> CampaignDealer { get; set; }
