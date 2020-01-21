@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using CSP_Redemption_WebApi.Repositories;
 using CSP_Redemption_WebApi.Entities.DBContext;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace CSP_Redemption_WebApi
 {
@@ -102,6 +104,7 @@ namespace CSP_Redemption_WebApi
                 };
             });
 
+            services.AddDirectoryBrowser();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -127,13 +130,22 @@ namespace CSP_Redemption_WebApi
                 builder
                     .SetPreflightMaxAge(TimeSpan.MaxValue)
                     .AllowAnyMethod()
-                    .WithOrigins("http://localhost:4200")
-                    .WithOrigins("https://etax.chanwanich.com/csp-redemption-ui/")
+                    .AllowAnyOrigin()
                     .AllowCredentials()
                     .AllowAnyHeader();
             });
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles(); // For the wwwroot folder
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "CSP-Redemption-Attachments")),
+                RequestPath = "/attachments"
+            });
+
             app.UseMvc();
         }
     }

@@ -13,6 +13,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<ChartResponseModel> GetChartTransaction(int canpaignId);
         Task<ChartResponseModel> GetChartQrCode(int canpaignId);
         Task<ChartResponseModel> GetChartProvince(int campaignId);
+        Task<ChartResponseModel> GetGraphCampaignByBrandId(int brandId);
     }
     public class ChartService: IChartService
     {
@@ -21,6 +22,7 @@ namespace CSP_Redemption_WebApi.Services
         private readonly IProvinceRepository  provinceRepository;
         private readonly IAmphurRepository amphurRepository;
         private readonly ITumbolRepository tumbolRepository;
+        private readonly ICampaignRepository campaignRepository;
 
         public ChartService
             (
@@ -28,7 +30,8 @@ namespace CSP_Redemption_WebApi.Services
             IQrCodeRepository qrCodeRepository,
             IProvinceRepository provinceRepository,
             IAmphurRepository amphurRepository,
-            ITumbolRepository tumbolRepository
+            ITumbolRepository tumbolRepository,
+            ICampaignRepository campaignRepository
             )
         {
             this.transactionRepository = transactionRepository;
@@ -36,6 +39,7 @@ namespace CSP_Redemption_WebApi.Services
             this.provinceRepository = provinceRepository;
             this.amphurRepository = amphurRepository;
             this.tumbolRepository = tumbolRepository;
+            this.campaignRepository = campaignRepository;
         }
 
         public async Task<ChartResponseModel> GetChartTransaction(int canpaignId)
@@ -113,6 +117,7 @@ namespace CSP_Redemption_WebApi.Services
             try
             {
                 var charts = new List<ChartsModel>();
+                var MarkerProvinces = new List<MarkerProvincesModel>();
 
                 var provinces = await this.provinceRepository.GetProvincesAsync();
                 List<string> zipCodes = new List<string>();
@@ -154,6 +159,13 @@ namespace CSP_Redemption_WebApi.Services
                         chart.name = province.NameTh;
                         chart.value = countTran;
                         charts.Add(chart);
+
+                        var MarkerProvince = new MarkerProvincesModel();
+                        MarkerProvince.Location = $"{province.NameTh} : {countTran}";
+                        MarkerProvince.Latitude = province.Latitude;
+                        MarkerProvince.Longitude = province.Longitude;
+
+                        MarkerProvinces.Add(MarkerProvince);
                     }
 
                 }
@@ -169,6 +181,7 @@ namespace CSP_Redemption_WebApi.Services
                 }
 
                 response.charts = charts;
+                response.MarkerProvinces = MarkerProvinces;
                 response.IsSuccess = true;
 
             }
@@ -176,6 +189,57 @@ namespace CSP_Redemption_WebApi.Services
             {
                 response.Message = ex.Message;
             }
+            return response;
+        }
+
+        public async Task<ChartResponseModel> GetGraphCampaignByBrandId(int brandId)
+        {
+            var response = new ChartResponseModel();
+            try
+            {
+                var campaigns = await this.campaignRepository.GetCampaignsActiveByBrandIdAsync(brandId);
+                List<GraphModel> graphModels = new List<GraphModel>();
+                if (campaigns != null)
+                {
+
+                    foreach (var campaign in campaigns)
+                    {
+                        List<ChartsModel> series = new List<ChartsModel>();
+
+                        int countAll = await this.transactionRepository.GetCountAllTransaction(campaign.Id);
+                        int countSuccess = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 4);
+                        int countOther = countAll - countSuccess;
+
+
+                        var success = new ChartsModel();
+                        success.name = "Success";
+                        success.value = countSuccess;
+                        series.Add(success);
+
+                        var other = new ChartsModel();
+                        other.name = "Other";
+                        other.value = countOther;
+                        series.Add(other);
+
+                        graphModels.Add(new GraphModel()
+                        {
+                            name = campaign.Name,
+                            series = series
+                        });
+
+
+
+                    }
+
+                }
+                response.IsSuccess = true;
+                response.graphs = graphModels;
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+           
             return response;
         }
     }

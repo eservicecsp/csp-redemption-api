@@ -209,6 +209,7 @@ namespace CSP_Redemption_WebApi.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int CampaignTypeId { get; set; }
+        public int? CampaignStatusId { get; set; }
         public int BrandId { get; set; }
         public int Product { get; set; }
         public int? DealerId { get; set; }
@@ -674,12 +675,29 @@ namespace CSP_Redemption_WebApi.Models
         public string Message { get; set; }
 
         public List<ChartsModel> charts { get; set; }
+        public List<GraphModel> graphs { get; set; }
+        public List<MarkerProvincesModel>  MarkerProvinces { get; set; }
     }
     public class ChartsModel
     {
         public string name { get; set; }
         public int value { get; set; }
     }
+
+    public class GraphModel
+    {
+        public string name { get; set; }
+        public List<ChartsModel> series { get; set; }
+    }
+
+    public class MarkerProvincesModel
+    {
+        public string Location { get; set; }
+        public string Latitude { get; set; }
+        public string Longitude { get; set; }
+    }
+
+
     #endregion
 
     #region ReoductType

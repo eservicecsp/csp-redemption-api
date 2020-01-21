@@ -21,6 +21,7 @@ namespace CSP_Redemption_WebApi.Repositories
         Task<List<Campaign>> GetCampaignsPaginationByBrandIdAsync(PaginationModel data, int brandId);
         Task<int> GetCampaignsTotalPaginationByBrandIdAsync(PaginationModel data, int brandId);
         Task<bool> updatestatusCampaignAsync(Campaign campaign);
+        Task<List<Campaign>> GetCampaignsActiveByBrandIdAsync(int brandId);
     }
     public class CampaignRepository : ICampaignRepository
     {
@@ -56,6 +57,8 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 //var consumers = Context.Consumer.AsQueryable();
+                DateTime currentDate = DateTime.Now;
+
                 var campaigns = Context.Campaign.Include(x=>x.CampaignType).Where(x => x.BrandId == brandId);
                 if (data.filtersCampaign.campaignName != null)
                 {
@@ -66,10 +69,14 @@ namespace CSP_Redemption_WebApi.Repositories
                 if(data.filtersCampaign.campaignStatusId == 1 || data.filtersCampaign.campaignStatusId == 2)
                 {
                     campaigns = campaigns.Where(x => x.CampaignStatusId == data.filtersCampaign.campaignStatusId);
+                    if(data.filtersCampaign.campaignStatusId == 2)
+                    {
+                        campaigns = campaigns.Where(x => x.EndDate.Value.Date >= currentDate.Date);
+                    }
                 }
                 else
                 {
-                    DateTime currentDate = DateTime.Now;
+                    
                     campaigns = campaigns.Where(x => x.CampaignStatusId == 3 || x.EndDate.Value.Date < currentDate.Date);
                 }
 
@@ -108,6 +115,7 @@ namespace CSP_Redemption_WebApi.Repositories
             using (var Context = new CSP_RedemptionContext())
             {
                 //var consumers = Context.Consumer.AsQueryable();
+                DateTime currentDate = DateTime.Now;
                 var campaigns = Context.Campaign.Where(x => x.BrandId == brandId);
                 if (data.filtersCampaign.campaignName != null)
                 {
@@ -118,10 +126,14 @@ namespace CSP_Redemption_WebApi.Repositories
                 if (data.filtersCampaign.campaignStatusId == 1 || data.filtersCampaign.campaignStatusId == 2)
                 {
                     campaigns = campaigns.Where(x => x.CampaignStatusId == data.filtersCampaign.campaignStatusId);
+                    if (data.filtersCampaign.campaignStatusId == 2)
+                    {
+                        campaigns = campaigns.Where(x => x.EndDate.Value.Date >= currentDate.Date);
+                    }
                 }
                 else
                 {
-                    DateTime currentDate = DateTime.Now;
+                    
                     campaigns = campaigns.Where(x => x.CampaignStatusId == 3 || x.EndDate.Value.Date < currentDate.Date);
                 }
 
@@ -387,6 +399,10 @@ namespace CSP_Redemption_WebApi.Repositories
                 thisRow.DuplicateMessage = campaign.DuplicateMessage;
                 thisRow.QrCodeNotExistMessage = campaign.QrCodeNotExistMessage;
                 thisRow.WinMessage = campaign.WinMessage;
+                thisRow.Tel = campaign.Tel;
+                thisRow.Facebook = campaign.Facebook;
+                thisRow.Line = campaign.Line;
+                thisRow.Web = campaign.Web;
                 Context.Entry(thisRow).CurrentValues.SetValues(thisRow);
                 return await Context.SaveChangesAsync() > 0;
 
@@ -400,6 +416,19 @@ namespace CSP_Redemption_WebApi.Repositories
                 Campaign dbCampaign = await Context.Campaign.FirstOrDefaultAsync(x => x.Id == campaign.Id);
                 Context.Entry(dbCampaign).CurrentValues.SetValues(campaign);
                 return await Context.SaveChangesAsync() > 0;
+            }
+        }
+
+        public async Task<List<Campaign>> GetCampaignsActiveByBrandIdAsync(int brandId)
+        {
+            using (var Context = new CSP_RedemptionContext())
+            {
+                DateTime currentDate = DateTime.Now;
+
+                var campaigns =  Context.Campaign.Where(x => x.BrandId == brandId && x.CampaignStatusId == 2);
+                campaigns = campaigns.Where(x => x.StartDate.Value.Date <= currentDate);
+                campaigns = campaigns.Where(x => x.EndDate.Value.Date >= currentDate);
+                return await campaigns.OrderByDescending(x => x.Id).ToListAsync();
             }
         }
     }

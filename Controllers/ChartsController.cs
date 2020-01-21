@@ -37,5 +37,13 @@ namespace CSP_Redemption_WebApi.Controllers
         {
             return Ok(await this.chartService.GetChartProvince(campaignId)); 
         }
+
+        [HttpGet("graph")]
+        public async Task<IActionResult> GetGraphCampaignByBrandId()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            int brandId = Convert.ToInt32(Helpers.JwtHelper.Decrypt(token.Split(' ')[1], "brandId"));
+            return Ok(await this.chartService.GetGraphCampaignByBrandId(brandId));
+        }
     }
 }

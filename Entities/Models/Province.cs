@@ -16,6 +16,8 @@ namespace CSP_Redemption_WebApi.Entities.Models
         public string NameTh { get; set; }
         public string NameEn { get; set; }
         public int ZoneId { get; set; }
+        public string Latitude { get; set; }
+        public string Longitude { get; set; }
 
         public virtual Zone Zone { get; set; }
         public virtual ICollection<Amphur> Amphur { get; set; }

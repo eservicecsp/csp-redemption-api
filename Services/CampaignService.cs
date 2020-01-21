@@ -78,7 +78,8 @@ namespace CSP_Redemption_WebApi.Services
                         QrCodeNotExistMessage = campaign.QrCodeNotExistMessage,
                         Quantity = campaign.Quantity,
                         WinMessage = campaign.WinMessage,
-                        GrandTotal = campaign.GrandTotal == null ? 0 : campaign.GrandTotal.Value
+                        GrandTotal = campaign.GrandTotal == null ? 0 : campaign.GrandTotal.Value,
+                        CampaignStatusId = campaign.CampaignStatusId
                     });
                 }
 
@@ -199,7 +200,12 @@ namespace CSP_Redemption_WebApi.Services
                     QrCodeNotExistMessage = requestModel.Campaign.QrCodeNotExistMessage,
                     WinMessage = requestModel.Campaign.WinMessage,
                     CreatedBy = requestModel.Campaign.CreatedBy,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    Tel = requestModel.Campaign.Tel,
+                    Facebook = requestModel.Campaign.Facebook,
+                    Line = requestModel.Campaign.Line,
+                    Web = requestModel.Campaign.Web,
+                    CampaignStatusId = 1
                 };
 
                 if (requestModel.Campaign.CampaignTypeId == 3)  //Enrollment & Member
@@ -482,7 +488,11 @@ namespace CSP_Redemption_WebApi.Services
                         Columns = campaignDb.Columns,
                         CollectingType = campaignDb.CollectingType.ToString(),
                         CollectingData = collections,
-                        CampaignTypeId = campaignDb.CampaignTypeId
+                        CampaignTypeId = campaignDb.CampaignTypeId,
+                        Tel = campaignDb.Tel,
+                        Facebook = campaignDb.Facebook,
+                        Line = campaignDb.Line,
+                        Web = campaignDb.Web
 
                     };
                     response.Campaign = campaign;

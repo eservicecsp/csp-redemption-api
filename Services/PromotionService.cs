@@ -32,7 +32,7 @@ namespace CSP_Redemption_WebApi.Services
             IPromotionRepository promotionRepository,
             IPromotionTypeRepository promotionTypeRepository,
             IBrandRepository brandRepository,
-            IConfiguration configuration ,
+            IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
         )
         {
@@ -158,10 +158,10 @@ namespace CSP_Redemption_WebApi.Services
                         Line = promotion.Line
                     };
 
-                    if(promotion.PromotionTypeId == 1)
+                    if (promotion.PromotionTypeId == 1)
                     {
                         ImageModel ImageBackground = new ImageModel();
-                        if(promotion.ImageBackground != null)
+                        if (promotion.ImageBackground != null)
                         {
                             byte[] imageArray = System.IO.File.ReadAllBytes(promotion.ImageBackground);
                             string base64ImageRepresentation = Convert.ToBase64String(imageArray);
@@ -278,7 +278,7 @@ namespace CSP_Redemption_WebApi.Services
                     Line = cPromotion.Line,
                     Web = cPromotion.Web
                 };
-                if(cPromotion.PromotionTypeId == 1)
+                if (cPromotion.PromotionTypeId == 1)
                 {
                     promotion.MemberDiscount = cPromotion.MemberDiscount;
                     promotion.BirthDateDiscount = cPromotion.BirthDateDiscount;
@@ -315,7 +315,7 @@ namespace CSP_Redemption_WebApi.Services
                         File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
                         promotion.ImagePath1 = filePath;
                         promotion.ImageExtension1 = Extensions[0];
-                        if(cPromotion.image1.imageUrl != "" && cPromotion.image1.imageUrl != null)
+                        if (cPromotion.image1.imageUrl != "" && cPromotion.image1.imageUrl != null)
                         {
                             promotion.ImageUrl1 = cPromotion.image1.imageUrl;
                         }
@@ -357,9 +357,9 @@ namespace CSP_Redemption_WebApi.Services
                     }
                 }
 
-                
 
-                
+
+
 
                 bool isSuccess = await _promotionRepository.CreateAsync(promotion);
                 if (isSuccess)
@@ -388,9 +388,11 @@ namespace CSP_Redemption_WebApi.Services
                 string promotionsAttachmentPath = _configuration["Attachments:Promotions"];
                 promotionsAttachmentPath = promotionsAttachmentPath.Replace("[#brandId#]", $"{uPromotion.BrandId.ToString()}-{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}");
 
+
                 var dbPromotion = await _promotionRepository.GetPromotionAsync(uPromotion.BrandId, uPromotion.Id);
                 var dbPromotionType = await _promotionTypeRepository.GetPromotionTypeAsync(uPromotion.PromotionTypeId);
 
+                string oldPath = string.Empty;
                 if (dbPromotion != null)
                 {
                     dbPromotion.Id = uPromotion.Id;
@@ -399,7 +401,7 @@ namespace CSP_Redemption_WebApi.Services
                     dbPromotion.ModifiedBy = uPromotion.ModifiedBy;
                     dbPromotion.Name = uPromotion.Name;
                     dbPromotion.Description = uPromotion.Description;
-                   // dbPromotion.PromotionType = dbPromotionType;
+                    // dbPromotion.PromotionType = dbPromotionType;
                     dbPromotion.StartDate = uPromotion.StartDate;
                     dbPromotion.EndDate = uPromotion.EndDate;
                     dbPromotion.Tel = uPromotion.Tel;
@@ -408,76 +410,86 @@ namespace CSP_Redemption_WebApi.Services
                     dbPromotion.Web = uPromotion.Web;
                     dbPromotion.ProductId = uPromotion.ProductId;
 
-                    //if (uPromotion.PromotionTypeId == 1)
-                    //{
-                    //    dbPromotion.MemberDiscount = uPromotion.MemberDiscount;
-                    //    dbPromotion.BirthDateDiscount = uPromotion.BirthDateDiscount;
-                    //    dbPromotion.ProductGroupDiscount = uPromotion.ProductGroupDiscount;
+                    if (dbPromotion.PromotionTypeId == 1)
+                    {
+                        dbPromotion.MemberDiscount = uPromotion.MemberDiscount;
+                        dbPromotion.BirthDateDiscount = uPromotion.BirthDateDiscount;
+                        dbPromotion.ProductGroupDiscount = uPromotion.ProductGroupDiscount;
+                        if ( uPromotion.backgroundImage != null )
+                        {
+                            oldPath = dbPromotion.ImageBackground;
+                            string[] Extensions = uPromotion.backgroundImage.file.Split(',');
+                            var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.backgroundImage.name);
+                            if (!Directory.Exists(promotionsAttachmentPath))
+                            {
+                                Directory.CreateDirectory(promotionsAttachmentPath);
+                            }
 
-                    //    if (uPromotion.backgroundImage != null)
-                    //    {
-                    //        string[] Extensions = uPromotion.backgroundImage.file.Split(',');
-                    //        var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.backgroundImage.name);
-                    //        if (!Directory.Exists(promotionsAttachmentPath))
-                    //        {
-                    //            Directory.CreateDirectory(promotionsAttachmentPath);
-                    //        }
+                            File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
+                            dbPromotion.ImageBackground = filePath;
+                            dbPromotion.ImageBackgroundExtention = Extensions[0];
+                        }
+                    }
+                    else
+                    {
+                        //dbPromotion.PromotionSubTypeId = uPromotion.PromotionSubTypeId;
+                        if (uPromotion.image1.name != "" && uPromotion.image1.name  != null)
+                        {
+                            oldPath = dbPromotion.ImagePath1;
+                            string[] Extensions = uPromotion.image1.file.Split(',');
+                            var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.image1.name);
+                            if (!Directory.Exists(promotionsAttachmentPath))
+                            {
+                                Directory.CreateDirectory(promotionsAttachmentPath);
+                            }
 
-                    //        File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
-                    //        dbPromotion.ImageBackground = filePath;
-                    //        dbPromotion.ImageBackgroundExtention = Extensions[0];
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    dbPromotion.PromotionSubTypeId = uPromotion.PromotionSubTypeId;
-                    //    if (uPromotion.image1.name != "")
-                    //    {
-                    //        string[] Extensions = uPromotion.image1.file.Split(',');
-                    //        var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.image1.name);
-                    //        if (!Directory.Exists(promotionsAttachmentPath))
-                    //        {
-                    //            Directory.CreateDirectory(promotionsAttachmentPath);
-                    //        }
+                            File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
+                            dbPromotion.ImagePath1 = filePath;
+                            dbPromotion.ImageExtension1 = Extensions[0];
+                        }
 
-                    //        File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
-                    //        dbPromotion.ImagePath1 = filePath;
-                    //        dbPromotion.ImageExtension1 = Extensions[0];
-                    //    }
+                        if (uPromotion.image2.name != "" && uPromotion.image2.name != null)
+                        {
+                            oldPath = dbPromotion.ImagePath2;
+                            string[] Extensions = uPromotion.image2.file.Split(',');
+                            var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.image2.name);
+                            if (!Directory.Exists(promotionsAttachmentPath))
+                            {
+                                Directory.CreateDirectory(promotionsAttachmentPath);
+                            }
 
-                    //    if (uPromotion.image2.name != "")
-                    //    {
-                    //        string[] Extensions = uPromotion.image2.file.Split(',');
-                    //        var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.image2.name);
-                    //        if (!Directory.Exists(promotionsAttachmentPath))
-                    //        {
-                    //            Directory.CreateDirectory(promotionsAttachmentPath);
-                    //        }
+                            File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
+                            dbPromotion.ImagePath2 = filePath;
+                            dbPromotion.ImageExtension2 = Extensions[0];
+                        }
+                        if (uPromotion.image3.name != "" && uPromotion.image3.name != null)
+                        {
+                            oldPath = dbPromotion.ImagePath3;
+                            string[] Extensions = uPromotion.image3.file.Split(',');
+                            var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.image3.name);
+                            if (!Directory.Exists(promotionsAttachmentPath))
+                            {
+                                Directory.CreateDirectory(promotionsAttachmentPath);
+                            }
 
-                    //        File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
-                    //        dbPromotion.ImagePath2 = filePath;
-                    //        dbPromotion.ImageExtension2 = Extensions[0];
-                    //    }
-                    //    if (uPromotion.image3.name != "")
-                    //    {
-                    //        string[] Extensions = uPromotion.image3.file.Split(',');
-                    //        var filePath = Path.Combine(promotionsAttachmentPath, uPromotion.image3.name);
-                    //        if (!Directory.Exists(promotionsAttachmentPath))
-                    //        {
-                    //            Directory.CreateDirectory(promotionsAttachmentPath);
-                    //        }
-
-                    //        File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
-                    //        dbPromotion.ImagePath3 = filePath;
-                    //        dbPromotion.ImageExtension3 = Extensions[0];
-                    //    }
-                    //}
+                            File.WriteAllBytes(filePath, Convert.FromBase64String(Extensions[1]));
+                            dbPromotion.ImagePath3 = filePath;
+                            dbPromotion.ImageExtension3 = Extensions[0];
+                        }
+                    }
 
 
                     bool isSuccess = await _promotionRepository.UpdateAsync(dbPromotion);
                     if (isSuccess)
                     {
                         response.IsSuccess = true;
+                        if (oldPath != null)
+                        {
+                            var oldPathoArray = oldPath.Split('\\');
+                            string delPath = $"\\\\{oldPathoArray[2]}\\{oldPathoArray[3]}\\{oldPathoArray[4]}\\{oldPathoArray[5]}";
+                            Directory.Delete(delPath, true);
+                        }
+
                     }
                     else
                     {

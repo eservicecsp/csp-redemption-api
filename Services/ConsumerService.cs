@@ -482,67 +482,83 @@ namespace CSP_Redemption_WebApi.Services
                     IsConsumer = false
                 };
 
-
-                if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
+                if (campaign.CampaignStatusId != 2)
                 {
-                    qrCode.Token = dataConsumer.Token;
-                    qrCode.CampaignId = dataConsumer.CampaignId;
-                    qrCode.ConsumerId = dataConsumer.ConsumerId;
-                    qrCode.ScanDate = DateTime.Now;
-                    qrCode.Code = dataConsumer.Code;
-                    var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
-                    if (dbQrCode != null)
+                    IsError = true;
+                    response.Message = "Campaign not actived.";
+                    response.StatusTypeCode = "FAIL";
+
+                    tran.TransactionTypeId = 1;
+                    tran.ResponseMessage = "Campaign not actived.";
+                }
+                else
+                {
+                    if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
                     {
-                        if (dbQrCode.EnrollmentId == null)
+                        qrCode.Token = dataConsumer.Token;
+                        qrCode.CampaignId = dataConsumer.CampaignId;
+                        qrCode.ConsumerId = dataConsumer.ConsumerId;
+                        qrCode.ScanDate = DateTime.Now;
+                        qrCode.Code = dataConsumer.Code;
+                        var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
+                        if (dbQrCode != null)
                         {
+                            if (dbQrCode.EnrollmentId == null)
+                            {
 
-                            response.Message = campaign.WinMessage;
-                            response.StatusTypeCode = "SUCCESS";
+                                response.Message = campaign.WinMessage;
+                                response.StatusTypeCode = "SUCCESS";
 
-                            tran.TransactionTypeId = 4;
-                            tran.ResponseMessage = campaign.WinMessage;
+                                tran.TransactionTypeId = 4;
+                                tran.ResponseMessage = campaign.WinMessage;
 
+
+                            }
+                            else
+                            {
+                                //IsError = true;
+                                response.Message = campaign.DuplicateMessage;
+                                response.StatusTypeCode = "DUPLICATE";
+
+                                tran.TransactionTypeId = 3;
+                                tran.ResponseMessage = campaign.DuplicateMessage;
+                            }
 
                         }
                         else
                         {
                             //IsError = true;
-                            response.Message = campaign.DuplicateMessage;
-                            response.StatusTypeCode = "DUPLICATE";
+                            response.Message = campaign.QrCodeNotExistMessage;
+                            response.StatusTypeCode = "EMPTY";
 
-                            tran.TransactionTypeId = 3;
-                            tran.ResponseMessage = campaign.DuplicateMessage;
+                            tran.TransactionTypeId = 2;
+                            tran.ResponseMessage = campaign.QrCodeNotExistMessage;
                         }
+                        response.IsSuccess = true;
                     }
                     else
                     {
                         //IsError = true;
-                        response.Message = campaign.QrCodeNotExistMessage;
-                        response.StatusTypeCode = "EMPTY";
+                        response.Message = campaign.AlertMessage;
+                        response.StatusTypeCode = "FAIL";
 
-                        tran.TransactionTypeId = 2;
-                        tran.ResponseMessage = campaign.QrCodeNotExistMessage;
+                        tran.TransactionTypeId = 1;
+                        tran.ResponseMessage = campaign.AlertMessage;
+                    }
+                    var statusTran = await this.transactionRepository.CreateTransactionEnrollmentAsync(tran, qrCode, enrollment);
+                    if (!statusTran)
+                    {
+                        IsError = true;
+                        response.Message = "System error.";
+                        response.StatusTypeCode = "FAIL";
+
+                        tran.TransactionTypeId = 1;
+                        tran.ResponseMessage = "System error.";
                     }
                 }
-                else
-                {
-                    //IsError = true;
-                    response.Message = campaign.AlertMessage;
-                    response.StatusTypeCode = "FAIL";
 
-                    tran.TransactionTypeId = 1;
-                    tran.ResponseMessage = campaign.AlertMessage;
-                }
-                var statusTran = await this.transactionRepository.CreateTransactionEnrollmentAsync(tran, qrCode, enrollment);
-                if (!statusTran)
-                {
-                    IsError = true;
-                    response.Message = "System error.";
-                    response.StatusTypeCode = "FAIL";
-
-                    tran.TransactionTypeId = 1;
-                    tran.ResponseMessage = "System error.";
-                }
+                
+                
                 if (IsError)
                 {
                     await this.transactionRepository.CreateTransactionErrorAsync(tran);
@@ -653,203 +669,216 @@ namespace CSP_Redemption_WebApi.Services
                 response.ConsumerId = consumerRequest.ConsumerId;
                 response.CampaignType = campaign.CampaignTypeId;
                 response.TotalPieces = campaign.TotalPeice;
-                if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
+                if(campaign.CampaignStatusId != 2) 
                 {
-                    qrCode.Token = consumerRequest.Token;
-                    qrCode.CampaignId = consumerRequest.CampaignId;
-                    qrCode.ConsumerId = consumerRequest.ConsumerId;
-                    qrCode.ScanDate = DateTime.Now;
-                    qrCode.Code = null;
+                    IsError = true;
+                    response.Message = "Campaign not actived.";
+                    response.StatusTypeCode = "FAIL";
 
-                    if (campaign.CampaignTypeId == 3) //Enrollment & Member
+                    tran.TransactionTypeId = 1;
+                    tran.ResponseMessage = "Campaign not actived.";
+                }
+                else
+                {
+                    if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
                     {
+                        qrCode.Token = consumerRequest.Token;
+                        qrCode.CampaignId = consumerRequest.CampaignId;
+                        qrCode.ConsumerId = consumerRequest.ConsumerId;
+                        qrCode.ScanDate = DateTime.Now;
+                        qrCode.Code = null;
 
-                        //qrCode.Code = consumerRequest.Code;
-                        //var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
-                        //if(dbQrCode != null)
-                        //{
-                        //    qrCode.Id = dbQrCode.Id;
-                        //    qrCode.Peice = dbQrCode.Peice;
-                        //    if (dbQrCode.EnrollmentId == null)
-                        //    {
-                        //        response.Message = campaign.WinMessage;
-                        //        response.StatusTypeCode = "SUCCESS";
-
-                        //        tran.TransactionTypeId = 4;
-                        //        tran.ResponseMessage = campaign.WinMessage;
-
-                        //        var enrollment = new Enrollment()
-                        //        {
-                        //        };
-                        //        var statusTran = await this.transactionRepository.CreateTransactionEnrollmentAsync(tran, qrCode, enrollment);
-                        //        if (!statusTran)
-                        //        {
-                        //            IsError = true;
-                        //            response.Message = "System error.";
-                        //            response.StatusTypeCode = "FAIL";
-
-                        //            tran.TransactionTypeId = 1;
-                        //            tran.ResponseMessage = "System error.";
-                        //        }
-                        //    }
-                        //    else
-                        //    {
-                        //        IsError = true;
-                        //        response.Message = campaign.DuplicateMessage;
-                        //        response.StatusTypeCode = "DUPLICATE";
-
-                        //        tran.TransactionTypeId = 3;
-                        //        tran.ResponseMessage = campaign.DuplicateMessage;
-                        //    }
-                        //}
-                        //else
-                        //{
-                        //    IsError = true;
-                        //    response.Message = campaign.QrCodeNotExistMessage;
-                        //    response.StatusTypeCode = "EMPTY";
-
-                        //    tran.TransactionTypeId = 2;
-                        //    tran.ResponseMessage = campaign.QrCodeNotExistMessage;
-                        //}
-
-                    }
-                    else
-                    {
-                        var dbQrCode = await this.qrCodeRepository.GetQrCode(qrCode);
-
-                        if (dbQrCode != null)
+                        if (campaign.CampaignTypeId == 3) //Enrollment & Member
                         {
-                            if (dbQrCode.ConsumerId == null)
+
+                            //qrCode.Code = consumerRequest.Code;
+                            //var dbQrCode = await this.qrCodeRepository.GetQCodeByCode(qrCode);
+                            //if(dbQrCode != null)
+                            //{
+                            //    qrCode.Id = dbQrCode.Id;
+                            //    qrCode.Peice = dbQrCode.Peice;
+                            //    if (dbQrCode.EnrollmentId == null)
+                            //    {
+                            //        response.Message = campaign.WinMessage;
+                            //        response.StatusTypeCode = "SUCCESS";
+
+                            //        tran.TransactionTypeId = 4;
+                            //        tran.ResponseMessage = campaign.WinMessage;
+
+                            //        var enrollment = new Enrollment()
+                            //        {
+                            //        };
+                            //        var statusTran = await this.transactionRepository.CreateTransactionEnrollmentAsync(tran, qrCode, enrollment);
+                            //        if (!statusTran)
+                            //        {
+                            //            IsError = true;
+                            //            response.Message = "System error.";
+                            //            response.StatusTypeCode = "FAIL";
+
+                            //            tran.TransactionTypeId = 1;
+                            //            tran.ResponseMessage = "System error.";
+                            //        }
+                            //    }
+                            //    else
+                            //    {
+                            //        IsError = true;
+                            //        response.Message = campaign.DuplicateMessage;
+                            //        response.StatusTypeCode = "DUPLICATE";
+
+                            //        tran.TransactionTypeId = 3;
+                            //        tran.ResponseMessage = campaign.DuplicateMessage;
+                            //    }
+                            //}
+                            //else
+                            //{
+                            //    IsError = true;
+                            //    response.Message = campaign.QrCodeNotExistMessage;
+                            //    response.StatusTypeCode = "EMPTY";
+
+                            //    tran.TransactionTypeId = 2;
+                            //    tran.ResponseMessage = campaign.QrCodeNotExistMessage;
+                            //}
+
+                        }
+                        else
+                        {
+                            var dbQrCode = await this.qrCodeRepository.GetQrCode(qrCode);
+
+                            if (dbQrCode != null)
                             {
-                                qrCode.Id = dbQrCode.Id;
-                                qrCode.Peice = dbQrCode.Peice;
-                                qrCode.Point = dbQrCode.Point + consumerRequest.Point;
+                                if (dbQrCode.ConsumerId == null)
+                                {
+                                    qrCode.Id = dbQrCode.Id;
+                                    qrCode.Peice = dbQrCode.Peice;
+                                    qrCode.Point = dbQrCode.Point + consumerRequest.Point;
+
+                                    if (campaign.CampaignTypeId == 1) //JigSaw
+                                    {
+                                        response.Message = campaign.WinMessage;
+                                        response.StatusTypeCode = "SUCCESS";
+
+                                        tran.TransactionTypeId = 4;
+                                        tran.ResponseMessage = campaign.WinMessage;
+
+                                        var statusTran = await this.transactionRepository.CreateTransactionJigSawAsync(tran, qrCode);
+                                        if (!statusTran)
+                                        {
+                                            IsError = true;
+                                            response.Message = "System error.";
+                                            response.StatusTypeCode = "FAIL";
+
+                                            tran.TransactionTypeId = 1;
+                                            tran.ResponseMessage = "System error.";
+                                        }
+                                    }
+                                    else if (campaign.CampaignTypeId == 2) //Point
+                                    {
+
+
+                                        var dbConsumer = await this.consumerRepository.GetConsumerByIdAsync(consumerRequest.ConsumerId);
+                                        tran.Point = dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0;
+                                        totalPoint = (dbConsumer.Point != null ? Convert.ToInt32(dbConsumer.Point) : 0) + (dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0);
+                                        // qrCode.Point = dbQrCode.Point;
+
+                                        response.Message = campaign.WinMessage;
+                                        response.StatusTypeCode = "SUCCESS";
+
+                                        tran.TransactionTypeId = 4;
+                                        tran.ResponseMessage = campaign.WinMessage;
+
+                                        var statusTran = await this.transactionRepository.CreateTransactionPointAsync(tran, qrCode);
+                                        if (!statusTran)
+                                        {
+                                            IsError = true;
+                                            response.Message = "System error.";
+                                            response.StatusTypeCode = "FAIL";
+
+                                            tran.TransactionTypeId = 1;
+                                            tran.ResponseMessage = "System error.";
+
+                                        }
+
+                                    }
+
+                                }
+                                else
+                                {
+                                    IsError = true;
+                                    response.Message = campaign.DuplicateMessage;
+                                    response.StatusTypeCode = "DUPLICATE";
+
+                                    tran.TransactionTypeId = 3;
+                                    tran.ResponseMessage = campaign.DuplicateMessage;
+                                }
+
 
                                 if (campaign.CampaignTypeId == 1) //JigSaw
                                 {
-                                    response.Message = campaign.WinMessage;
-                                    response.StatusTypeCode = "SUCCESS";
-
-                                    tran.TransactionTypeId = 4;
-                                    tran.ResponseMessage = campaign.WinMessage;
-
-                                    var statusTran = await this.transactionRepository.CreateTransactionJigSawAsync(tran, qrCode);
-                                    if (!statusTran)
+                                    response.Pieces = await this.qrCodeRepository.GetPiece(qrCode);
+                                    if (campaign.CampaignTypeId == 1)
                                     {
-                                        IsError = true;
-                                        response.Message = "System error.";
-                                        response.StatusTypeCode = "FAIL";
-
-                                        tran.TransactionTypeId = 1;
-                                        tran.ResponseMessage = "System error.";
+                                        response.CollectingType = campaign.CollectingType.Value;
+                                        response.Rows = campaign.Rows.Value;
+                                        response.Columns = campaign.Columns.Value;
+                                        List<CollectionModel> collections = new List<CollectionModel>();
+                                        var collection = await this.collectionRepository.GetCollecttionsByCampaignIdAsync(campaign.Id);
+                                        if (collection != null)
+                                        {
+                                            int Peice = 1;
+                                            foreach (var item in collection)
+                                            {
+                                                byte[] imageArray = System.IO.File.ReadAllBytes(item.CollectionPath);
+                                                string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+                                                string img_grayscale = null;
+                                                var grayscale = await qrCodeRepository.GetPeiceByCampaignIdConsumerIdAsync(campaign.Id, Peice, consumerRequest.ConsumerId);
+                                                if (!grayscale)
+                                                {
+                                                    img_grayscale = "img_grayscale";
+                                                }
+                                                collections.Add(new CollectionModel()
+                                                {
+                                                    Id = item.Id,
+                                                    Quantity = item.Quantity,
+                                                    TotalQuantity = item.TotalQuantity.Value,
+                                                    row = item.CollectionRow,
+                                                    column = item.CollectionColumn,
+                                                    name = item.CollectionName,
+                                                    //path = item.CollectionPath,
+                                                    file = base64ImageRepresentation,
+                                                    extension = item.Extension,
+                                                    IsCollected = img_grayscale
+                                                });
+                                                Peice++;
+                                            }
+                                            response.CollectingData = collections;
+                                        }
                                     }
                                 }
-                                else if (campaign.CampaignTypeId == 2) //Point
-                                {
-
-
-                                    var dbConsumer = await this.consumerRepository.GetConsumerByIdAsync(consumerRequest.ConsumerId);
-                                    tran.Point = dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0;
-                                    totalPoint = (dbConsumer.Point != null ? Convert.ToInt32(dbConsumer.Point) : 0) + (dbQrCode.Point != null ? Convert.ToInt32(dbQrCode.Point) : 0);
-                                    // qrCode.Point = dbQrCode.Point;
-
-                                    response.Message = campaign.WinMessage;
-                                    response.StatusTypeCode = "SUCCESS";
-
-                                    tran.TransactionTypeId = 4;
-                                    tran.ResponseMessage = campaign.WinMessage;
-
-                                    var statusTran = await this.transactionRepository.CreateTransactionPointAsync(tran, qrCode);
-                                    if (!statusTran)
-                                    {
-                                        IsError = true;
-                                        response.Message = "System error.";
-                                        response.StatusTypeCode = "FAIL";
-
-                                        tran.TransactionTypeId = 1;
-                                        tran.ResponseMessage = "System error.";
-
-                                    }
-
-                                }
-
                             }
                             else
                             {
                                 IsError = true;
-                                response.Message = campaign.DuplicateMessage;
-                                response.StatusTypeCode = "DUPLICATE";
+                                response.Message = campaign.QrCodeNotExistMessage;
+                                response.StatusTypeCode = "EMPTY";
 
-                                tran.TransactionTypeId = 3;
-                                tran.ResponseMessage = campaign.DuplicateMessage;
+                                tran.TransactionTypeId = 2;
+                                tran.ResponseMessage = campaign.QrCodeNotExistMessage;
                             }
-
-
-                            if (campaign.CampaignTypeId == 1) //JigSaw
-                            {
-                                response.Pieces = await this.qrCodeRepository.GetPiece(qrCode);
-                                if (campaign.CampaignTypeId == 1)
-                                {
-                                    response.CollectingType = campaign.CollectingType.Value;
-                                    response.Rows = campaign.Rows.Value;
-                                    response.Columns = campaign.Columns.Value;
-                                    List<CollectionModel> collections = new List<CollectionModel>();
-                                    var collection = await this.collectionRepository.GetCollecttionsByCampaignIdAsync(campaign.Id);
-                                    if (collection != null)
-                                    {
-                                        int Peice = 1;
-                                        foreach (var item in collection)
-                                        {
-                                            byte[] imageArray = System.IO.File.ReadAllBytes(item.CollectionPath);
-                                            string base64ImageRepresentation = Convert.ToBase64String(imageArray);
-                                            string img_grayscale = null;
-                                            var grayscale = await qrCodeRepository.GetPeiceByCampaignIdConsumerIdAsync(campaign.Id, Peice, consumerRequest.ConsumerId);
-                                            if (!grayscale)
-                                            {
-                                                img_grayscale = "img_grayscale";
-                                            }
-                                            collections.Add(new CollectionModel()
-                                            {
-                                                Id = item.Id,
-                                                Quantity = item.Quantity,
-                                                TotalQuantity = item.TotalQuantity.Value,
-                                                row = item.CollectionRow,
-                                                column = item.CollectionColumn,
-                                                name = item.CollectionName,
-                                                //path = item.CollectionPath,
-                                                file = base64ImageRepresentation,
-                                                extension = item.Extension,
-                                                IsCollected = img_grayscale
-                                            });
-                                            Peice++;
-                                        }
-                                        response.CollectingData = collections;
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            IsError = true;
-                            response.Message = campaign.QrCodeNotExistMessage;
-                            response.StatusTypeCode = "EMPTY";
-
-                            tran.TransactionTypeId = 2;
-                            tran.ResponseMessage = campaign.QrCodeNotExistMessage;
                         }
                     }
-                }
-                else
-                {
-                    IsError = true;
-                    response.Message = campaign.AlertMessage;
-                    response.StatusTypeCode = "FAIL";
+                    else
+                    {
+                        IsError = true;
+                        response.Message = campaign.AlertMessage;
+                        response.StatusTypeCode = "FAIL";
 
-                    tran.TransactionTypeId = 1;
-                    tran.ResponseMessage = campaign.AlertMessage;
-                }
+                        tran.TransactionTypeId = 1;
+                        tran.ResponseMessage = campaign.AlertMessage;
+                    }
 
-                response.CampaignType = campaign.CampaignTypeId;
+                    response.CampaignType = campaign.CampaignTypeId;
+                }
+               
                 if (IsError)
                 {
                     await this.transactionRepository.CreateTransactionErrorAsync(tran);

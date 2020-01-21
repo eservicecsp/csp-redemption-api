@@ -30,7 +30,7 @@ namespace CSP_Redemption_WebApi.Controllers
         //}
 
 
-        
+
         [HttpPost]
         public async Task<IActionResult> Register(ConsumerRequestModel consumerRequest)
         {

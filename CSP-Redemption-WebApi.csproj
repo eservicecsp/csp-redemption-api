@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
+    <AspNetCoreModuleName>AspNetCoreModule</AspNetCoreModuleName>
     <RootNamespace>CSP_Redemption_WebApi</RootNamespace>
   </PropertyGroup>
 
@@ -15,13 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="CSP-Redemption-Attachments\" />
     <Folder Include="Uploads\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Attachments\Products\0.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
