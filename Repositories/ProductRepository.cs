@@ -29,7 +29,10 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Product.Include(x => x.ProductAttachment).Include(x=>x.ProductType).Where(x => x.Id == id).FirstOrDefaultAsync();
+                return await Context.Product
+                    .Include(x => x.ProductAttachment)
+                    .Include(x => x.ProductType)
+                    .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
         }
 
@@ -68,13 +71,13 @@ namespace CSP_Redemption_WebApi.Repositories
                         Product dbProduct = await Context.Product.Include(x => x.ProductAttachment).SingleAsync(x => x.Id == uProduct.Id);
                         Context.Entry(dbProduct).CurrentValues.SetValues(uProduct);
 
-                        foreach(var dbAttachmentProduct in dbProduct.ProductAttachment.ToList())
+                        foreach (var dbAttachmentProduct in dbProduct.ProductAttachment.ToList())
                         {
                             if (!uProduct.ProductAttachment.Any(x => x.Id == dbAttachmentProduct.Id))
                                 Context.ProductAttachment.Remove(dbAttachmentProduct);
                         }
 
-                        foreach(var uAttachmentProduct in uProduct.ProductAttachment)
+                        foreach (var uAttachmentProduct in uProduct.ProductAttachment)
                         {
                             Context.ProductAttachment.Attach(uAttachmentProduct);
                         }
