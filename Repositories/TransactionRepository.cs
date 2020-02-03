@@ -361,7 +361,7 @@ namespace CSP_Redemption_WebApi.Repositories
         {
             using (var Context = new CSP_RedemptionContext())
             {
-                return await Context.Transaction.Where(x => x.CampaignId == campaignId && zipCode.Contains(x.ZipCode)).CountAsync();
+                return await Context.Transaction.Where(x => x.CampaignId == campaignId && zipCode.Contains(x.ZipCode) && x.TransactionTypeId == 4).CountAsync();
             }
         }
     }

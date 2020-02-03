@@ -101,11 +101,11 @@ namespace CSP_Redemption_WebApi.Repositories
 
                 if (index >= length)
                 {
-                    campaigns = campaigns.Skip(0).Take(data.pageSize);
+                    campaigns = campaigns.OrderByDescending(x => x.Id).Skip(0).Take(data.pageSize);
                 }
                 else
                 {
-                    campaigns = campaigns.Skip(index).Take(data.pageSize);
+                    campaigns = campaigns.OrderByDescending(x => x.Id).Skip(index).Take(data.pageSize);
                 }
                 return await campaigns.ToListAsync();
             }

@@ -30,7 +30,9 @@ namespace CSP_Redemption_WebApi.Repositories
             return await _context.Promotion
                     .Include(x => x.CreatedByNavigation)
                     .Include(x => x.PromotionType)
-                    .Where(x => x.BrandId == brandId).ToListAsync();
+                    .Where(x => x.BrandId == brandId)
+                    .OrderByDescending(x => x.Id)
+                    .ToListAsync();
         }
 
         public async Task<List<Promotion>> GetPromotionsValidAsync(int brandId)
@@ -44,6 +46,7 @@ namespace CSP_Redemption_WebApi.Repositories
                     .Where(x => x.StartDate.Value.Date <= currentDate.Date && x.EndDate.Value.Date >= currentDate.Date)
                     .Where(x=>x.PromotionTypeId != 6)
                     .Where(x=>x.IsActived == true)
+                    .OrderByDescending(x=>x.Id)
                     .ToListAsync();
         }
         public async Task<Promotion> GetPromotionAsync(int brandId, int promotionId)

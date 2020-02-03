@@ -135,8 +135,13 @@ namespace CSP_Redemption_WebApi.Services
                             foreach (var item in navigations)
                             {
                                 var existParent = item.children.Where(x => x.id == function.ParentId.ToString()).FirstOrDefault();
+                               
                                 if (existParent != null)
                                 {
+                                    if (existParent.children == null)
+                                    {
+                                        existParent.children = new List<SubChild>();
+                                    }
                                     var subChild = new SubChild()
                                     {
                                         id = function.Id.ToString(),
@@ -206,8 +211,13 @@ namespace CSP_Redemption_WebApi.Services
                                 foreach (var item in navigations)
                                 {
                                     var existParent = item.children.Where(x => x.id == function.ParentId.ToString()).FirstOrDefault();
+                                    
                                     if (existParent != null)
                                     {
+                                        if (existParent.children == null)
+                                        {
+                                            existParent.children = new List<SubChild>();
+                                        }
                                         var subChild = new SubChild()
                                         {
                                             id = function.Id.ToString(),

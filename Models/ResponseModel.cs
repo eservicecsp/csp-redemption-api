@@ -27,6 +27,7 @@ namespace CSP_Redemption_WebApi.Models
         public string StatusTypeCode { get; set; }
         public int CampaignType { get; set; }
         public int CollectingType { get; set; }
+        public int BrandId { get; set; }
         public List<CollectionModel> CollectingData { get; set; }
         public int Rows { get; set; }
         public int Columns { get; set; }
@@ -43,6 +44,7 @@ namespace CSP_Redemption_WebApi.Models
         public string StatusTypeCode { get; set; }
         public int CampaignType { get; set; }
         public int CollectingType { get; set; }
+        public int BrandId { get; set; }
         public List<CollectionModel> CollectingData { get; set; }
         public int Rows { get; set; }
         public int Columns { get; set; }
@@ -695,6 +697,7 @@ namespace CSP_Redemption_WebApi.Models
         public string Location { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
+        public int Total { get; set; }
     }
 
 

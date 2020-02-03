@@ -538,10 +538,12 @@ namespace CSP_Redemption_WebApi.Services
                         int TotalSuccess = 0;
                         int TotalTran = 0;
                         string CampaignStatusType = string.Empty;
+
+                        PaginationModel data = new PaginationModel();
+                        data.campaignId = campaign.Id;
                         if (paginationModel.filtersCampaign.campaignStatusId == 1)//New
                         {
-                            PaginationModel data = new PaginationModel();
-                            data.campaignId = campaign.Id;
+                            
                             TotalQrCode = await this.qrCodeRepository.GetQrCodeTotalByCompanyIdAsync(data);
                         }
                         else
@@ -552,6 +554,7 @@ namespace CSP_Redemption_WebApi.Services
                             TotalSuccess = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 4);
                             TotalTran = await this.transactionRepository.GetCountAllTransaction(campaign.Id);
                             CampaignStatusType = campaign.CampaignStatusId == 3 ? "Delete" : "Expire";
+                            TotalQrCode = await this.qrCodeRepository.GetQrCodeTotalByCompanyIdAsync(data);
                         }
                         CampaignPagination.Add(new CampaignPaginationModel()
                         {
