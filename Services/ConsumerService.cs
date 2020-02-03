@@ -139,7 +139,7 @@ namespace CSP_Redemption_WebApi.Services
                 var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
                 if (campaign != null)
                 {
-                    
+                    response.BrandId = campaign.BrandId;
 
                     var checkConsumer = new Consumer()
                     {
@@ -322,6 +322,7 @@ namespace CSP_Redemption_WebApi.Services
             }
             else
             {
+                response.BrandId = campaign.BrandId;
                 var consumer = new Consumer()
                 {
                     FirstName = consumerRequest.FirstName.Trim(),
@@ -460,6 +461,16 @@ namespace CSP_Redemption_WebApi.Services
                 }
 
                 var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
+
+                response.BrandId = campaign.BrandId;
+
+                var isConsumer = await this.consumerRepository.GetConsumerByPhoneAndBrandIdAsync(dataConsumer.Phone, campaign.BrandId);
+                if(isConsumer != null)
+                {
+                    response.ConsumerId = isConsumer.Id;
+                }
+
+
                 tran.CampaignId = campaign.Id;
                 // tran.ConsumerId = consumerRequest.ConsumerId;
                 tran.Token = dataConsumer.Token;
@@ -577,7 +588,7 @@ namespace CSP_Redemption_WebApi.Services
             try
             {
                 var campaign = await this.campaignRepository.GetCampaignByIdAsync(dataConsumer.CampaignId);
-
+                response.BrandId = campaign.BrandId;
 
                 if ((campaign.StartDate.Value.Date <= DateTime.Now.Date) && (campaign.EndDate.Value.Date >= DateTime.Now.Date))
                 {
@@ -666,6 +677,7 @@ namespace CSP_Redemption_WebApi.Services
                 tran.ZipCode = consumerRequest.ZipCode;
                 tran.CreatedDate = DateTime.Now;
 
+                response.BrandId = campaign.BrandId;
                 response.ConsumerId = consumerRequest.ConsumerId;
                 response.CampaignType = campaign.CampaignTypeId;
                 response.TotalPieces = campaign.TotalPeice;

@@ -13,7 +13,7 @@ namespace CSP_Redemption_WebApi.Services
         Task<ChartResponseModel> GetChartTransaction(int canpaignId);
         Task<ChartResponseModel> GetChartQrCode(int canpaignId);
         Task<ChartResponseModel> GetChartProvince(int campaignId);
-        Task<ChartResponseModel> GetGraphCampaignByBrandId(int brandId);
+        Task<ChartResponseModel> GetGraphCampaignByBrandId(SearchGraphModel searchGraph);
     }
     public class ChartService: IChartService
     {
@@ -50,9 +50,14 @@ namespace CSP_Redemption_WebApi.Services
                 var charts = new List<ChartsModel>();
 
                 var all = new ChartsModel();
-                all.name = "ALL";
+                all.name = "Enroll";
                 all.value = await this.transactionRepository.GetCountAllTransaction(canpaignId);
                 charts.Add(all);
+
+                var success = new ChartsModel();
+                success.name = "Success";
+                success.value = await this.transactionRepository.GetCountTransactionByTypeId(canpaignId, 4);
+                charts.Add(success);
 
                 var fail = new ChartsModel();
                 fail.name = "Fail";
@@ -60,7 +65,7 @@ namespace CSP_Redemption_WebApi.Services
                 charts.Add(fail);
 
                 var empty = new ChartsModel();
-                empty.name = "Empty";
+                empty.name = "Invalid";
                 empty.value = await this.transactionRepository.GetCountTransactionByTypeId(canpaignId, 2);
                 charts.Add(empty);
 
@@ -69,10 +74,7 @@ namespace CSP_Redemption_WebApi.Services
                 dup.value = await this.transactionRepository.GetCountTransactionByTypeId(canpaignId, 3);
                 charts.Add(dup);
 
-                var success = new ChartsModel();
-                success.name = "Success";
-                success.value = await this.transactionRepository.GetCountTransactionByTypeId(canpaignId, 4);
-                charts.Add(success);
+                
 
                 response.charts = charts;
                 response.IsSuccess = true;
@@ -89,16 +91,22 @@ namespace CSP_Redemption_WebApi.Services
             try
             {
                 var charts = new List<ChartsModel>();
-
+                int Qrall = await this.qrCodeRepository.GetCountQrCode(canpaignId);
                 var all = new ChartsModel();
-                all.name = "ALL";
-                all.value = await this.qrCodeRepository.GetCountQrCode(canpaignId);
+                all.name = "Total";
+                all.value = Qrall;
                 charts.Add(all);
 
+                int used = await this.qrCodeRepository.GetCountQrCodeUsed(canpaignId);
                 var redeem = new ChartsModel();
-                redeem.name = "Redeem";
-                redeem.value = await this.qrCodeRepository.GetCountQrCodeUsed(canpaignId);
+                redeem.name = "Used";
+                redeem.value = used;
                 charts.Add(redeem);
+
+                var unused = new ChartsModel();
+                unused.name = "Unused";
+                unused.value = Qrall - used;
+                charts.Add(unused);
 
                 response.charts = charts;
                 response.IsSuccess = true;
@@ -164,11 +172,14 @@ namespace CSP_Redemption_WebApi.Services
                         MarkerProvince.Location = $"{province.NameTh} : {countTran}";
                         MarkerProvince.Latitude = province.Latitude;
                         MarkerProvince.Longitude = province.Longitude;
+                        MarkerProvince.Total = countTran;
 
                         MarkerProvinces.Add(MarkerProvince);
                     }
 
                 }
+                //MarkerProvinces = MarkerProvinces.OrderByDescending(x => x.Total);
+
                 List<string> zipCodesNull = new List<string>();
                 zipCodesNull.Add(null);
                 int countTranNull = await this.transactionRepository.GetCountTransactionByProvince(zipCodesNull.ToArray(), campaignId);
@@ -179,7 +190,7 @@ namespace CSP_Redemption_WebApi.Services
                     chartNull.value = countTranNull;
                     charts.Add(chartNull);
                 }
-
+                
                 response.charts = charts;
                 response.MarkerProvinces = MarkerProvinces;
                 response.IsSuccess = true;
@@ -192,44 +203,142 @@ namespace CSP_Redemption_WebApi.Services
             return response;
         }
 
-        public async Task<ChartResponseModel> GetGraphCampaignByBrandId(int brandId)
+        public async Task<ChartResponseModel> GetGraphCampaignByBrandId(SearchGraphModel searchGraph)
         {
             var response = new ChartResponseModel();
             try
             {
-                var campaigns = await this.campaignRepository.GetCampaignsActiveByBrandIdAsync(brandId);
+                var campaigns = await this.campaignRepository.GetCampaignsActiveByBrandIdAsync(searchGraph.brandId);
                 List<GraphModel> graphModels = new List<GraphModel>();
                 if (campaigns != null)
                 {
-
-                    foreach (var campaign in campaigns)
+                    if(searchGraph.startDate != null)
                     {
+                        campaigns = campaigns.Where(x => x.StartDate.Value.Date >= searchGraph.startDate.Value.Date).ToList();
+                    }
+                    if (searchGraph.endDate != null)
+                    {
+                        campaigns = campaigns.Where(x => x.EndDate.Value.Date <= searchGraph.endDate.Value.Date).ToList();
+                    }
+
+                    
+                    // Line 1
+                    //var TranAll = new GraphModel();
+                    //TranAll.name = "Total";
+                    //List<ChartsModel> seriesAll = new List<ChartsModel>();
+                    //foreach (var campaign in campaigns)
+                    //{
+                    //    seriesAll.Add(new ChartsModel()
+                    //    {
+                    //        name = campaign.Name,
+                    //        // value = await this.transactionRepository.GetCountAllTransaction(campaign.Id)
+                    //        value = await this.qrCodeRepository.GetCountQrCode(campaign.Id)
+                    //    });
+
+                    //}
+                    //TranAll.series = seriesAll;
+                    //graphModels.Add(TranAll);
+
+                    //var TranSuccess = new GraphModel();
+                    //TranSuccess.name = "Success";
+                    //List<ChartsModel> seriesSuccess = new List<ChartsModel>();
+                    //foreach (var campaign in campaigns)
+                    //{
+                    //    seriesSuccess.Add(new ChartsModel()
+                    //    {
+                    //        name = campaign.Name,
+                    //        value = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 4)
+                    //    });
+
+                    //}
+                    //TranSuccess.series = seriesSuccess;
+                    //graphModels.Add(TranSuccess);
+
+                    //var TranOther = new GraphModel();
+                    //TranOther.name = "Other";
+                    //List<ChartsModel> seriesOther = new List<ChartsModel>();
+                    //foreach (var campaign in campaigns)
+                    //{
+                    //    int countAll = await this.transactionRepository.GetCountAllTransaction(campaign.Id);
+                    //    int countSuccess = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 4);
+                    //    seriesOther.Add(new ChartsModel()
+                    //    {
+                    //        name = campaign.Name,
+                    //        value = countAll - countSuccess
+                    //    });
+
+                    //}
+                    //TranOther.series = seriesOther;
+                    //graphModels.Add(TranOther);
+
+                    // Line 2
+
+                    foreach (var campaign in campaigns.OrderByDescending(x=>x.Id))
+                    {
+                        var campaignGroup = new GraphModel();
+                        campaignGroup.name = campaign.Name;
                         List<ChartsModel> series = new List<ChartsModel>();
-
                         int countAll = await this.transactionRepository.GetCountAllTransaction(campaign.Id);
+                        int countQr = await this.qrCodeRepository.GetCountQrCode(campaign.Id);
                         int countSuccess = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 4);
-                        int countOther = countAll - countSuccess;
-
-
-                        var success = new ChartsModel();
-                        success.name = "Success";
-                        success.value = countSuccess;
-                        series.Add(success);
-
-                        var other = new ChartsModel();
-                        other.name = "Other";
-                        other.value = countOther;
-                        series.Add(other);
-
-                        graphModels.Add(new GraphModel()
+                        series.Add(new ChartsModel()
                         {
-                            name = campaign.Name,
-                            series = series
+                            name = "Total",
+                            value = countQr
                         });
 
+                        series.Add(new ChartsModel()
+                        {
+                            name = "Unused",
+                            value = countQr - countSuccess
+                        });
 
+                        series.Add(new ChartsModel()
+                        {
+                            name = "Success",
+                            value = countSuccess
+                        });
+                        series.Add(new ChartsModel()
+                        {
+                            name = "Not success",
+                            value = countAll - countSuccess
+                        });
+                        campaignGroup.series = series;
+                        graphModels.Add(campaignGroup);
 
                     }
+
+                    // Bar 1
+                    //series.Add(success);
+
+                    //foreach (var campaign in campaigns)
+                    //{
+                    //    List<ChartsModel> series = new List<ChartsModel>();
+
+                    //    int countAll = await this.transactionRepository.GetCountAllTransaction(campaign.Id);
+                    //    int countSuccess = await this.transactionRepository.GetCountTransactionByTypeId(campaign.Id, 4);
+                    //    int countOther = countAll - countSuccess;
+
+
+                    //    var success = new ChartsModel();
+                    //    success.name = "Success";
+                    //    success.value = countSuccess;
+                    //    series.Add(success);
+
+                    //    var other = new ChartsModel();
+                    //    other.name = "Other";
+                    //    other.value = countOther;
+                    //    series.Add(other);
+
+                    //    graphModels.Add(new GraphModel()
+                    //    {
+                    //        name = campaign.Name,
+                    //        series = series
+                    //    });
+
+
+
+                    //}
 
                 }
                 response.IsSuccess = true;

@@ -189,4 +189,11 @@ namespace CSP_Redemption_WebApi.Models
         public string IsCollected { get; set; }
 
     }
+
+    public class SearchGraphModel
+    {
+        public DateTime? startDate { get; set; }
+        public DateTime? endDate { get; set; }
+        public int brandId { get; set; }
+    }
 }
